@@ -3,155 +3,147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a0908">
+<meta name="theme-color" content="#100c08">
 <meta name="color-scheme" content="dark">
-<title>RemoveBG · Ember Studio</title>
+<title>RemoveBG · Sandstorm Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- LOADER -->
+<!-- ==================== LOADER ==================== -->
 <div id="loader">
-  <div class="ld-orb"></div>
+  <div class="ld-warm"></div>
   <canvas id="fx"></canvas>
 
-  <div class="ld-core">
-    <div class="ld-ring r1"></div>
-    <div class="ld-ring r2"></div>
+  <div class="ld-mark">
+    <svg viewBox="0 0 100 100" class="ld-svg">
+      <defs>
+        <linearGradient id="ldG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f0d9b0"/>
+          <stop offset="100%" stop-color="#b8834a"/>
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="45" class="ld-circle"/>
+      <circle cx="50" cy="50" r="34" class="ld-circle2"/>
+    </svg>
     <div class="ld-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
   </div>
 
   <div class="ld-info">
-    <div class="ld-brand">REMOVE<span>BG</span></div>
-    <div class="ld-sub">EMBER STUDIO</div>
-    <div class="ld-status" id="ldStatus">تهيئة...</div>
+    <div class="ld-title">RemoveBG</div>
+    <div class="ld-tag">SANDSTORM STUDIO</div>
     <div class="ld-track"><div class="ld-fill" id="ldFill"></div></div>
     <div class="ld-pct" id="ldPct">0%</div>
   </div>
 </div>
 
-<!-- AUTH -->
+<!-- ==================== AUTH ==================== -->
 <section id="authScreen" class="auth hidden">
-  <div class="auth-wrap">
+  <div class="auth-sky"></div>
+  <div class="auth-sand"></div>
 
-    <aside class="auth-visual">
-      <div class="v-orb-1"></div>
-      <div class="v-orb-2"></div>
+  <div class="auth-card">
+    <span class="corner c-tl"></span>
+    <span class="corner c-tr"></span>
+    <span class="corner c-bl"></span>
+    <span class="corner c-br"></span>
 
-      <div class="v-top">
-        <div class="v-badge"><i></i> EMBER ENGINE</div>
-      </div>
-
-      <div class="v-bottom">
-        <h2 class="v-title">أزل الخلفية<br><span>في ثوانٍ</span></h2>
-        <p class="v-desc">استوديو احترافي · نتائج شفافة PNG · حفظ تلقائي</p>
-        <div class="v-stats">
-          <div><strong>99.9%</strong><span>دقة</span></div>
-          <div><strong>&lt;3s</strong><span>معالجة</span></div>
-          <div><strong>PNG</strong><span>شفاف</span></div>
-        </div>
-      </div>
-    </aside>
-
-    <div class="auth-card">
-      <div class="auth-logo">
-        <img src="https://up6.cc/2026/09/178886608408951.jpg" alt="">
-      </div>
-
-      <h1 class="auth-title">Remove<span>BG</span></h1>
-      <p class="auth-sub" id="authSub">سجّل دخولك للمتابعة</p>
-
-      <div class="tabs" data-mode="login">
-        <button id="tabLogin" class="tab active" type="button">دخول</button>
-        <button id="tabRegister" class="tab" type="button">حساب جديد</button>
-        <span class="tab-ind"></span>
-      </div>
-
-      <form id="authForm" autocomplete="on" novalidate>
-
-        <div class="field hidden" id="fUsername">
-          <label>اسم المستخدم</label>
-          <input id="username" type="text" maxlength="20" placeholder="username_123" autocomplete="username" spellcheck="false">
-          <span class="err" id="errUsername"></span>
-        </div>
-
-        <div class="field">
-          <label>البريد الإلكتروني</label>
-          <div class="in-wrap">
-            <input id="email" type="email" placeholder="you@example.com" autocomplete="email" spellcheck="false" required>
-            <span class="in-ok" id="eOk"></span>
-          </div>
-          <span class="err" id="errEmail"></span>
-        </div>
-
-        <div class="field">
-          <label>كلمة المرور</label>
-          <div class="in-wrap">
-            <input id="password" type="password" minlength="8" placeholder="8 أحرف على الأقل" autocomplete="current-password" required>
-            <button class="eye" id="eyePass" type="button" tabindex="-1" aria-label="عرض">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-          <div class="strength hidden" id="strength">
-            <div class="bars" data-lvl="0"><i></i><i></i><i></i><i></i></div>
-            <span id="strengthTxt">—</span>
-          </div>
-          <span class="err" id="errPassword"></span>
-        </div>
-
-        <div class="field hidden" id="fConfirm">
-          <label>تأكيد كلمة المرور</label>
-          <div class="in-wrap">
-            <input id="confirm" type="password" placeholder="أعد إدخالها" autocomplete="new-password">
-            <button class="eye" id="eyeConfirm" type="button" tabindex="-1" aria-label="عرض">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-          <span class="err" id="errConfirm"></span>
-        </div>
-
-        <ul class="reqs hidden" id="reqs">
-          <li data-r="len"><i></i>8 أحرف+</li>
-          <li data-r="upper"><i></i>حرف كبير</li>
-          <li data-r="lower"><i></i>حرف صغير</li>
-          <li data-r="num"><i></i>رقم</li>
-          <li data-r="sym"><i></i>رمز خاص</li>
-        </ul>
-
-        <div class="row-between">
-          <label class="check">
-            <input type="checkbox" id="remember" checked>
-            <span class="box"></span>
-            <span>تذكرني</span>
-          </label>
-          <button type="button" class="link" id="forgotBtn">نسيت كلمة المرور؟</button>
-        </div>
-
-        <button type="submit" id="submitBtn" class="btn-primary" disabled>
-          <span class="btn-text">تسجيل الدخول</span>
-        </button>
-
-      </form>
-
-      <div id="authMsg" class="msg"></div>
+    <div class="brand-mark">
+      <div class="brand-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
+      <h1 class="brand-name">Remove<span>BG</span></h1>
+      <div class="brand-sub">SANDSTORM STUDIO</div>
     </div>
 
+    <div class="tabs" data-mode="login">
+      <button id="tabLogin" class="tab active" type="button">دخول</button>
+      <button id="tabRegister" class="tab" type="button">حساب جديد</button>
+      <span class="tab-ind"></span>
+    </div>
+
+    <form id="authForm" autocomplete="on" novalidate>
+
+      <div class="field hidden" id="fUsername">
+        <label>اسم المستخدم</label>
+        <input id="username" type="text" maxlength="20" placeholder="username_123" autocomplete="username" spellcheck="false">
+        <span class="err" id="errUsername"></span>
+      </div>
+
+      <div class="field">
+        <label>البريد الإلكتروني</label>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email" spellcheck="false" required>
+        <span class="err" id="errEmail"></span>
+      </div>
+
+      <div class="field">
+        <label>كلمة المرور</label>
+        <div class="in-wrap">
+          <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+          <button class="eye" id="eyePass" type="button" tabindex="-1" aria-label="عرض">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="strength hidden" id="strength">
+          <div class="bars" data-lvl="0"><i></i><i></i><i></i><i></i></div>
+          <span id="strengthTxt">—</span>
+        </div>
+        <span class="err" id="errPassword"></span>
+      </div>
+
+      <div class="field hidden" id="fConfirm">
+        <label>تأكيد كلمة المرور</label>
+        <div class="in-wrap">
+          <input id="confirm" type="password" placeholder="أعد الإدخال" autocomplete="new-password">
+          <button class="eye" id="eyeConfirm" type="button" tabindex="-1" aria-label="عرض">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <span class="err" id="errConfirm"></span>
+      </div>
+
+      <ul class="reqs hidden" id="reqs">
+        <li data-r="len"><i></i>8 أحرف على الأقل</li>
+        <li data-r="num"><i></i>رقم واحد على الأقل</li>
+        <li data-r="upper"><i></i>حرف كبير (A-Z)</li>
+        <li data-r="match"><i></i>الكلمتان متطابقتان</li>
+      </ul>
+
+      <div class="row-between">
+        <label class="check">
+          <input type="checkbox" id="remember" checked>
+          <span class="box"></span>
+          <span>تذكرني</span>
+        </label>
+        <button type="button" class="link" id="forgotBtn">نسيت كلمة المرور؟</button>
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn-main" disabled>
+        <span class="btn-text">تسجيل الدخول</span>
+      </button>
+
+    </form>
+
+    <div id="authMsg" class="msg"></div>
+
+    <div class="auth-foot">
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/></svg>
+      اتصال آمن · مشفّر بالكامل
+    </div>
   </div>
 </section>
 
-<!-- APP -->
+<!-- ==================== APP ==================== -->
 <main id="appScreen" class="app hidden">
   <div class="container">
 
-    <header class="hdr glass">
+    <header class="hdr">
       <div class="brand">
         <div class="brand-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
         <div class="brand-txt">
           <strong>RemoveBG</strong>
-          <span>EMBER STUDIO</span>
+          <span>SANDSTORM</span>
         </div>
       </div>
       <div class="hdr-tools">
@@ -160,37 +152,45 @@
       </div>
     </header>
 
-    <nav class="nav glass">
+    <nav class="nav">
       <button class="nav-btn active" data-view="studio" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9V6a2 2 0 0 1 2-2h3M15 4h3a2 2 0 0 1 2 2v3M20 15v3a2 2 0 0 1-2 2h-3M9 20H6a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9V6a2 2 0 0 1 2-2h3M15 4h3a2 2 0 0 1 2 2v3M20 15v3a2 2 0 0 1-2 2h-3M9 20H6a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="12" r="3"/></svg>
         <span>الاستوديو</span>
       </button>
       <button class="nav-btn" data-view="history" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l4 2"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l4 2"/></svg>
         <span>السجل</span>
       </button>
       <button class="nav-btn" data-view="profile" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="7" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="7" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
         <span>حسابي</span>
       </button>
       <button id="adminNav" class="nav-btn hidden" data-view="admin" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 4v5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V7l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l7 4v5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V7l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
         <span>المطوّر</span>
       </button>
     </nav>
 
     <!-- STUDIO -->
     <section id="studioView" class="view">
-      <div class="hero glass">
+      <div class="hero">
+        <span class="corner c-tl"></span>
+        <span class="corner c-tr"></span>
+        <span class="corner c-bl"></span>
+        <span class="corner c-br"></span>
         <div class="hero-glow"></div>
         <div class="hero-inner">
-          <div class="hero-badge"><i></i> EMBER ENGINE</div>
+          <div class="hero-badge"><i></i> SANDSTORM ENGINE</div>
           <h1>استوديو <span>إزالة الخلفية</span></h1>
-          <p>معالجة فورية · نتائج شفافة PNG</p>
         </div>
       </div>
 
-      <div class="workspace glass">
+      <div class="workspace">
+        <span class="corner c-tl"></span>
+        <span class="corner c-tr"></span>
+        <span class="corner c-bl"></span>
+        <span class="corner c-br"></span>
+
         <div class="ws-head">
           <div class="ws-title"><i></i> مساحة المعالجة</div>
           <div class="ws-status">● ONLINE</div>
@@ -201,9 +201,9 @@
             <div class="upload-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
             </div>
-            <h3>اسحب صورة أو اختر من جهازك</h3>
-            <p>PNG · JPG · WEBP</p>
-            <button id="chooseBtn" class="btn-primary small" type="button"><span class="btn-text">اختيار صورة</span></button>
+            <h3>اختر صورة للبدء</h3>
+            <p>PNG · JPG · WEBP — حتى 20MB</p>
+            <button id="chooseBtn" class="btn-main small" type="button"><span class="btn-text">اختيار صورة</span></button>
           </div>
         </div>
         <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
@@ -221,7 +221,7 @@
           </div>
 
           <div class="pv-actions">
-            <button id="removeBtn" class="btn-primary small" type="button"><span class="btn-text">✂️ إزالة الخلفية</span></button>
+            <button id="removeBtn" class="btn-main small" type="button"><span class="btn-text">✂️ إزالة الخلفية</span></button>
             <button id="changeBtn" class="btn-ghost" type="button">تغيير</button>
             <button id="downloadBtn" class="btn-success hidden" type="button">⬇ تحميل</button>
           </div>
@@ -229,7 +229,6 @@
           <div id="processing" class="processing hidden">
             <div class="proc-ring"><span></span></div>
             <strong>جاري المعالجة...</strong>
-            <small>يتم تحليل الصورة</small>
           </div>
         </div>
       </div>
@@ -237,7 +236,7 @@
 
     <!-- HISTORY -->
     <section id="historyView" class="view hidden">
-      <div class="sec-head glass">
+      <div class="sec-head">
         <div class="sec-title">سجل <span>العمليات</span></div>
         <div class="sec-chips">
           <div class="chip">الكل <strong id="statTotal">0</strong></div>
@@ -253,15 +252,23 @@
 
     <!-- PROFILE -->
     <section id="profileView" class="view hidden">
-      <div class="profile-grid">
-        <div class="profile-card glass">
+      <div class="profile-wrap">
+        <div class="profile-card">
+          <span class="corner c-tl"></span>
+          <span class="corner c-tr"></span>
+          <span class="corner c-bl"></span>
+          <span class="corner c-br"></span>
           <div id="avatar" class="avatar">?</div>
           <div id="pUsername" class="p-name">—</div>
           <div id="pEmail" class="p-email">—</div>
           <div id="pRole" class="p-role">● مستخدم</div>
           <span id="pJoined" class="p-joined"></span>
         </div>
-        <div class="panel glass">
+        <div class="panel">
+          <span class="corner c-tl"></span>
+          <span class="corner c-tr"></span>
+          <span class="corner c-bl"></span>
+          <span class="corner c-br"></span>
           <div class="panel-title">إحصائيات</div>
           <div class="stats-3">
             <div class="st"><strong id="statOps">0</strong><span>إجمالي</span></div>
@@ -282,7 +289,11 @@
 
     <!-- ADMIN -->
     <section id="adminView" class="view hidden">
-      <div class="admin-hdr glass">
+      <div class="admin-hdr">
+        <span class="corner c-tl"></span>
+        <span class="corner c-tr"></span>
+        <span class="corner c-bl"></span>
+        <span class="corner c-br"></span>
         <div>
           <div class="admin-title">مركز <span>المطوّر</span></div>
           <div class="admin-sub">إدارة الحسابات والعمليات</div>
@@ -293,25 +304,25 @@
         </div>
       </div>
       <div class="metrics">
-        <div class="metric glass"><strong id="mUsers">0</strong><span>حسابات</span></div>
-        <div class="metric glass"><strong id="mOps">0</strong><span>عمليات</span></div>
-        <div class="metric glass"><strong id="mToday">0</strong><span>اليوم</span></div>
-        <div class="metric glass"><strong id="mActive">0</strong><span>نشاط</span></div>
+        <div class="metric"><strong id="mUsers">0</strong><span>حسابات</span></div>
+        <div class="metric"><strong id="mOps">0</strong><span>عمليات</span></div>
+        <div class="metric"><strong id="mToday">0</strong><span>اليوم</span></div>
+        <div class="metric"><strong id="mActive">0</strong><span>نشاط</span></div>
       </div>
       <input id="adminSearch" class="search" type="search" placeholder="ابحث بالاسم أو البريد...">
       <div class="admin-cols">
-        <div class="sec glass">
+        <div class="sec">
           <div class="sec-head2"><strong>الحسابات</strong><span id="usersLabel">0</span></div>
           <div id="usersList" class="users-list"></div>
         </div>
-        <div class="sec glass">
+        <div class="sec">
           <div class="sec-head2"><strong>آخر العمليات</strong><span>الكل</span></div>
           <div id="opsList" class="ops-grid"></div>
         </div>
       </div>
     </section>
 
-    <footer class="ft">© RemoveBG · Ember Studio</footer>
+    <footer class="ft">© RemoveBG · Sandstorm Studio</footer>
   </div>
 </main>
 
@@ -325,4 +336,4 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 </body>
-          </html>
+                                                                                               </html>
