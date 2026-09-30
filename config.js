@@ -7,19 +7,10 @@ window.CONFIG = Object.freeze({
   PIXELCUT_CLIENT_VERSION: 'web:pixa.com:4a5b0af2',
 
   BUCKET: 'user-images',
-  SESSION_KEY: 'removebg_ember_session_v1',
+  SESSION_KEY: 'removebg_sandstorm_v1',
   SIGNED_URL_SECONDS: 900,
 
   DEFAULT_DAILY_LIMIT: 5,
   MAX_FILE_MB: 20,
-  LOADER_MIN_MS: 3500,
-
-  /* ✅ قواعد كلمة المرور - واضحة ومقبولة */
-  PWD_MIN: 8,
-  PWD_MAX: 72,
-
-  BLOCK_DISPOSABLE: [
-    'tempmail','10minutemail','guerrillamail','mailinator',
-    'throwaway','yopmail','trashmail','getnada','sharklasers'
-  ]
+  LOADER_MIN_MS: 3200
 });
