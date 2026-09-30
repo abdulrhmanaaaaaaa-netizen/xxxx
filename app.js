@@ -1,5 +1,5 @@
 /* ============================================================
-   RemoveBG · Ember Studio · MAIN
+   RemoveBG · Sandstorm Studio · MAIN
    ============================================================ */
 
 const $ = id => document.getElementById(id);
@@ -26,7 +26,6 @@ const initials = v => {
 };
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const debounce = (fn, ms=500) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 
 /* Toast */
 const toastEl = $('toast');
@@ -34,45 +33,36 @@ function toast(msg, type=''){
   toastEl.className = 'toast show ' + type;
   toastEl.textContent = msg;
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => toastEl.classList.remove('show'), 4000);
+  toast._t = setTimeout(() => toastEl.classList.remove('show'), 3800);
 }
 
 /* ========== EMAIL ========== */
-const EmailV = (() => {
-  const RE = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-
-  const isFormat = e => RE.test(e) && e.length <= 254 && !e.includes('..');
-  const isDisposable = e => {
-    const d = e.split('@')[1]?.toLowerCase() || '';
-    return CONFIG.BLOCK_DISPOSABLE.some(x => d.includes(x));
-  };
-
-  return { isFormat, isDisposable };
-})();
+const isEmailValid = e => {
+  if(!e || e.length > 254) return false;
+  const RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  return RE.test(e);
+};
 
 /* ========== PASSWORD ========== */
-const PWD = (() => {
-  function check(p){
-    const r = {
-      len: p.length >= 8,
-      upper: /[A-Z]/.test(p),
-      lower: /[a-z]/.test(p),
-      num: /\d/.test(p),
-      sym: /[^a-zA-Z0-9]/.test(p)
-    };
-    const cnt = Object.values(r).filter(Boolean).length;
-    let lvl = 0;
-    if(p.length < 6) lvl = 1;
-    else if(cnt <= 2) lvl = 1;
-    else if(cnt === 3) lvl = 2;
-    else if(cnt === 4) lvl = 3;
-    else if(cnt === 5 && p.length >= 10) lvl = 4;
-    else lvl = 3;
-    const labels = ['','ضعيفة','متوسطة','قوية','ممتازة'];
-    return { reqs:r, lvl, label:labels[lvl], valid: r.len && r.upper && r.lower && r.num && r.sym };
-  }
-  return { check };
-})();
+const checkPwd = p => {
+  const r = {
+    len: p.length >= 8,
+    num: /\d/.test(p),
+    upper: /[A-Z]/.test(p),
+    lower: /[a-z]/.test(p)
+  };
+  /* ✅ مبسّط: 8+ chars + رقم + حرف كبير + حرف صغير */
+  const valid = r.len && r.num && r.upper && r.lower;
+  let lvl = 0;
+  const cnt = [r.len, r.num, r.upper, r.lower].filter(Boolean).length;
+  if(cnt <= 1) lvl = 1;
+  else if(cnt === 2) lvl = 2;
+  else if(cnt === 3) lvl = 3;
+  else if(cnt === 4 && p.length >= 10) lvl = 4;
+  else lvl = 3;
+  const labels = ['','ضعيفة','متوسطة','قوية','ممتازة'];
+  return { reqs:r, lvl, label:labels[lvl], valid };
+};
 
 /* ========== LOADER ========== */
 const Loader = (() => {
@@ -94,13 +84,13 @@ const Loader = (() => {
     resize();
     addEventListener('resize', resize);
 
-    const n = Math.min(60, Math.floor(innerWidth/20));
+    const n = Math.min(45, Math.floor(innerWidth/25));
     for(let i=0;i<n;i++){
       parts.push({
         x: Math.random()*w, y: Math.random()*h,
-        vx:(Math.random()-.5)*.25*dpr, vy:(Math.random()-.5)*.25*dpr,
-        r:(Math.random()*1.4+.5)*dpr, a:Math.random()*.5+.3,
-        hue: 30 + Math.random()*15
+        vx:(Math.random()-.5)*.22*dpr, vy:(Math.random()-.5)*.22*dpr,
+        r:(Math.random()*1.3+.4)*dpr, a:Math.random()*.5+.3,
+        hue: 32 + Math.random()*12
       });
     }
 
@@ -111,7 +101,7 @@ const Loader = (() => {
         if(p.x<0||p.x>w)p.vx*=-1;
         if(p.y<0||p.y>h)p.vy*=-1;
         ctx.beginPath();
-        ctx.fillStyle = `hsla(${p.hue},90%,60%,${p.a})`;
+        ctx.fillStyle = `hsla(${p.hue},70%,60%,${p.a})`;
         ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
         ctx.fill();
       }
@@ -123,23 +113,13 @@ const Loader = (() => {
   async function run(){
     particles();
 
-    const steps = [
-      {t:0,s:'تهيئة...'},
-      {t:800,s:'تحميل المحرك...'},
-      {t:1600,s:'فحص الجلسة...'},
-      {t:2400,s:'جاهز ✦'}
-    ];
-    steps.forEach(st => setTimeout(() => {
-      if(!$('loader').classList.contains('hide')) $('ldStatus').textContent = st.s;
-    }, st.t));
-
     let p = 0;
     const fill = $('ldFill'), pct = $('ldPct');
     const tick = setInterval(() => {
-      p = Math.min(98, p + Math.random()*6 + 3);
+      p = Math.min(98, p + Math.random()*7 + 3);
       fill.style.width = p + '%';
       pct.textContent = Math.round(p) + '%';
-    }, 150);
+    }, 130);
 
     const el = performance.now() - START;
     await wait(Math.max(0, CONFIG.LOADER_MIN_MS - el));
@@ -147,10 +127,10 @@ const Loader = (() => {
     clearInterval(tick);
     fill.style.width = '100%';
     pct.textContent = '100%';
-    await wait(300);
+    await wait(280);
     $('loader').classList.add('hide');
     if(raf) cancelAnimationFrame(raf);
-    setTimeout(() => $('loader')?.remove(), 850);
+    setTimeout(() => $('loader')?.remove(), 800);
   }
 
   return { run };
@@ -169,7 +149,7 @@ const API = (() => {
 
     let res;
     try{ res = await fetch(CONFIG.SUPABASE_URL + path, {...opt, headers}); }
-    catch{ const e = new Error('فشل الاتصال بالسيرفر.'); e.status = 0; throw e; }
+    catch{ const e = new Error('فشل الاتصال'); e.status = 0; throw e; }
 
     const text = await res.text();
     let data = null;
@@ -203,7 +183,10 @@ const API = (() => {
       method:'POST',
       body: JSON.stringify({ email, password, data:{ username } })
     });
-    if(!d?.access_token) return { needsConfirmation:true, user:d?.user||null };
+    if(!d?.access_token){
+      /* Supabase يطلب تأكيد الإيميل */
+      return { needsConfirmation:true, user:d?.user||null };
+    }
     return norm(d);
   };
 
@@ -510,22 +493,38 @@ const AuthUI = (() => {
     $('reqs').classList.toggle('hidden', !reg);
     $('strength').classList.toggle('hidden', !reg);
     $('submitBtn').querySelector('.btn-text').textContent = reg ? 'إنشاء حساب' : 'تسجيل الدخول';
-    $('authSub').textContent = reg ? 'أنشئ حسابك الجديد' : 'سجّل دخولك للمتابعة';
-    $('password').placeholder = reg ? '8 أحرف على الأقل' : '••••••••';
+    $('password').placeholder = reg ? '8 أحرف + رقم + حرف كبير' : '••••••••';
     $('password').setAttribute('autocomplete', reg ? 'new-password' : 'current-password');
+    updateReqs();
     checkSubmit();
+  };
+
+  const updateReqs = () => {
+    if(mode !== 'register') return;
+    const p = $('password').value;
+    const c = $('confirm').value;
+    const { reqs, lvl, label } = checkPwd(p);
+    const match = c && c === p;
+    const all = {...reqs, match};
+
+    document.querySelector('.bars').dataset.lvl = lvl;
+    $('strengthTxt').textContent = label;
+
+    document.querySelectorAll('.reqs li').forEach(li => {
+      li.classList.toggle('ok', !!all[li.dataset.r]);
+    });
   };
 
   const checkSubmit = () => {
     const email = $('email').value.trim();
     const pwd = $('password').value;
     const reg = mode === 'register';
-    let ok = email && EmailV.isFormat(email);
+    let ok = isEmailValid(email);
     if(reg){
-      const { valid } = PWD.check(pwd);
+      const { valid } = checkPwd(pwd);
       ok = ok && valid;
       ok = ok && $('username').value.trim().length >= 3;
-      ok = ok && $('confirm').value === pwd;
+      ok = ok && $('confirm').value === pwd && $('confirm').value.length > 0;
     }else{
       ok = ok && pwd.length >= 1;
     }
@@ -535,8 +534,24 @@ const AuthUI = (() => {
   const eye = (input, btn) => {
     const v = input.type === 'text';
     input.type = v ? 'password' : 'text';
-    btn.style.color = v ? '' : 'var(--amber)';
+    btn.style.color = v ? '' : 'var(--sand)';
   };
+
+  /* ترجمة أخطاء Supabase */
+  function translateError(e){
+    const m = String(e?.message || '').toLowerCase();
+    if(m.includes('invalid login') || m.includes('invalid credentials')) return 'البريد أو كلمة المرور غير صحيحة';
+    if(m.includes('already registered') || m.includes('already been registered') || m.includes('user already')) return 'هذا البريد مسجّل بالفعل';
+    if(m.includes('email not confirmed')) return 'يرجى تأكيد بريدك الإلكتروني أولًا';
+    if(m.includes('signup requires a valid password')) return 'كلمة المرور غير مقبولة';
+    if(m.includes('password should be at least')) return 'كلمة المرور قصيرة جدًا (6+ أحرف)';
+    if(m.includes('password is too short')) return 'كلمة المرور قصيرة';
+    if(m.includes('unable to validate email')) return 'صيغة البريد غير صحيحة';
+    if(m.includes('invalid email')) return 'البريد الإلكتروني غير صحيح';
+    if(m.includes('rate limit') || m.includes('too many')) return 'محاولات كثيرة، حاول لاحقًا';
+    if(e?.status === 0) return 'فشل الاتصال بالإنترنت';
+    return e?.message || 'حدث خطأ';
+  }
 
   function init(){
     setMode('login');
@@ -547,41 +562,33 @@ const AuthUI = (() => {
     $('eyeConfirm').addEventListener('click', () => eye($('confirm'), $('eyeConfirm')));
 
     const emailI = $('email');
-    emailI.addEventListener('input', debounce(() => {
-      const v = emailI.value.trim();
-      const okEl = $('eOk');
-      if(!v){ emailI.classList.remove('ok','bad'); okEl.classList.remove('show'); return; }
-      if(EmailV.isFormat(v) && !EmailV.isDisposable(v)){
-        emailI.classList.add('ok'); emailI.classList.remove('bad');
-        okEl.textContent = '✓'; okEl.classList.add('show');
-        $('errEmail').classList.remove('show');
+    emailI.addEventListener('input', () => {
+      if(isEmailValid(emailI.value.trim())){
+        emailI.classList.add('ok');
+        emailI.classList.remove('bad');
       }else{
         emailI.classList.remove('ok');
-        okEl.classList.remove('show');
-      }
-    }, 400));
-    emailI.addEventListener('input', checkSubmit);
-
-    const pwdI = $('password');
-    pwdI.addEventListener('input', () => {
-      if(mode === 'register'){
-        const v = pwdI.value;
-        const { reqs, lvl, label } = PWD.check(v);
-        $('strength').classList.remove('hidden');
-        document.querySelector('.bars').dataset.lvl = lvl;
-        $('strengthTxt').textContent = label;
-        document.querySelectorAll('.reqs li').forEach(li => {
-          li.classList.toggle('ok', !!reqs[li.dataset.r]);
-        });
       }
       checkSubmit();
     });
 
-    ['username','confirm'].forEach(k => $(k).addEventListener('input', checkSubmit));
+    const pwdI = $('password');
+    pwdI.addEventListener('input', () => {
+      updateReqs();
+      checkSubmit();
+    });
+
+    const confirmI = $('confirm');
+    confirmI.addEventListener('input', () => {
+      updateReqs();
+      checkSubmit();
+    });
+
+    $('username').addEventListener('input', checkSubmit);
 
     $('forgotBtn').addEventListener('click', async () => {
       const email = emailI.value.trim();
-      if(!email || !EmailV.isFormat(email)){
+      if(!isEmailValid(email)){
         msg('أدخل بريدك الإلكتروني أولًا', 'err');
         return;
       }
@@ -589,7 +596,7 @@ const AuthUI = (() => {
         await API.forgot(email);
         msg('تم إرسال رابط إعادة التعيين إلى بريدك ✓', 'ok');
       }catch(e){
-        msg(e.message || 'فشل الإرسال', 'err');
+        msg(translateError(e), 'err');
       }
     });
 
@@ -600,12 +607,8 @@ const AuthUI = (() => {
       const email = emailI.value.trim();
       const pwd = pwdI.value;
 
-      if(!EmailV.isFormat(email)){
+      if(!isEmailValid(email)){
         setErr(emailI, $('errEmail'), 'بريد غير صحيح');
-        return;
-      }
-      if(EmailV.isDisposable(email)){
-        setErr(emailI, $('errEmail'), 'البريد المؤقت غير مسموح');
         return;
       }
 
@@ -615,13 +618,13 @@ const AuthUI = (() => {
           setErr($('username'), $('errUsername'), 'أحرف وأرقام و _ فقط (3-20)');
           return;
         }
-        const { valid } = PWD.check(pwd);
+        const { valid } = checkPwd(pwd);
         if(!valid){
           setErr(pwdI, $('errPassword'), 'كلمة المرور لا تحقق الشروط');
           return;
         }
         if($('confirm').value !== pwd){
-          setErr($('confirm'), $('errConfirm'), 'كلمتا المرور غير متطابقتين');
+          setErr(confirmI, $('errConfirm'), 'كلمتا المرور غير متطابقتين');
           return;
         }
       }else{
@@ -645,7 +648,7 @@ const AuthUI = (() => {
             msg('هذا الحساب موقوف', 'err');
             return;
           }
-          toast(`أهلًا ${Auth.profile?.username || ''} 🔥`, 'ok');
+          toast(`أهلًا ${Auth.profile?.username || ''} 🏜️`, 'ok');
           await App.enterApp();
         }else{
           const r = await Auth.doSignup(email, pwd, $('username').value.trim());
@@ -653,19 +656,13 @@ const AuthUI = (() => {
             msg('تم إنشاء الحساب ✓\nتحقق من بريدك الإلكتروني لتفعيل الحساب.', 'ok');
             return;
           }
-          toast('تم إنشاء الحساب 🔥', 'ok');
+          toast('تم إنشاء الحساب 🏜️', 'ok');
           await App.enterApp();
         }
 
         ['email','password','username','confirm'].forEach(k => $(k).value = '');
       }catch(err){
-        let m = err?.message || 'حدث خطأ';
-        const l = m.toLowerCase();
-        if(l.includes('invalid login')||l.includes('invalid credentials')) m = 'البريد أو كلمة المرور غير صحيحة';
-        else if(l.includes('already registered')||l.includes('duplicate')) m = 'البريد أو الاسم مستخدم بالفعل';
-        else if(l.includes('email not confirmed')) m = 'يجب تأكيد البريد الإلكتروني أولًا';
-        else if(err?.status === 0) m = 'فشل الاتصال بالإنترنت';
-        msg(m, 'err');
+        msg(translateError(err), 'err');
       }finally{
         btn.disabled = false;
         txt.textContent = original;
@@ -901,22 +898,12 @@ const App = (() => {
     resetResult();
 
     try{
-      /* Upload original */
       const orig = await API.upload(s.access_token, s.user.id, selectedFile, 'orig');
-
-      /* Remove background */
       const blob = await API.removeBg(selectedFile);
-
-      /* Save blob for download */
       resultBlob = blob;
-
-      /* Upload result */
       const res = await API.upload(s.access_token, s.user.id, blob, 'res');
-
-      /* Save operation */
       await API.saveOp(s.access_token, orig, res);
 
-      /* Show result card */
       $('previewResult').src = URL.createObjectURL(blob);
       $('resultCard').classList.remove('hidden');
       $('downloadBtn').classList.remove('hidden');
@@ -932,46 +919,29 @@ const App = (() => {
     }
   }
 
-  /* ============================================================
-     DOWNLOAD — يعمل دائمًا
-     ============================================================ */
-  async function downloadBlob(blob, name){
-    if(!blob){
-      toast('لا يوجد ملف للتحميل', 'err');
-      return;
-    }
-    try{
-      /* Method 1: blob URL — يعمل في كل المتصفحات */
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = name;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 3000);
-    }catch(e){
-      console.error(e);
-      toast('فشل التحميل', 'err');
-    }
+  function downloadBlob(blob, name){
+    if(!blob){ toast('لا يوجد ملف', 'err'); return; }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
 
   async function downloadFromUrl(url, name){
     try{
       const r = await fetch(url, {mode:'cors'});
-      if(!r.ok) throw new Error('HTTP ' + r.status);
+      if(!r.ok) throw new Error();
       const b = await r.blob();
-      await downloadBlob(b, name);
-    }catch(e){
-      /* Fallback: افتح في tab جديد */
+      downloadBlob(b, name);
+    }catch{
       const a = document.createElement('a');
-      a.href = url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
   }
 
@@ -1022,21 +992,10 @@ const App = (() => {
 
     $('removeBtn').addEventListener('click', doRemove);
 
-    /* Download button — يستخدم blob المحفوظ مباشرة */
-    $('downloadBtn').addEventListener('click', async () => {
-      if(!resultBlob){
-        toast('لا يوجد ملف', 'err');
-        return;
-      }
-      $('downloadBtn').disabled = true;
-      try{
-        await downloadBlob(resultBlob, `removebg-${Date.now()}.png`);
-        toast('تم التحميل ✓', 'ok');
-      }catch(e){
-        toast('فشل التحميل', 'err');
-      }finally{
-        $('downloadBtn').disabled = false;
-      }
+    $('downloadBtn').addEventListener('click', () => {
+      if(!resultBlob){ toast('لا يوجد ملف', 'err'); return; }
+      downloadBlob(resultBlob, `removebg-${Date.now()}.png`);
+      toast('تم التحميل ✓', 'ok');
     });
   }
 
@@ -1172,7 +1131,7 @@ const Admin = (() => {
         <button id="aBan" class="switch ${profile.is_banned?'active':''}" type="button"></button>
       </div>
       <div class="modal-actions">
-        <button id="aSave" class="btn-primary small" type="button"><span class="btn-text">حفظ</span></button>
+        <button id="aSave" class="btn-main small" type="button"><span class="btn-text">حفظ</span></button>
         <button id="aClose" class="btn-ghost" type="button">إغلاق</button>
       </div>
       <div class="modal-section-title">عمليات المستخدم</div>
