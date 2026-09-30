@@ -1,5 +1,5 @@
 /* ============================================================
-   RemoveBG · MAJESTIC Studio · MAIN
+   RemoveBG · Ember Studio · MAIN
    ============================================================ */
 
 const $ = id => document.getElementById(id);
@@ -28,18 +28,18 @@ const initials = v => {
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const debounce = (fn, ms=500) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 
+/* Toast */
 const toastEl = $('toast');
 function toast(msg, type=''){
   toastEl.className = 'toast show ' + type;
   toastEl.textContent = msg;
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => toastEl.classList.remove('show'), 4200);
+  toast._t = setTimeout(() => toastEl.classList.remove('show'), 4000);
 }
 
-/* ========== EMAIL VALIDATOR ========== */
+/* ========== EMAIL ========== */
 const EmailV = (() => {
   const RE = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-  const cache = new Map();
 
   const isFormat = e => RE.test(e) && e.length <= 254 && !e.includes('..');
   const isDisposable = e => {
@@ -47,56 +47,31 @@ const EmailV = (() => {
     return CONFIG.BLOCK_DISPOSABLE.some(x => d.includes(x));
   };
 
-  async function hasMX(domain){
-    if(cache.has(domain)) return cache.get(domain);
-    try{
-      const r = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(domain)}&type=MX`,
-        {headers:{Accept:'application/dns-json'}});
-      const d = await r.json();
-      const ok = Array.isArray(d?.Answer) && d.Answer.some(a => a.type === 15);
-      cache.set(domain, ok);
-      return ok;
-    }catch{ return true; }
-  }
-
-  async function validate(email){
-    if(!email) return {ok:false, msg:''};
-    if(!isFormat(email)) return {ok:false, msg:'صيغة البريد غير صحيحة'};
-    if(isDisposable(email)) return {ok:false, msg:'البريد المؤقت غير مسموح'};
-    const d = email.split('@')[1];
-    if(!await hasMX(d)) return {ok:false, msg:'النطاق غير صالح'};
-    return {ok:true, msg:''};
-  }
-
-  return { validate, isFormat, isDisposable };
+  return { isFormat, isDisposable };
 })();
 
 /* ========== PASSWORD ========== */
 const PWD = (() => {
-  const COMMON = ['password','12345678','123456789','qwerty123','11111111','password1','abc12345','letmein1','welcome1','admin123'];
-
-  function score(p){
+  function check(p){
     const r = {
       len: p.length >= 8,
       upper: /[A-Z]/.test(p),
       lower: /[a-z]/.test(p),
       num: /\d/.test(p),
-      sym: /[^a-zA-Z0-9]/.test(p),
-      safe: !COMMON.includes(p.toLowerCase()) && p.length >= 8
+      sym: /[^a-zA-Z0-9]/.test(p)
     };
-    const cnt = ['len','upper','lower','num','sym'].filter(k => r[k]).length;
+    const cnt = Object.values(r).filter(Boolean).length;
     let lvl = 0;
     if(p.length < 6) lvl = 1;
     else if(cnt <= 2) lvl = 1;
     else if(cnt === 3) lvl = 2;
     else if(cnt === 4) lvl = 3;
-    else if(cnt === 5 && p.length >= 10 && r.safe) lvl = 4;
+    else if(cnt === 5 && p.length >= 10) lvl = 4;
     else lvl = 3;
-    if(!r.safe && p.length < 8) lvl = 1;
-    const labels = ['','ضعيفة','متوسطة','قوية','قوية جداً'];
-    return { reqs:r, lvl, label:labels[lvl] };
+    const labels = ['','ضعيفة','متوسطة','قوية','ممتازة'];
+    return { reqs:r, lvl, label:labels[lvl], valid: r.len && r.upper && r.lower && r.num && r.sym };
   }
-  return { score };
+  return { check };
 })();
 
 /* ========== LOADER ========== */
@@ -119,38 +94,24 @@ const Loader = (() => {
     resize();
     addEventListener('resize', resize);
 
-    const n = Math.min(85, Math.floor(innerWidth/15));
+    const n = Math.min(60, Math.floor(innerWidth/20));
     for(let i=0;i<n;i++){
       parts.push({
-        x:Math.random()*w, y:Math.random()*h,
-        vx:(Math.random()-.5)*.32*dpr, vy:(Math.random()-.5)*.32*dpr,
-        r:(Math.random()*1.7+.6)*dpr, a:Math.random()*.6+.35,
-        hue:38 + Math.random()*18
+        x: Math.random()*w, y: Math.random()*h,
+        vx:(Math.random()-.5)*.25*dpr, vy:(Math.random()-.5)*.25*dpr,
+        r:(Math.random()*1.4+.5)*dpr, a:Math.random()*.5+.3,
+        hue: 30 + Math.random()*15
       });
     }
 
     function loop(){
       ctx.clearRect(0,0,w,h);
-      for(let i=0;i<parts.length;i++){
-        for(let j=i+1;j<parts.length;j++){
-          const dx=parts[i].x-parts[j].x, dy=parts[i].y-parts[j].y;
-          const d = Math.hypot(dx,dy);
-          if(d < 130*dpr){
-            ctx.strokeStyle = `hsla(45,80%,60%,${(1-d/(130*dpr))*.18})`;
-            ctx.lineWidth = .7*dpr;
-            ctx.beginPath();
-            ctx.moveTo(parts[i].x,parts[i].y);
-            ctx.lineTo(parts[j].x,parts[j].y);
-            ctx.stroke();
-          }
-        }
-      }
       for(const p of parts){
         p.x+=p.vx; p.y+=p.vy;
         if(p.x<0||p.x>w)p.vx*=-1;
         if(p.y<0||p.y>h)p.vy*=-1;
         ctx.beginPath();
-        ctx.fillStyle = `hsla(${p.hue},85%,70%,${p.a})`;
+        ctx.fillStyle = `hsla(${p.hue},90%,60%,${p.a})`;
         ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
         ctx.fill();
       }
@@ -163,11 +124,10 @@ const Loader = (() => {
     particles();
 
     const steps = [
-      {t:0,s:'تهيئة النظام...'},
-      {t:900,s:'تحميل محرك المعالجة...'},
-      {t:1800,s:'فحص الجلسة...'},
-      {t:2700,s:'تجهيز الواجهة...'},
-      {t:3600,s:'جاهز ✦'}
+      {t:0,s:'تهيئة...'},
+      {t:800,s:'تحميل المحرك...'},
+      {t:1600,s:'فحص الجلسة...'},
+      {t:2400,s:'جاهز ✦'}
     ];
     steps.forEach(st => setTimeout(() => {
       if(!$('loader').classList.contains('hide')) $('ldStatus').textContent = st.s;
@@ -176,10 +136,10 @@ const Loader = (() => {
     let p = 0;
     const fill = $('ldFill'), pct = $('ldPct');
     const tick = setInterval(() => {
-      p = Math.min(98, p + Math.random()*5 + 2);
+      p = Math.min(98, p + Math.random()*6 + 3);
       fill.style.width = p + '%';
       pct.textContent = Math.round(p) + '%';
-    }, 170);
+    }, 150);
 
     const el = performance.now() - START;
     await wait(Math.max(0, CONFIG.LOADER_MIN_MS - el));
@@ -187,10 +147,10 @@ const Loader = (() => {
     clearInterval(tick);
     fill.style.width = '100%';
     pct.textContent = '100%';
-    await wait(360);
+    await wait(300);
     $('loader').classList.add('hide');
     if(raf) cancelAnimationFrame(raf);
-    setTimeout(() => $('loader').remove(), 950);
+    setTimeout(() => $('loader')?.remove(), 850);
   }
 
   return { run };
@@ -551,6 +511,7 @@ const AuthUI = (() => {
     $('strength').classList.toggle('hidden', !reg);
     $('submitBtn').querySelector('.btn-text').textContent = reg ? 'إنشاء حساب' : 'تسجيل الدخول';
     $('authSub').textContent = reg ? 'أنشئ حسابك الجديد' : 'سجّل دخولك للمتابعة';
+    $('password').placeholder = reg ? '8 أحرف على الأقل' : '••••••••';
     $('password').setAttribute('autocomplete', reg ? 'new-password' : 'current-password');
     checkSubmit();
   };
@@ -559,12 +520,14 @@ const AuthUI = (() => {
     const email = $('email').value.trim();
     const pwd = $('password').value;
     const reg = mode === 'register';
-    let ok = email && pwd.length >= 8;
+    let ok = email && EmailV.isFormat(email);
     if(reg){
-      const { reqs } = PWD.score(pwd);
+      const { valid } = PWD.check(pwd);
+      ok = ok && valid;
       ok = ok && $('username').value.trim().length >= 3;
       ok = ok && $('confirm').value === pwd;
-      ok = ok && reqs.len && reqs.upper && reqs.lower && reqs.num && reqs.sym && reqs.safe;
+    }else{
+      ok = ok && pwd.length >= 1;
     }
     $('submitBtn').disabled = !ok;
   };
@@ -572,7 +535,7 @@ const AuthUI = (() => {
   const eye = (input, btn) => {
     const v = input.type === 'text';
     input.type = v ? 'password' : 'text';
-    btn.style.color = v ? '' : 'var(--gold-2)';
+    btn.style.color = v ? '' : 'var(--amber)';
   };
 
   function init(){
@@ -584,29 +547,26 @@ const AuthUI = (() => {
     $('eyeConfirm').addEventListener('click', () => eye($('confirm'), $('eyeConfirm')));
 
     const emailI = $('email');
-    emailI.addEventListener('input', debounce(async () => {
+    emailI.addEventListener('input', debounce(() => {
       const v = emailI.value.trim();
-      if(!v){ emailI.classList.remove('ok','bad'); return; }
-      if(!EmailV.isFormat(v)){ emailI.classList.remove('ok'); return; }
-      if(EmailV.isDisposable(v)){
-        setErr(emailI, $('errEmail'), 'البريد المؤقت غير مسموح');
-        return;
-      }
-      const r = await EmailV.validate(v);
-      if(r.ok){
+      const okEl = $('eOk');
+      if(!v){ emailI.classList.remove('ok','bad'); okEl.classList.remove('show'); return; }
+      if(EmailV.isFormat(v) && !EmailV.isDisposable(v)){
         emailI.classList.add('ok'); emailI.classList.remove('bad');
+        okEl.textContent = '✓'; okEl.classList.add('show');
         $('errEmail').classList.remove('show');
       }else{
         emailI.classList.remove('ok');
+        okEl.classList.remove('show');
       }
-    }, 550));
+    }, 400));
     emailI.addEventListener('input', checkSubmit);
 
     const pwdI = $('password');
     pwdI.addEventListener('input', () => {
       if(mode === 'register'){
         const v = pwdI.value;
-        const { reqs, lvl, label } = PWD.score(v);
+        const { reqs, lvl, label } = PWD.check(v);
         $('strength').classList.remove('hidden');
         document.querySelector('.bars').dataset.lvl = lvl;
         $('strengthTxt').textContent = label;
@@ -644,8 +604,8 @@ const AuthUI = (() => {
         setErr(emailI, $('errEmail'), 'بريد غير صحيح');
         return;
       }
-      if(pwd.length < 8){
-        setErr(pwdI, $('errPassword'), '8 أحرف على الأقل');
+      if(EmailV.isDisposable(email)){
+        setErr(emailI, $('errEmail'), 'البريد المؤقت غير مسموح');
         return;
       }
 
@@ -655,13 +615,18 @@ const AuthUI = (() => {
           setErr($('username'), $('errUsername'), 'أحرف وأرقام و _ فقط (3-20)');
           return;
         }
+        const { valid } = PWD.check(pwd);
+        if(!valid){
+          setErr(pwdI, $('errPassword'), 'كلمة المرور لا تحقق الشروط');
+          return;
+        }
         if($('confirm').value !== pwd){
           setErr($('confirm'), $('errConfirm'), 'كلمتا المرور غير متطابقتين');
           return;
         }
-        const { reqs } = PWD.score(pwd);
-        if(!(reqs.len && reqs.upper && reqs.lower && reqs.num && reqs.sym && reqs.safe)){
-          setErr(pwdI, $('errPassword'), 'كلمة المرور لا تحقق كل الشروط');
+      }else{
+        if(pwd.length < 1){
+          setErr(pwdI, $('errPassword'), 'أدخل كلمة المرور');
           return;
         }
       }
@@ -680,7 +645,7 @@ const AuthUI = (() => {
             msg('هذا الحساب موقوف', 'err');
             return;
           }
-          toast(`أهلًا ${Auth.profile?.username || ''} ✦`, 'ok');
+          toast(`أهلًا ${Auth.profile?.username || ''} 🔥`, 'ok');
           await App.enterApp();
         }else{
           const r = await Auth.doSignup(email, pwd, $('username').value.trim());
@@ -688,7 +653,7 @@ const AuthUI = (() => {
             msg('تم إنشاء الحساب ✓\nتحقق من بريدك الإلكتروني لتفعيل الحساب.', 'ok');
             return;
           }
-          toast('تم إنشاء الحساب ✦', 'ok');
+          toast('تم إنشاء الحساب 🔥', 'ok');
           await App.enterApp();
         }
 
@@ -715,7 +680,7 @@ const AuthUI = (() => {
 /* ========== APP ========== */
 const App = (() => {
 
-  let selectedFile = null, resultUrl = null, opsCache = [];
+  let selectedFile = null, resultBlob = null, opsCache = [];
 
   const showAuth = () => {
     $('authScreen').classList.remove('hidden');
@@ -822,12 +787,17 @@ const App = (() => {
         if(!op) return;
         if(b.dataset.act === 'dl'){
           b.disabled = true;
+          b.textContent = '...';
           try{
             const u = await API.resolveImg(op.result_url, s.access_token);
             if(!u) throw new Error('تعذر تجهيز الصورة');
-            await downloadUrl(u, `removebg-${String(op.id).slice(0,8)}.png`);
-          }catch(err){ toast(err.message, 'err'); }
-          finally{ b.disabled = false; }
+            await downloadFromUrl(u, `removebg-${String(op.id).slice(0,8)}.png`);
+          }catch(err){
+            toast(err.message || 'فشل التحميل', 'err');
+          }finally{
+            b.disabled = false;
+            b.textContent = '⬇ تحميل';
+          }
         }
         if(b.dataset.act === 'del'){
           if(!confirm('حذف هذه العملية؟')) return;
@@ -878,11 +848,10 @@ const App = (() => {
   }
 
   function resetResult(){
-    if(resultUrl){ URL.revokeObjectURL(resultUrl); resultUrl = null; }
+    resultBlob = null;
     $('previewResult').src = '';
     $('resultCard').classList.add('hidden');
     $('downloadBtn').classList.add('hidden');
-    $('downloadBtn').dataset.url = '';
   }
 
   function setFile(file){
@@ -896,9 +865,6 @@ const App = (() => {
     $('processing').classList.add('hidden');
     $('removeBtn').disabled = false;
     $('changeBtn').disabled = false;
-    /* Hide result until process */
-    $('resultCard').classList.add('hidden');
-    $('downloadBtn').classList.add('hidden');
   }
 
   async function validateFile(f){
@@ -935,21 +901,27 @@ const App = (() => {
     resetResult();
 
     try{
+      /* Upload original */
       const orig = await API.upload(s.access_token, s.user.id, selectedFile, 'orig');
+
+      /* Remove background */
       const blob = await API.removeBg(selectedFile);
+
+      /* Save blob for download */
+      resultBlob = blob;
+
+      /* Upload result */
       const res = await API.upload(s.access_token, s.user.id, blob, 'res');
+
+      /* Save operation */
       await API.saveOp(s.access_token, orig, res);
 
-      /* Show result card AFTER success */
-      resultUrl = URL.createObjectURL(blob);
-      $('previewResult').src = resultUrl;
+      /* Show result card */
+      $('previewResult').src = URL.createObjectURL(blob);
       $('resultCard').classList.remove('hidden');
-
-      const perm = await API.resolveImg(res, s.access_token);
-      $('downloadBtn').dataset.url = perm || '';
       $('downloadBtn').classList.remove('hidden');
 
-      toast('تمت إزالة الخلفية بنجاح ✦', 'ok');
+      toast('تمت إزالة الخلفية ✓', 'ok');
       await refreshUsage();
     }catch(e){
       console.error(e);
@@ -960,20 +932,46 @@ const App = (() => {
     }
   }
 
-  async function downloadUrl(url, name){
+  /* ============================================================
+     DOWNLOAD — يعمل دائمًا
+     ============================================================ */
+  async function downloadBlob(blob, name){
+    if(!blob){
+      toast('لا يوجد ملف للتحميل', 'err');
+      return;
+    }
+    try{
+      /* Method 1: blob URL — يعمل في كل المتصفحات */
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+    }catch(e){
+      console.error(e);
+      toast('فشل التحميل', 'err');
+    }
+  }
+
+  async function downloadFromUrl(url, name){
     try{
       const r = await fetch(url, {mode:'cors'});
-      if(!r.ok) throw 0;
+      if(!r.ok) throw new Error('HTTP ' + r.status);
       const b = await r.blob();
-      const u = URL.createObjectURL(b);
+      await downloadBlob(b, name);
+    }catch(e){
+      /* Fallback: افتح في tab جديد */
       const a = document.createElement('a');
-      a.href = u; a.download = name;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(u), 2600);
-    }catch{
-      const a = document.createElement('a');
-      a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      document.body.appendChild(a); a.click(); a.remove();
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
   }
 
@@ -1024,16 +1022,25 @@ const App = (() => {
 
     $('removeBtn').addEventListener('click', doRemove);
 
+    /* Download button — يستخدم blob المحفوظ مباشرة */
     $('downloadBtn').addEventListener('click', async () => {
-      const u = $('downloadBtn').dataset.url || $('previewResult').src;
-      if(!u) return toast('لا نتيجة', 'err');
+      if(!resultBlob){
+        toast('لا يوجد ملف', 'err');
+        return;
+      }
       $('downloadBtn').disabled = true;
-      try{ await downloadUrl(u, `removebg-${Date.now()}.png`); }
-      finally{ $('downloadBtn').disabled = false; }
+      try{
+        await downloadBlob(resultBlob, `removebg-${Date.now()}.png`);
+        toast('تم التحميل ✓', 'ok');
+      }catch(e){
+        toast('فشل التحميل', 'err');
+      }finally{
+        $('downloadBtn').disabled = false;
+      }
     });
   }
 
-  return { showAuth, showApp, enterApp, switchView, bindUI, downloadUrl };
+  return { showAuth, showApp, enterApp, switchView, bindUI };
 })();
 
 /* ========== ADMIN ========== */
@@ -1168,7 +1175,7 @@ const Admin = (() => {
         <button id="aSave" class="btn-primary small" type="button"><span class="btn-text">حفظ</span></button>
         <button id="aClose" class="btn-ghost" type="button">إغلاق</button>
       </div>
-      <div class="modal-section-title">عمليات <span class="gold-text">المستخدم</span></div>
+      <div class="modal-section-title">عمليات المستخدم</div>
       <div id="aOps" class="ops-grid"></div>
     `;
     $('modal').classList.add('show');
@@ -1240,7 +1247,7 @@ const Admin = (() => {
   return { init, refresh };
 })();
 
-/* ========== BOOTSTRAP ========== */
+/* ========== BOOT ========== */
 (async function boot(){
   AuthUI.init();
   App.bindUI();
