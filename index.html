@@ -3,41 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0d0806">
+<meta name="theme-color" content="#0a0705">
 <meta name="color-scheme" content="dark">
 <title>RemoveBG · Sandstorm Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;500;600;700&family=Playfair+Display:wght@500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <!-- ==================== LOADER ==================== -->
 <div id="loader">
-  <div class="ld-warm"></div>
-  <div class="ld-warm w2"></div>
+  <div class="ld-ambient a1"></div>
+  <div class="ld-ambient a2"></div>
   <canvas id="fx"></canvas>
 
   <div class="ld-stage">
-    <!-- Rings -->
-    <div class="ring r1"></div>
-    <div class="ring r2"></div>
-    <div class="ring r3"></div>
-    <div class="ring r4"></div>
-    <div class="ring r5"></div>
-    <div class="ring r6"></div>
+    <!-- Arc 1 — outer half circle -->
+    <div class="arc arc-1">
+      <svg viewBox="0 0 240 240">
+        <defs>
+          <linearGradient id="arcG1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f5d8b0"/>
+            <stop offset="50%" stop-color="#e0b884"/>
+            <stop offset="100%" stop-color="#c98a58"/>
+          </linearGradient>
+        </defs>
+        <circle cx="120" cy="120" r="112" fill="none"
+          stroke="url(#arcG1)" stroke-width="2.5" stroke-linecap="round"
+          stroke-dasharray="352 703"/>
+      </svg>
+    </div>
 
-    <!-- Orbits with satellites -->
+    <!-- Arc 2 — inner half circle reverse -->
+    <div class="arc arc-2">
+      <svg viewBox="0 0 240 240">
+        <defs>
+          <linearGradient id="arcG2" x1="1" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ecc0c0"/>
+            <stop offset="100%" stop-color="#b886a0"/>
+          </linearGradient>
+        </defs>
+        <circle cx="120" cy="120" r="94" fill="none"
+          stroke="url(#arcG2)" stroke-width="2" stroke-linecap="round"
+          stroke-dasharray="295 590"/>
+      </svg>
+    </div>
+
+    <!-- Arc 3 — quarter arc sand -->
+    <div class="arc arc-3">
+      <svg viewBox="0 0 240 240">
+        <defs>
+          <linearGradient id="arcG3" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0%" stop-color="#c4783a"/>
+            <stop offset="100%" stop-color="#e8c896"/>
+          </linearGradient>
+        </defs>
+        <circle cx="120" cy="120" r="76" fill="none"
+          stroke="url(#arcG3)" stroke-width="3" stroke-linecap="round"
+          stroke-dasharray="120 478"/>
+      </svg>
+    </div>
+
+    <!-- Arc 4 — dotted ring -->
+    <div class="arc arc-4">
+      <svg viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r="58" fill="none"
+          stroke="rgba(224,184,132,.35)" stroke-width="1.5"
+          stroke-dasharray="3 8" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- Orbiting dots -->
     <div class="orbit o1"><i></i></div>
     <div class="orbit o2"><i></i></div>
-    <div class="orbit o3"><i></i></div>
 
-    <!-- Center mark -->
-    <div class="ld-core">
-      <div class="ld-core-inner">
-        <div class="ld-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
-      </div>
+    <!-- Center logo -->
+    <div class="ld-center">
+      <div class="ld-halo"></div>
+      <div class="ld-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
     </div>
   </div>
 
@@ -45,9 +90,7 @@
     <div class="ld-eyebrow">◆ SANDSTORM STUDIO ◆</div>
     <div class="ld-title">Remove<span>BG</span></div>
     <div class="ld-tag">PREMIUM BACKGROUND ENGINE</div>
-    <div class="ld-track">
-      <div class="ld-fill" id="ldFill"></div>
-    </div>
+    <div class="ld-track"><div class="ld-fill" id="ldFill"></div></div>
     <div class="ld-pct" id="ldPct">0%</div>
   </div>
 </div>
@@ -58,6 +101,7 @@
   <div class="auth-orb ob"></div>
   <div class="auth-orb oc"></div>
   <div class="auth-grid-bg"></div>
+  <div class="auth-scan-line"></div>
 
   <div class="auth-card">
     <span class="corner c-tl"></span>
@@ -66,40 +110,58 @@
     <span class="corner c-br"></span>
     <span class="edge-glow"></span>
 
-    <div class="brand-mark">
-      <div class="brand-logo-wrap">
-        <div class="brand-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
-        <div class="brand-logo-glow"></div>
+    <!-- Welcome header (Code.Box style) -->
+    <div class="welcome-head">
+      <div class="welcome-logo">
+        <img src="https://up6.cc/2026/09/178886608408951.jpg" alt="">
       </div>
-      <h1 class="brand-name">Remove<span>BG</span></h1>
-      <div class="brand-sub">◆ SANDSTORM STUDIO ◆</div>
+      <div class="welcome-text">
+        <h1 class="welcome-title">أهلًا بعودتك إلى <span>RemoveBG</span></h1>
+        <p class="welcome-sub">سجّل دخولك لمتابعة رحلتك الإبداعية</p>
+      </div>
     </div>
 
+    <div class="divider-line"></div>
+
     <div class="tabs" data-mode="login">
-      <button id="tabLogin" class="tab active" type="button">تسجيل الدخول</button>
+      <button id="tabLogin" class="tab active" type="button">دخول</button>
       <button id="tabRegister" class="tab" type="button">حساب جديد</button>
       <span class="tab-ind"></span>
     </div>
 
     <form id="authForm" autocomplete="on" novalidate>
+
       <div class="field hidden" id="fUsername">
-        <label><span class="lbl-dot"></span> اسم المستخدم</label>
-        <input id="username" type="text" maxlength="20" placeholder="username_123" autocomplete="username" spellcheck="false">
+        <label>اسم المستخدم</label>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="7" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          </span>
+          <input id="username" type="text" maxlength="20" placeholder="username_123" autocomplete="username" spellcheck="false">
+        </div>
         <span class="err" id="errUsername"></span>
       </div>
 
       <div class="field">
-        <label><span class="lbl-dot"></span> البريد الإلكتروني</label>
-        <input id="email" type="email" placeholder="you@example.com" autocomplete="email" spellcheck="false" required>
+        <label>البريد الإلكتروني</label>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+          </span>
+          <input id="email" type="email" placeholder="you@example.com" autocomplete="email" spellcheck="false" required>
+        </div>
         <span class="err" id="errEmail"></span>
       </div>
 
       <div class="field">
-        <label><span class="lbl-dot"></span> كلمة المرور</label>
-        <div class="in-wrap">
+        <label>كلمة المرور</label>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
           <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
           <button class="eye" id="eyePass" type="button" tabindex="-1" aria-label="عرض">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
         <div class="strength hidden" id="strength">
@@ -110,11 +172,14 @@
       </div>
 
       <div class="field hidden" id="fConfirm">
-        <label><span class="lbl-dot"></span> تأكيد كلمة المرور</label>
-        <div class="in-wrap">
+        <label>تأكيد كلمة المرور</label>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
           <input id="confirm" type="password" placeholder="أعد الإدخال" autocomplete="new-password">
           <button class="eye" id="eyeConfirm" type="button" tabindex="-1" aria-label="عرض">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
         <span class="err" id="errConfirm"></span>
@@ -139,6 +204,9 @@
       <button type="submit" id="submitBtn" class="btn-main" disabled>
         <span class="btn-glow"></span>
         <span class="btn-text">تسجيل الدخول</span>
+        <span class="btn-arrow">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg>
+        </span>
       </button>
     </form>
 
@@ -281,9 +349,11 @@
           <span class="corner c-tr"></span>
           <span class="corner c-bl"></span>
           <span class="corner c-br"></span>
-          <span class="pc-glow"></span>
-          <div class="pc-bg-pattern"></div>
-          <div id="avatar" class="avatar">?</div>
+          <div class="pc-glow"></div>
+          <div class="pc-grid"></div>
+          <div class="avatar-ring">
+            <div id="avatar" class="avatar">?</div>
+          </div>
           <div id="pUsername" class="p-name">—</div>
           <div id="pEmail" class="p-email">—</div>
           <div id="pRole" class="p-role">● مستخدم</div>
@@ -361,4 +431,4 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 </body>
-                 </html>
+  </html>
