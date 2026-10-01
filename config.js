@@ -12,5 +12,6 @@ window.CONFIG = Object.freeze({
 
   DEFAULT_DAILY_LIMIT: 5,
   MAX_FILE_MB: 20,
-  LOADER_MIN_MS: 3200
+
+  LOADER_MIN_MS: 5000
 });
