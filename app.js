@@ -13,8 +13,8 @@ const fmtDate = v => {
   try{
     const d = new Date(v);
     return d.toLocaleDateString('ar-EG',{year:'numeric',month:'short',day:'numeric'}) +
-           ' · ' +
-           d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+      ' · ' +
+      d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
   }catch{ return String(v); }
 };
 
@@ -26,6 +26,36 @@ const initials = v => {
 };
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* ============================================================
+   PRESET BACKGROUNDS
+   ============================================================ */
+const PRESET_BACKGROUNDS = [
+  'https://i.postimg.cc/SsY3CNhB/06b2725f5d4eaed9019cdd45727369cb.jpg',
+  'https://i.postimg.cc/zBH6KXrP/189db98cca60bfab2425301f9554e569.jpg',
+  'https://i.postimg.cc/FRk83s4G/24120c0c61a7f0bea682cadbc2a2c864.jpg',
+  'https://i.postimg.cc/6qsS0JWS/301993462c1c3a8dc18ab3c8d45abb96.jpg',
+  'https://i.postimg.cc/gJLQ8kWK/31eebd1cd36d9712c6b0082084de34f5.jpg',
+  'https://i.postimg.cc/sXGq7Dr8/38f9db786eee7e7a5e309d021eb50dbd.jpg',
+  'https://i.postimg.cc/JnHvZ4LS/3a2576ec62e621b866369d4c64702cf7.jpg',
+  'https://i.postimg.cc/NM2SmfcJ/3e13500046726d734ef24e3338557ae5.jpg',
+  'https://i.postimg.cc/yxq5P41r/512ab0e4cc8524d55ea0c31d2814d15a.jpg',
+  'https://i.postimg.cc/76Jd0Y4v/5b54a19d12bb826c9bae7e4f34532f5a.jpg',
+  'https://i.postimg.cc/0jg3fRk4/5ee8c4afd82e9093f5efd8d3217172a7.jpg',
+  'https://i.postimg.cc/J0wgqVrv/6bbe938f0420e527a4f34eee3d6a7a68.jpg',
+  'https://i.postimg.cc/9MwKZFhJ/85a439f7feafb7a57852b8a530830711.jpg',
+  'https://i.postimg.cc/SsY3CNh3/96ea037e6edca786b9fde92910536087.jpg',
+  'https://i.postimg.cc/QtKw1xDG/d1560c2999545107f9150ea4e12c8e66.jpg',
+  'https://i.postimg.cc/Tw5FgY6q/e7f13771a9e2e5d5b453073fc8711238.jpg',
+  'https://i.postimg.cc/RFJyKVBd/ef21469b3e8c02e7566287c25ec70c92.jpg',
+  'https://i.postimg.cc/vBxkfHsK/ff31ed3961d79e2488345ca2c089050d.jpg'
+];
+
+const BG_COLOR_SWATCHES = [
+  '#ffffff','#000000','#e0b884','#d4a5a5','#c4783a',
+  '#84d896','#e88c7a','#8ab4f8','#c084fc','#fbbf24',
+  '#2dd4bf','#f472b6','#1a130c','#2a2015','#f5e8d4'
+];
 
 /* Toast */
 const toastEl = $('toast');
@@ -51,7 +81,6 @@ const checkPwd = p => {
     upper: /[A-Z]/.test(p),
     lower: /[a-z]/.test(p)
   };
-  /* ✅ مبسّط: 8+ chars + رقم + حرف كبير + حرف صغير */
   const valid = r.len && r.num && r.upper && r.lower;
   let lvl = 0;
   const cnt = [r.len, r.num, r.upper, r.lower].filter(Boolean).length;
@@ -84,13 +113,13 @@ const Loader = (() => {
     resize();
     addEventListener('resize', resize);
 
-    const n = Math.min(45, Math.floor(innerWidth/25));
+    const n = Math.min(50, Math.floor(innerWidth/22));
     for(let i=0;i<n;i++){
       parts.push({
         x: Math.random()*w, y: Math.random()*h,
-        vx:(Math.random()-.5)*.22*dpr, vy:(Math.random()-.5)*.22*dpr,
-        r:(Math.random()*1.3+.4)*dpr, a:Math.random()*.5+.3,
-        hue: 32 + Math.random()*12
+        vx:(Math.random()-.5)*.28*dpr, vy:(Math.random()-.5)*.28*dpr,
+        r:(Math.random()*1.4+.4)*dpr, a:Math.random()*.5+.3,
+        hue: 32 + Math.random()*14
       });
     }
 
@@ -101,7 +130,7 @@ const Loader = (() => {
         if(p.x<0||p.x>w)p.vx*=-1;
         if(p.y<0||p.y>h)p.vy*=-1;
         ctx.beginPath();
-        ctx.fillStyle = `hsla(${p.hue},70%,60%,${p.a})`;
+        ctx.fillStyle = `hsla(${p.hue},75%,62%,${p.a})`;
         ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
         ctx.fill();
       }
@@ -116,10 +145,10 @@ const Loader = (() => {
     let p = 0;
     const fill = $('ldFill'), pct = $('ldPct');
     const tick = setInterval(() => {
-      p = Math.min(98, p + Math.random()*7 + 3);
+      p = Math.min(98, p + Math.random()*8 + 4);
       fill.style.width = p + '%';
       pct.textContent = Math.round(p) + '%';
-    }, 130);
+    }, 120);
 
     const el = performance.now() - START;
     await wait(Math.max(0, CONFIG.LOADER_MIN_MS - el));
@@ -184,7 +213,6 @@ const API = (() => {
       body: JSON.stringify({ email, password, data:{ username } })
     });
     if(!d?.access_token){
-      /* Supabase يطلب تأكيد الإيميل */
       return { needsConfirmation:true, user:d?.user||null };
     }
     return norm(d);
@@ -485,9 +513,16 @@ const AuthUI = (() => {
     mode = m;
     clearErr(); clearMsg();
     const reg = m === 'register';
+
     $('tabLogin').classList.toggle('active', !reg);
     $('tabRegister').classList.toggle('active', reg);
-    document.querySelector('.tabs').dataset.mode = reg ? 'register' : 'login';
+
+    const mt = document.querySelector('.mode-toggle');
+    if(mt) mt.dataset.mode = reg ? 'register' : 'login';
+
+    $('formTitle').textContent = reg ? 'انضم إلينا' : 'أهلًا بعودتك';
+    $('formSub').textContent = reg ? 'أنشئ حسابك وابدأ رحلتك الإبداعية' : 'سجّل دخولك لمتابعة رحلتك الإبداعية';
+
     $('fUsername').classList.toggle('hidden', !reg);
     $('fConfirm').classList.toggle('hidden', !reg);
     $('reqs').classList.toggle('hidden', !reg);
@@ -537,7 +572,6 @@ const AuthUI = (() => {
     btn.style.color = v ? '' : 'var(--sand)';
   };
 
-  /* ترجمة أخطاء Supabase */
   function translateError(e){
     const m = String(e?.message || '').toLowerCase();
     if(m.includes('invalid login') || m.includes('invalid credentials')) return 'البريد أو كلمة المرور غير صحيحة';
@@ -672,6 +706,303 @@ const AuthUI = (() => {
   }
 
   return { init, checkSubmit };
+})();
+
+/* ============================================================
+   BACKGROUND CHANGER
+   ============================================================ */
+const BgChanger = (() => {
+  let sourceBlob = null;
+  let sourceImg = null;
+  let currentBg = null;
+  let bgImage = null;
+  let bgColor = '#e0b884';
+  let opacity = 1;
+  let scale = 1;
+  let initDone = false;
+
+  const $c = id => document.getElementById(id);
+
+  function init() {
+    if(initDone) return;
+    initDone = true;
+
+    /* Presets grid */
+    const presetsWrap = $c('bgPresets');
+    if (presetsWrap) {
+      PRESET_BACKGROUNDS.forEach((url, i) => {
+        const el = document.createElement('div');
+        el.className = 'bg-preset-item';
+        el.dataset.index = i;
+        el.dataset.url = url;
+        el.innerHTML = `<img src="${url}" alt="" loading="lazy" crossorigin="anonymous"><div class="bg-check"></div>`;
+        el.addEventListener('click', () => selectPreset(url, el));
+        presetsWrap.appendChild(el);
+      });
+    }
+
+    /* Color swatches */
+    const swWrap = $c('bgColorSwatches');
+    if (swWrap) {
+      BG_COLOR_SWATCHES.forEach(c => {
+        const s = document.createElement('div');
+        s.className = 'bg-swatch';
+        s.style.background = c;
+        s.dataset.color = c;
+        s.addEventListener('click', () => {
+          $c('bgColorPicker').value = c;
+          bgColor = c;
+          document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
+          s.classList.add('active');
+          setBg({ type: 'color', value: c });
+        });
+        swWrap.appendChild(s);
+      });
+    }
+
+    /* Toggle panel */
+    $c('bgToggle')?.addEventListener('click', () => {
+      const panel = $c('bgPanel');
+      const btn = $c('bgToggle');
+      panel.classList.toggle('hidden');
+      btn.classList.toggle('open');
+    });
+
+    /* Tabs */
+    document.querySelectorAll('.bg-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const mode = tab.dataset.bgmode;
+        document.querySelectorAll('.bg-tab').forEach(t => t.classList.toggle('active', t === tab));
+        ['preset','upload','color'].forEach(m => {
+          $c(`bg${m.charAt(0).toUpperCase()+m.slice(1)}Content`)?.classList.toggle('hidden', m !== mode);
+        });
+      });
+    });
+
+    /* Upload */
+    const uz = $c('bgUploadZone');
+    const fi = $c('bgFileInput');
+    $c('bgChooseBtn')?.addEventListener('click', e => { e.stopPropagation(); fi.click(); });
+    uz?.addEventListener('click', () => fi.click());
+    ['dragenter','dragover'].forEach(n => uz?.addEventListener(n, e => { e.preventDefault(); uz.classList.add('drag'); }));
+    ['dragleave','drop'].forEach(n => uz?.addEventListener(n, e => { e.preventDefault(); uz.classList.remove('drag'); }));
+    uz?.addEventListener('drop', e => {
+      const f = e.dataTransfer?.files?.[0];
+      if (f) handleBgUpload(f);
+    });
+    fi?.addEventListener('change', () => {
+      const f = fi.files?.[0];
+      fi.value = '';
+      if (f) handleBgUpload(f);
+    });
+
+    /* Color picker */
+    $c('bgColorPicker')?.addEventListener('input', e => {
+      bgColor = e.target.value;
+      setBg({ type: 'color', value: bgColor });
+    });
+
+    /* Sliders */
+    $c('bgOpacity')?.addEventListener('input', e => {
+      opacity = e.target.value / 100;
+      $c('bgOpacityVal').textContent = e.target.value + '%';
+      drawPreview();
+    });
+    $c('bgScale')?.addEventListener('input', e => {
+      scale = e.target.value / 100;
+      $c('bgScaleVal').textContent = e.target.value + '%';
+      drawPreview();
+    });
+
+    /* Reset */
+    $c('bgResetBtn')?.addEventListener('click', () => {
+      currentBg = null;
+      bgImage = null;
+      opacity = 1;
+      scale = 1;
+      $c('bgOpacity').value = 100;
+      $c('bgScale').value = 100;
+      $c('bgOpacityVal').textContent = '100%';
+      $c('bgScaleVal').textContent = '100%';
+      document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
+      drawPreview();
+      toast('تم إعادة ضبط الخلفية', 'ok');
+    });
+
+    /* Apply */
+    $c('bgApplyBtn')?.addEventListener('click', applyBackground);
+  }
+
+  function setBg(bg) {
+    currentBg = bg;
+    if (bg.type === 'preset') {
+      bgImage = new Image();
+      bgImage.crossOrigin = 'anonymous';
+      bgImage.onload = drawPreview;
+      bgImage.onerror = () => toast('تعذر تحميل الخلفية', 'err');
+      bgImage.src = bg.value;
+    } else if (bg.type === 'color') {
+      bgImage = null;
+    }
+    drawPreview();
+  }
+
+  function selectPreset(url, el) {
+    document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    setBg({ type: 'preset', value: url });
+  }
+
+  function handleBgUpload(file) {
+    if (!file.type.startsWith('image/')) return toast('صيغة غير مدعومة', 'err');
+    if (file.size > 10 * 1024 * 1024) return toast('الحجم > 10MB', 'err');
+    const url = URL.createObjectURL(file);
+    bgImage = new Image();
+    bgImage.onload = () => {
+      currentBg = { type: 'upload', value: file };
+      drawPreview();
+    };
+    bgImage.src = url;
+    toast('تم تحميل الخلفية ✓', 'ok');
+  }
+
+  function drawPreview() {
+    if (!sourceImg) return;
+    const canvas = $c('bgPreviewCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const maxW = 340, maxH = 260;
+    const ratio = Math.min(maxW / sourceImg.width, maxH / sourceImg.height, 1);
+    canvas.width = Math.round(sourceImg.width * ratio);
+    canvas.height = Math.round(sourceImg.height * ratio);
+
+    if (currentBg?.type === 'color') {
+      ctx.fillStyle = currentBg.value;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else if (bgImage?.complete && bgImage.naturalWidth) {
+      drawCoverImage(ctx, bgImage, canvas.width, canvas.height);
+    } else {
+      drawChecker(ctx, canvas.width, canvas.height);
+    }
+
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    const dw = canvas.width * scale;
+    const dh = canvas.height * scale;
+    const dx = (canvas.width - dw) / 2;
+    const dy = (canvas.height - dh) / 2;
+    ctx.drawImage(sourceImg, dx, dy, dw, dh);
+    ctx.restore();
+  }
+
+  function drawCoverImage(ctx, img, w, h) {
+    const ir = img.width / img.height;
+    const cr = w / h;
+    let sw, sh, sx, sy;
+    if (ir > cr) {
+      sh = img.height;
+      sw = sh * cr;
+      sx = (img.width - sw) / 2;
+      sy = 0;
+    } else {
+      sw = img.width;
+      sh = sw / cr;
+      sx = 0;
+      sy = (img.height - sh) / 2;
+    }
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+  }
+
+  function drawChecker(ctx, w, h) {
+    const size = 12;
+    for (let y = 0; y < h; y += size) {
+      for (let x = 0; x < w; x += size) {
+        ctx.fillStyle = ((x / size + y / size) % 2 === 0) ? '#1a130c' : '#221a12';
+        ctx.fillRect(x, y, size, size);
+      }
+    }
+  }
+
+  async function setSource(blob) {
+    sourceBlob = blob;
+    const url = URL.createObjectURL(blob);
+    sourceImg = new Image();
+    sourceImg.onload = () => {
+      $c('bgChanger')?.classList.remove('hidden');
+      drawPreview();
+    };
+    sourceImg.src = url;
+  }
+
+  async function applyBackground() {
+    if (!sourceImg) return toast('لا توجد صورة', 'err');
+    if (!currentBg) return toast('اختر خلفية أولاً', 'err');
+
+    const btn = $c('bgApplyBtn');
+    btn.disabled = true;
+    const orig = btn.textContent;
+    btn.textContent = 'جاري التطبيق...';
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = sourceImg.naturalWidth;
+      canvas.height = sourceImg.naturalHeight;
+      const ctx = canvas.getContext('2d');
+
+      if (currentBg.type === 'color') {
+        ctx.fillStyle = currentBg.value;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      } else if (bgImage?.complete && bgImage.naturalWidth) {
+        drawCoverImage(ctx, bgImage, canvas.width, canvas.height);
+      }
+
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.drawImage(sourceImg, 0, 0);
+      ctx.restore();
+
+      const outBlob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+
+      const resultImg = $c('previewResult');
+      const oldSrc = resultImg.src;
+      resultImg.src = URL.createObjectURL(outBlob);
+      if (oldSrc?.startsWith('blob:')) URL.revokeObjectURL(oldSrc);
+
+      if (typeof App !== 'undefined' && App.setResultBlob) {
+        App.setResultBlob(outBlob);
+      }
+
+      toast('تم تطبيق الخلفية ✓', 'ok');
+    } catch (e) {
+      console.error(e);
+      toast('فشل التطبيق', 'err');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = orig;
+    }
+  }
+
+  function reset() {
+    sourceBlob = null;
+    sourceImg = null;
+    currentBg = null;
+    bgImage = null;
+    opacity = 1;
+    scale = 1;
+    $c('bgChanger')?.classList.add('hidden');
+    $c('bgPanel')?.classList.add('hidden');
+    $c('bgToggle')?.classList.remove('open');
+    if ($c('bgOpacity')) $c('bgOpacity').value = 100;
+    if ($c('bgScale')) $c('bgScale').value = 100;
+    if ($c('bgOpacityVal')) $c('bgOpacityVal').textContent = '100%';
+    if ($c('bgScaleVal')) $c('bgScaleVal').textContent = '100%';
+    document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
+  }
+
+  return { init, setSource, reset, applyBackground };
 })();
 
 /* ========== APP ========== */
@@ -849,7 +1180,10 @@ const App = (() => {
     $('previewResult').src = '';
     $('resultCard').classList.add('hidden');
     $('downloadBtn').classList.add('hidden');
+    BgChanger.reset();
   }
+
+  function setResultBlob(b){ resultBlob = b; }
 
   function setFile(file){
     selectedFile = file;
@@ -907,6 +1241,8 @@ const App = (() => {
       $('previewResult').src = URL.createObjectURL(blob);
       $('resultCard').classList.remove('hidden');
       $('downloadBtn').classList.remove('hidden');
+
+      BgChanger.setSource(blob);
 
       toast('تمت إزالة الخلفية ✓', 'ok');
       await refreshUsage();
@@ -999,7 +1335,7 @@ const App = (() => {
     });
   }
 
-  return { showAuth, showApp, enterApp, switchView, bindUI };
+  return { showAuth, showApp, enterApp, switchView, bindUI, setResultBlob };
 })();
 
 /* ========== ADMIN ========== */
@@ -1211,6 +1547,7 @@ const Admin = (() => {
   AuthUI.init();
   App.bindUI();
   Admin.init();
+  BgChanger.init();
 
   let session = await Auth.valid();
   let profile = null;
