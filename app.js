@@ -57,9 +57,10 @@ const BG_COLOR_SWATCHES = [
   '#2dd4bf','#f472b6','#1a130c','#2a2015','#f5e8d4'
 ];
 
-/* Toast */
+/* ========== TOAST ========== */
 const toastEl = $('toast');
 function toast(msg, type=''){
+  if(!toastEl) return;
   toastEl.className = 'toast show ' + type;
   toastEl.textContent = msg;
   clearTimeout(toast._t);
@@ -93,7 +94,9 @@ const checkPwd = p => {
   return { reqs:r, lvl, label:labels[lvl], valid };
 };
 
-/* ========== LOADER ========== */
+/* ============================================================
+   LOADER — Gear mechanism
+   ============================================================ */
 const Loader = (() => {
   const START = performance.now();
   let raf;
@@ -146,18 +149,18 @@ const Loader = (() => {
     const fill = $('ldFill'), pct = $('ldPct');
     const tick = setInterval(() => {
       p = Math.min(98, p + Math.random()*8 + 4);
-      fill.style.width = p + '%';
-      pct.textContent = Math.round(p) + '%';
+      if(fill) fill.style.width = p + '%';
+      if(pct) pct.textContent = Math.round(p) + '%';
     }, 120);
 
     const el = performance.now() - START;
     await wait(Math.max(0, CONFIG.LOADER_MIN_MS - el));
 
     clearInterval(tick);
-    fill.style.width = '100%';
-    pct.textContent = '100%';
+    if(fill) fill.style.width = '100%';
+    if(pct) pct.textContent = '100%';
     await wait(280);
-    $('loader').classList.add('hide');
+    $('loader')?.classList.add('hide');
     if(raf) cancelAnimationFrame(raf);
     setTimeout(() => $('loader')?.remove(), 800);
   }
@@ -165,7 +168,9 @@ const Loader = (() => {
   return { run };
 })();
 
-/* ========== API ========== */
+/* ============================================================
+   API
+   ============================================================ */
 const API = (() => {
 
   async function req(path, opt={}, token=null){
@@ -422,7 +427,9 @@ const API = (() => {
   };
 })();
 
-/* ========== AUTH ========== */
+/* ============================================================
+   AUTH
+   ============================================================ */
 const Auth = (() => {
   let session = null, profile = null;
 
@@ -486,7 +493,9 @@ const Auth = (() => {
   };
 })();
 
-/* ========== AUTH UI ========== */
+/* ============================================================
+   AUTH UI — Modern switch-link style
+   ============================================================ */
 const AuthUI = (() => {
   let mode = 'login';
 
@@ -495,6 +504,7 @@ const AuthUI = (() => {
     el.textContent = msg;
     el.classList.toggle('show', !!msg);
   };
+
   const clearErr = () => {
     ['username','email','password','confirm'].forEach(k => {
       const i = $(k), e = $('err' + k[0].toUpperCase() + k.slice(1));
@@ -502,34 +512,52 @@ const AuthUI = (() => {
       if(e){ e.textContent = ''; e.classList.remove('show'); }
     });
   };
+
   const msg = (txt, type='') => {
     const m = $('authMsg');
+    if(!m) return;
     m.className = 'msg show ' + type;
     m.textContent = txt;
   };
-  const clearMsg = () => { $('authMsg').className = 'msg'; $('authMsg').textContent = ''; };
+
+  const clearMsg = () => {
+    const m = $('authMsg');
+    if(!m) return;
+    m.className = 'msg';
+    m.textContent = '';
+  };
 
   const setMode = m => {
     mode = m;
     clearErr(); clearMsg();
     const reg = m === 'register';
 
-    $('tabLogin').classList.toggle('active', !reg);
-    $('tabRegister').classList.toggle('active', reg);
+    // Titles
+    $('formTitle').textContent = reg ? 'أنشئ حسابك' : 'أهلًا بعودتك';
+    $('formSub').textContent = reg
+      ? 'ابدأ رحلتك الإبداعية في أقل من دقيقة'
+      : 'سجّل دخولك لمتابعة رحلتك الإبداعية';
 
-    const mt = document.querySelector('.mode-toggle');
-    if(mt) mt.dataset.mode = reg ? 'register' : 'login';
-
-    $('formTitle').textContent = reg ? 'انضم إلينا' : 'أهلًا بعودتك';
-    $('formSub').textContent = reg ? 'أنشئ حسابك وابدأ رحلتك الإبداعية' : 'سجّل دخولك لمتابعة رحلتك الإبداعية';
-
+    // Toggle register-only fields
     $('fUsername').classList.toggle('hidden', !reg);
     $('fConfirm').classList.toggle('hidden', !reg);
     $('reqs').classList.toggle('hidden', !reg);
     $('strength').classList.toggle('hidden', !reg);
-    $('submitBtn').querySelector('.btn-text').textContent = reg ? 'إنشاء حساب' : 'تسجيل الدخول';
+
+    // Submit button
+    $('submitBtn').querySelector('.btn-text').textContent =
+      reg ? 'إنشاء الحساب' : 'تسجيل الدخول';
+
+    // Password field
     $('password').placeholder = reg ? '8 أحرف + رقم + حرف كبير' : '••••••••';
     $('password').setAttribute('autocomplete', reg ? 'new-password' : 'current-password');
+
+    // Switch link (bottom)
+    const st = document.getElementById('switchText');
+    const sb = document.getElementById('switchBtn');
+    if (st) st.textContent = reg ? 'لديك حساب بالفعل؟' : 'ليس لديك حساب؟';
+    if (sb) sb.textContent = reg ? 'سجّل الدخول' : 'أنشئ حساباً';
+
     updateReqs();
     checkSubmit();
   };
@@ -542,8 +570,10 @@ const AuthUI = (() => {
     const match = c && c === p;
     const all = {...reqs, match};
 
-    document.querySelector('.bars').dataset.lvl = lvl;
-    $('strengthTxt').textContent = label;
+    const bars = document.querySelector('.bars');
+    if(bars) bars.dataset.lvl = lvl;
+    const st = $('strengthTxt');
+    if(st) st.textContent = label;
 
     document.querySelectorAll('.reqs li').forEach(li => {
       li.classList.toggle('ok', !!all[li.dataset.r]);
@@ -590,11 +620,16 @@ const AuthUI = (() => {
   function init(){
     setMode('login');
 
-    $('tabLogin').addEventListener('click', () => setMode('login'));
-    $('tabRegister').addEventListener('click', () => setMode('register'));
+    // Modern switch link
+    document.getElementById('switchBtn')?.addEventListener('click', () => {
+      setMode(mode === 'login' ? 'register' : 'login');
+    });
+
+    // Eye buttons
     $('eyePass').addEventListener('click', () => eye($('password'), $('eyePass')));
     $('eyeConfirm').addEventListener('click', () => eye($('confirm'), $('eyeConfirm')));
 
+    // Live validation
     const emailI = $('email');
     emailI.addEventListener('input', () => {
       if(isEmailValid(emailI.value.trim())){
@@ -620,6 +655,7 @@ const AuthUI = (() => {
 
     $('username').addEventListener('input', checkSubmit);
 
+    // Forgot password
     $('forgotBtn').addEventListener('click', async () => {
       const email = emailI.value.trim();
       if(!isEmailValid(email)){
@@ -634,6 +670,7 @@ const AuthUI = (() => {
       }
     });
 
+    // Submit
     $('authForm').addEventListener('submit', async e => {
       e.preventDefault();
       clearErr(); clearMsg();
@@ -694,7 +731,10 @@ const AuthUI = (() => {
           await App.enterApp();
         }
 
-        ['email','password','username','confirm'].forEach(k => $(k).value = '');
+        ['email','password','username','confirm'].forEach(k => {
+          const el = $(k);
+          if(el) el.value = '';
+        });
       }catch(err){
         msg(translateError(err), 'err');
       }finally{
@@ -709,7 +749,7 @@ const AuthUI = (() => {
 })();
 
 /* ============================================================
-   BACKGROUND CHANGER
+   BACKGROUND CHANGER v2 — Dedicated view + drag
    ============================================================ */
 const BgChanger = (() => {
   let sourceBlob = null;
@@ -719,31 +759,37 @@ const BgChanger = (() => {
   let bgColor = '#e0b884';
   let opacity = 1;
   let scale = 1;
+  let offsetX = 0;
+  let offsetY = 0;
+  let previewScale = 1;
   let initDone = false;
+  let dragging = false;
+  let dragStart = { x: 0, y: 0 };
+  let startOffset = { x: 0, y: 0 };
 
   const $c = id => document.getElementById(id);
 
-  function init() {
+  function init(){
     if(initDone) return;
     initDone = true;
 
-    /* Presets grid */
+    /* Presets */
     const presetsWrap = $c('bgPresets');
-    if (presetsWrap) {
-      PRESET_BACKGROUNDS.forEach((url, i) => {
+    if (presetsWrap){
+      PRESET_BACKGROUNDS.forEach(url => {
         const el = document.createElement('div');
         el.className = 'bg-preset-item';
-        el.dataset.index = i;
         el.dataset.url = url;
         el.innerHTML = `<img src="${url}" alt="" loading="lazy" crossorigin="anonymous"><div class="bg-check"></div>`;
         el.addEventListener('click', () => selectPreset(url, el));
         presetsWrap.appendChild(el);
       });
     }
+    if ($c('bgCount')) $c('bgCount').textContent = PRESET_BACKGROUNDS.length;
 
-    /* Color swatches */
+    /* Colors */
     const swWrap = $c('bgColorSwatches');
-    if (swWrap) {
+    if (swWrap){
       BG_COLOR_SWATCHES.forEach(c => {
         const s = document.createElement('div');
         s.className = 'bg-swatch';
@@ -754,19 +800,11 @@ const BgChanger = (() => {
           bgColor = c;
           document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
           s.classList.add('active');
-          setBg({ type: 'color', value: c });
+          setBg({ type:'color', value:c });
         });
         swWrap.appendChild(s);
       });
     }
-
-    /* Toggle panel */
-    $c('bgToggle')?.addEventListener('click', () => {
-      const panel = $c('bgPanel');
-      const btn = $c('bgToggle');
-      panel.classList.toggle('hidden');
-      btn.classList.toggle('open');
-    });
 
     /* Tabs */
     document.querySelectorAll('.bg-tab').forEach(tab => {
@@ -791,39 +829,36 @@ const BgChanger = (() => {
       if (f) handleBgUpload(f);
     });
     fi?.addEventListener('change', () => {
-      const f = fi.files?.[0];
-      fi.value = '';
+      const f = fi.files?.[0]; fi.value = '';
       if (f) handleBgUpload(f);
     });
 
     /* Color picker */
     $c('bgColorPicker')?.addEventListener('input', e => {
       bgColor = e.target.value;
-      setBg({ type: 'color', value: bgColor });
+      setBg({ type:'color', value:bgColor });
     });
 
     /* Sliders */
-    $c('bgOpacity')?.addEventListener('input', e => {
-      opacity = e.target.value / 100;
-      $c('bgOpacityVal').textContent = e.target.value + '%';
-      drawPreview();
-    });
     $c('bgScale')?.addEventListener('input', e => {
       scale = e.target.value / 100;
       $c('bgScaleVal').textContent = e.target.value + '%';
       drawPreview();
     });
+    $c('bgOpacity')?.addEventListener('input', e => {
+      opacity = e.target.value / 100;
+      $c('bgOpacityVal').textContent = e.target.value + '%';
+      drawPreview();
+    });
 
     /* Reset */
     $c('bgResetBtn')?.addEventListener('click', () => {
-      currentBg = null;
-      bgImage = null;
-      opacity = 1;
-      scale = 1;
-      $c('bgOpacity').value = 100;
+      currentBg = null; bgImage = null;
+      opacity = 1; scale = 1; offsetX = 0; offsetY = 0;
       $c('bgScale').value = 100;
-      $c('bgOpacityVal').textContent = '100%';
+      $c('bgOpacity').value = 100;
       $c('bgScaleVal').textContent = '100%';
+      $c('bgOpacityVal').textContent = '100%';
       document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
       document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
       drawPreview();
@@ -832,180 +867,236 @@ const BgChanger = (() => {
 
     /* Apply */
     $c('bgApplyBtn')?.addEventListener('click', applyBackground);
+
+    /* Drag canvas */
+    const canvas = $c('bgEditCanvas');
+    if (canvas){
+      canvas.addEventListener('pointerdown', onPointerDown);
+      canvas.addEventListener('pointermove', onPointerMove);
+      canvas.addEventListener('pointerup', onPointerUp);
+      canvas.addEventListener('pointercancel', onPointerUp);
+      canvas.addEventListener('wheel', onWheel, { passive: false });
+    }
+
+    /* Empty state button */
+    $c('bgEmptyStudio')?.addEventListener('click', () => App.switchView('studio'));
   }
 
-  function setBg(bg) {
+  function onPointerDown(e){
+    if (!sourceImg) return;
+    dragging = true;
+    dragStart = { x: e.clientX, y: e.clientY };
+    startOffset = { x: offsetX, y: offsetY };
+    e.target.setPointerCapture?.(e.pointerId);
+    e.target.classList.add('dragging');
+  }
+  function onPointerMove(e){
+    if (!dragging || !sourceImg) return;
+    const canvas = $c('bgEditCanvas');
+    const rect = canvas.getBoundingClientRect();
+    const dx = (e.clientX - dragStart.x) * (canvas.width / rect.width);
+    const dy = (e.clientY - dragStart.y) * (canvas.height / rect.height);
+    offsetX = startOffset.x + dx;
+    offsetY = startOffset.y + dy;
+    drawPreview();
+  }
+  function onPointerUp(e){
+    dragging = false;
+    e.target.classList.remove('dragging');
+  }
+  function onWheel(e){
+    if (!sourceImg) return;
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.05 : 0.05;
+    scale = Math.max(0.3, Math.min(3, scale + delta));
+    const pct = Math.round(scale * 100);
+    if($c('bgScale')) $c('bgScale').value = pct;
+    if($c('bgScaleVal')) $c('bgScaleVal').textContent = pct + '%';
+    drawPreview();
+  }
+
+  function setBg(bg){
     currentBg = bg;
-    if (bg.type === 'preset') {
+    if (bg.type === 'preset'){
       bgImage = new Image();
       bgImage.crossOrigin = 'anonymous';
       bgImage.onload = drawPreview;
       bgImage.onerror = () => toast('تعذر تحميل الخلفية', 'err');
       bgImage.src = bg.value;
-    } else if (bg.type === 'color') {
+    } else {
       bgImage = null;
     }
     drawPreview();
   }
 
-  function selectPreset(url, el) {
+  function selectPreset(url, el){
     document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
     el.classList.add('active');
-    setBg({ type: 'preset', value: url });
+    setBg({ type:'preset', value:url });
   }
 
-  function handleBgUpload(file) {
+  function handleBgUpload(file){
     if (!file.type.startsWith('image/')) return toast('صيغة غير مدعومة', 'err');
     if (file.size > 10 * 1024 * 1024) return toast('الحجم > 10MB', 'err');
     const url = URL.createObjectURL(file);
     bgImage = new Image();
     bgImage.onload = () => {
-      currentBg = { type: 'upload', value: file };
+      currentBg = { type:'upload', value:file };
       drawPreview();
     };
     bgImage.src = url;
     toast('تم تحميل الخلفية ✓', 'ok');
   }
 
-  function drawPreview() {
-    if (!sourceImg) return;
-    const canvas = $c('bgPreviewCanvas');
+  function drawPreview(){
+    const canvas = $c('bgEditCanvas');
     if (!canvas) return;
+    if (!sourceImg){
+      canvas.classList.add('hidden');
+      $c('bgEmptyState')?.classList.remove('hidden');
+      $c('bgDragHint')?.classList.add('hidden');
+      if ($c('bgCanvasStatus')) $c('bgCanvasStatus').textContent = '● فارغ';
+      return;
+    }
+    canvas.classList.remove('hidden');
+    $c('bgEmptyState')?.classList.add('hidden');
+    $c('bgDragHint')?.classList.remove('hidden');
+    if ($c('bgCanvasStatus')) $c('bgCanvasStatus').textContent = '● جاهز';
+
     const ctx = canvas.getContext('2d');
 
-    const maxW = 340, maxH = 260;
-    const ratio = Math.min(maxW / sourceImg.width, maxH / sourceImg.height, 1);
-    canvas.width = Math.round(sourceImg.width * ratio);
-    canvas.height = Math.round(sourceImg.height * ratio);
+    const maxW = 500, maxH = 500;
+    previewScale = Math.min(maxW / sourceImg.width, maxH / sourceImg.height, 1);
+    canvas.width = Math.round(sourceImg.width * previewScale);
+    canvas.height = Math.round(sourceImg.height * previewScale);
 
-    if (currentBg?.type === 'color') {
+    if (currentBg?.type === 'color'){
       ctx.fillStyle = currentBg.value;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-    } else if (bgImage?.complete && bgImage.naturalWidth) {
-      drawCoverImage(ctx, bgImage, canvas.width, canvas.height);
+    } else if (bgImage?.complete && bgImage.naturalWidth){
+      drawCover(ctx, bgImage, canvas.width, canvas.height);
     } else {
       drawChecker(ctx, canvas.width, canvas.height);
     }
 
     ctx.save();
     ctx.globalAlpha = opacity;
-    const dw = canvas.width * scale;
-    const dh = canvas.height * scale;
-    const dx = (canvas.width - dw) / 2;
-    const dy = (canvas.height - dh) / 2;
-    ctx.drawImage(sourceImg, dx, dy, dw, dh);
+    const imgW = canvas.width * scale;
+    const imgH = canvas.height * scale;
+    const baseX = (canvas.width - imgW) / 2;
+    const baseY = (canvas.height - imgH) / 2;
+    ctx.drawImage(sourceImg, baseX + offsetX, baseY + offsetY, imgW, imgH);
     ctx.restore();
   }
 
-  function drawCoverImage(ctx, img, w, h) {
+  function drawCover(ctx, img, w, h){
     const ir = img.width / img.height;
     const cr = w / h;
     let sw, sh, sx, sy;
-    if (ir > cr) {
-      sh = img.height;
-      sw = sh * cr;
-      sx = (img.width - sw) / 2;
-      sy = 0;
-    } else {
-      sw = img.width;
-      sh = sw / cr;
-      sx = 0;
-      sy = (img.height - sh) / 2;
-    }
+    if (ir > cr){ sh = img.height; sw = sh * cr; sx = (img.width - sw) / 2; sy = 0; }
+    else { sw = img.width; sh = sw / cr; sx = 0; sy = (img.height - sh) / 2; }
     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
   }
 
-  function drawChecker(ctx, w, h) {
-    const size = 12;
-    for (let y = 0; y < h; y += size) {
-      for (let x = 0; x < w; x += size) {
-        ctx.fillStyle = ((x / size + y / size) % 2 === 0) ? '#1a130c' : '#221a12';
-        ctx.fillRect(x, y, size, size);
+  function drawChecker(ctx, w, h){
+    const s = 12;
+    for (let y = 0; y < h; y += s){
+      for (let x = 0; x < w; x += s){
+        ctx.fillStyle = ((x/s + y/s) % 2 === 0) ? '#1a130c' : '#221a12';
+        ctx.fillRect(x, y, s, s);
       }
     }
   }
 
-  async function setSource(blob) {
+  async function setSource(blob){
     sourceBlob = blob;
     const url = URL.createObjectURL(blob);
     sourceImg = new Image();
     sourceImg.onload = () => {
-      $c('bgChanger')?.classList.remove('hidden');
+      offsetX = 0; offsetY = 0;
+      $('bgBadge')?.classList.remove('hidden');
       drawPreview();
     };
     sourceImg.src = url;
   }
 
-  async function applyBackground() {
+  async function applyBackground(){
     if (!sourceImg) return toast('لا توجد صورة', 'err');
     if (!currentBg) return toast('اختر خلفية أولاً', 'err');
 
     const btn = $c('bgApplyBtn');
-    btn.disabled = true;
-    const orig = btn.textContent;
-    btn.textContent = 'جاري التطبيق...';
+    if(btn){ btn.disabled = true; }
+    const orig = btn?.textContent || '';
+    if(btn) btn.textContent = 'جاري الحفظ...';
 
-    try {
+    try{
       const canvas = document.createElement('canvas');
       canvas.width = sourceImg.naturalWidth;
       canvas.height = sourceImg.naturalHeight;
       const ctx = canvas.getContext('2d');
 
-      if (currentBg.type === 'color') {
+      if (currentBg.type === 'color'){
         ctx.fillStyle = currentBg.value;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-      } else if (bgImage?.complete && bgImage.naturalWidth) {
-        drawCoverImage(ctx, bgImage, canvas.width, canvas.height);
+      } else if (bgImage?.complete && bgImage.naturalWidth){
+        drawCover(ctx, bgImage, canvas.width, canvas.height);
       }
 
+      const factor = 1 / previewScale;
       ctx.save();
       ctx.globalAlpha = opacity;
-      ctx.drawImage(sourceImg, 0, 0);
+      const imgW = canvas.width * scale;
+      const imgH = canvas.height * scale;
+      const baseX = (canvas.width - imgW) / 2;
+      const baseY = (canvas.height - imgH) / 2;
+      ctx.drawImage(sourceImg,
+        baseX + offsetX * factor,
+        baseY + offsetY * factor,
+        imgW, imgH);
       ctx.restore();
 
       const outBlob = await new Promise(r => canvas.toBlob(r, 'image/png'));
 
-      const resultImg = $c('previewResult');
-      const oldSrc = resultImg.src;
-      resultImg.src = URL.createObjectURL(outBlob);
-      if (oldSrc?.startsWith('blob:')) URL.revokeObjectURL(oldSrc);
-
-      if (typeof App !== 'undefined' && App.setResultBlob) {
-        App.setResultBlob(outBlob);
+      const resultImg = $('previewResult');
+      if (resultImg){
+        const old = resultImg.src;
+        resultImg.src = URL.createObjectURL(outBlob);
+        if (old?.startsWith('blob:')) URL.revokeObjectURL(old);
       }
+      App.setResultBlob(outBlob);
+      $('downloadBtn')?.classList.remove('hidden');
 
-      toast('تم تطبيق الخلفية ✓', 'ok');
-    } catch (e) {
+      toast('تم حفظ الصورة ✓', 'ok');
+    } catch(e){
       console.error(e);
-      toast('فشل التطبيق', 'err');
+      toast('فشل الحفظ', 'err');
     } finally {
-      btn.disabled = false;
-      btn.textContent = orig;
+      if(btn){ btn.disabled = false; btn.textContent = orig; }
     }
   }
 
-  function reset() {
-    sourceBlob = null;
-    sourceImg = null;
-    currentBg = null;
-    bgImage = null;
-    opacity = 1;
-    scale = 1;
-    $c('bgChanger')?.classList.add('hidden');
-    $c('bgPanel')?.classList.add('hidden');
-    $c('bgToggle')?.classList.remove('open');
-    if ($c('bgOpacity')) $c('bgOpacity').value = 100;
-    if ($c('bgScale')) $c('bgScale').value = 100;
-    if ($c('bgOpacityVal')) $c('bgOpacityVal').textContent = '100%';
-    if ($c('bgScaleVal')) $c('bgScaleVal').textContent = '100%';
+  function reset(){
+    sourceBlob = null; sourceImg = null;
+    currentBg = null; bgImage = null;
+    opacity = 1; scale = 1; offsetX = 0; offsetY = 0;
+    if($c('bgScale')) $c('bgScale').value = 100;
+    if($c('bgOpacity')) $c('bgOpacity').value = 100;
+    if($c('bgScaleVal')) $c('bgScaleVal').textContent = '100%';
+    if($c('bgOpacityVal')) $c('bgOpacityVal').textContent = '100%';
+    $c('bgEditCanvas')?.classList.add('hidden');
+    $c('bgEmptyState')?.classList.remove('hidden');
+    $c('bgDragHint')?.classList.add('hidden');
     document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
+    $('bgBadge')?.classList.add('hidden');
   }
 
   return { init, setSource, reset, applyBackground };
 })();
 
-/* ========== APP ========== */
+/* ============================================================
+   APP
+   ============================================================ */
 const App = (() => {
 
   let selectedFile = null, resultBlob = null, opsCache = [];
@@ -1035,28 +1126,31 @@ const App = (() => {
     document.querySelectorAll('.nav-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.view === name);
     });
-    ['studio','history','profile','admin'].forEach(v => {
+    ['studio','background','history','profile','admin'].forEach(v => {
       const el = $(v + 'View');
       if(el) el.classList.toggle('hidden', v !== name);
     });
     if(name === 'history') refreshHistory();
     if(name === 'profile') refreshProfile();
     if(name === 'admin') Admin.refresh();
+    if(name === 'background' && BgChanger.refresh) BgChanger.refresh();
     scrollTo({top:0, behavior:'smooth'});
   }
 
   function updateAdminVis(){
     const d = Auth.isDev();
-    $('adminMini').classList.toggle('hidden', !d);
-    $('adminNav').classList.toggle('hidden', !d);
+    $('adminMini')?.classList.toggle('hidden', !d);
+    $('adminNav')?.classList.toggle('hidden', !d);
   }
 
   function updatePlanUI(){
     const p = Auth.isPro();
-    $('planPill').classList.toggle('pro', p);
-    $('planTxt').textContent = p ? 'Pro • ∞' : 'Free';
+    $('planPill')?.classList.toggle('pro', p);
+    const pt = $('planTxt');
+    if(pt) pt.textContent = p ? 'Pro • ∞' : 'Free';
     const pr = Auth.profile;
-    $('pPlan').textContent = p ? 'Pro — بلا حدود'
+    const pp = $('pPlan');
+    if(pp) pp.textContent = p ? 'Pro — بلا حدود'
       : (pr?.plan === 'custom' ? `Custom — ${pr.daily_limit}` : 'Free — 5/يوم');
   }
 
@@ -1065,9 +1159,14 @@ const App = (() => {
     if(!s?.user) return;
     try{
       const t = await API.countToday(s.access_token, s.user.id);
-      if(Auth.isPro()){ $('statRemain').textContent = '∞'; return; }
+      if(Auth.isPro()){ 
+        const sr = $('statRemain');
+        if(sr) sr.textContent = '∞';
+        return;
+      }
       const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
-      $('statRemain').textContent = Math.max(0, lim - t);
+      const sr = $('statRemain');
+      if(sr) sr.textContent = Math.max(0, lim - t);
     }catch{}
   }
 
@@ -1075,13 +1174,14 @@ const App = (() => {
     const s = Auth.session;
     if(!s?.user) return;
     const wrap = $('historyContent');
+    if(!wrap) return;
     wrap.innerHTML = `<div class="empty"><div class="empty-icon">⌛</div><h3>جاري التحميل...</h3></div>`;
     try{
       const ops = await API.fetchOps(s.access_token, s.user.id);
       opsCache = ops;
       const today = await API.countToday(s.access_token, s.user.id);
-      $('statTotal').textContent = ops.length;
-      $('statToday').textContent = today;
+      const st = $('statTotal'); if(st) st.textContent = ops.length;
+      const std = $('statToday'); if(std) std.textContent = today;
 
       if(!ops.length){
         wrap.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><h3>لا توجد عمليات</h3><p>ابدأ من الاستوديو</p></div>`;
@@ -1157,29 +1257,36 @@ const App = (() => {
       const un = p?.username || s.user.user_metadata?.username || s.user.email?.split('@')[0] || '?';
       const em = p?.email || s.user.email || '—';
 
-      $('avatar').textContent = initials(un);
-      $('pUsername').textContent = un;
-      $('pEmail').textContent = em;
-      $('pRole').textContent = Auth.isDev() ? '✦ المطوّر' : '● مستخدم';
-      $('pRole').classList.toggle('dev', Auth.isDev());
-      $('pJoined').textContent = p?.created_at ? `انضم في ${fmtDate(p.created_at)}` : '';
-      $('statOps').textContent = ops.length;
-      $('statOpsToday').textContent = today;
-      updatePlanUI();
-      if(Auth.isPro()) $('statRemain').textContent = '∞';
-      else{
-        const lim = Number(p?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
-        $('statRemain').textContent = Math.max(0, lim - today);
+      const av = $('avatar'); if(av) av.textContent = initials(un);
+      const pu = $('pUsername'); if(pu) pu.textContent = un;
+      const pe = $('pEmail'); if(pe) pe.textContent = em;
+      const pr = $('pRole');
+      if(pr){
+        pr.textContent = Auth.isDev() ? '✦ المطوّر' : '● مستخدم';
+        pr.classList.toggle('dev', Auth.isDev());
       }
-      $('pStatus').textContent = p?.is_banned ? 'موقوف' : 'نشط';
+      const pj = $('pJoined');
+      if(pj) pj.textContent = p?.created_at ? `انضم في ${fmtDate(p.created_at)}` : '';
+      const so = $('statOps'); if(so) so.textContent = ops.length;
+      const sot = $('statOpsToday'); if(sot) sot.textContent = today;
+      updatePlanUI();
+      if(Auth.isPro()){
+        const sr = $('statRemain'); if(sr) sr.textContent = '∞';
+      } else {
+        const lim = Number(p?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
+        const sr = $('statRemain'); if(sr) sr.textContent = Math.max(0, lim - today);
+      }
+      const ps = $('pStatus');
+      if(ps) ps.textContent = p?.is_banned ? 'موقوف' : 'نشط';
     }catch(e){ toast(e.message, 'err'); }
   }
 
   function resetResult(){
     resultBlob = null;
-    $('previewResult').src = '';
-    $('resultCard').classList.add('hidden');
-    $('downloadBtn').classList.add('hidden');
+    const pr = $('previewResult'); if(pr) pr.src = '';
+    $('resultCard')?.classList.add('hidden');
+    $('downloadBtn')?.classList.add('hidden');
+    $('openBgBtn')?.classList.add('hidden');
     BgChanger.reset();
   }
 
@@ -1188,14 +1295,16 @@ const App = (() => {
   function setFile(file){
     selectedFile = file;
     const prev = $('previewOriginal');
-    if(prev.src?.startsWith('blob:')) URL.revokeObjectURL(prev.src);
-    prev.src = URL.createObjectURL(file);
+    if(prev){
+      if(prev.src?.startsWith('blob:')) URL.revokeObjectURL(prev.src);
+      prev.src = URL.createObjectURL(file);
+    }
     resetResult();
-    $('previewArea').classList.remove('hidden');
-    $('uploadPanel').classList.add('hidden');
-    $('processing').classList.add('hidden');
-    $('removeBtn').disabled = false;
-    $('changeBtn').disabled = false;
+    $('previewArea')?.classList.remove('hidden');
+    $('uploadPanel')?.classList.add('hidden');
+    $('processing')?.classList.add('hidden');
+    const rb = $('removeBtn'); if(rb) rb.disabled = false;
+    const cb = $('changeBtn'); if(cb) cb.disabled = false;
   }
 
   async function validateFile(f){
@@ -1227,8 +1336,8 @@ const App = (() => {
     }
 
     const btn = $('removeBtn');
-    btn.disabled = true;
-    $('processing').classList.remove('hidden');
+    if(btn) btn.disabled = true;
+    $('processing')?.classList.remove('hidden');
     resetResult();
 
     try{
@@ -1238,9 +1347,11 @@ const App = (() => {
       const res = await API.upload(s.access_token, s.user.id, blob, 'res');
       await API.saveOp(s.access_token, orig, res);
 
-      $('previewResult').src = URL.createObjectURL(blob);
-      $('resultCard').classList.remove('hidden');
-      $('downloadBtn').classList.remove('hidden');
+      const pr = $('previewResult');
+      if(pr) pr.src = URL.createObjectURL(blob);
+      $('resultCard')?.classList.remove('hidden');
+      $('downloadBtn')?.classList.remove('hidden');
+      $('openBgBtn')?.classList.remove('hidden');
 
       BgChanger.setSource(blob);
 
@@ -1250,8 +1361,8 @@ const App = (() => {
       console.error(e);
       toast(e.message || 'حدث خطأ', 'err');
     }finally{
-      $('processing').classList.add('hidden');
-      btn.disabled = false;
+      $('processing')?.classList.add('hidden');
+      if(btn) btn.disabled = false;
     }
   }
 
@@ -1285,14 +1396,14 @@ const App = (() => {
     document.querySelectorAll('.nav-btn').forEach(b => {
       b.addEventListener('click', () => switchView(b.dataset.view));
     });
-    $('adminMini').addEventListener('click', () => switchView('admin'));
+    $('adminMini')?.addEventListener('click', () => switchView('admin'));
 
-    $('historyRefresh').addEventListener('click', async e => {
+    $('historyRefresh')?.addEventListener('click', async e => {
       e.currentTarget.disabled = true;
       try{ await refreshHistory(); } finally{ e.currentTarget.disabled = false; }
     });
 
-    $('refreshProfile').addEventListener('click', async e => {
+    $('refreshProfile')?.addEventListener('click', async e => {
       e.currentTarget.disabled = true;
       try{
         Auth.profile = await API.getProfile(Auth.session.user.id, Auth.session.access_token);
@@ -1303,48 +1414,55 @@ const App = (() => {
       } finally{ e.currentTarget.disabled = false; }
     });
 
-    $('logoutBtn').addEventListener('click', () => Auth.doLogout(true));
+    $('logoutBtn')?.addEventListener('click', () => Auth.doLogout(true));
 
-    $('chooseBtn').addEventListener('click', e => { e.stopPropagation(); $('fileInput').click(); });
-    $('uploadPanel').addEventListener('click', () => $('fileInput').click());
-    $('changeBtn').addEventListener('click', () => $('fileInput').click());
+    $('chooseBtn')?.addEventListener('click', e => { e.stopPropagation(); $('fileInput').click(); });
+    $('uploadPanel')?.addEventListener('click', () => $('fileInput').click());
+    $('changeBtn')?.addEventListener('click', () => $('fileInput').click());
 
-    $('fileInput').addEventListener('change', () => {
+    $('fileInput')?.addEventListener('change', () => {
       const f = $('fileInput').files?.[0];
       $('fileInput').value = '';
       if(f) handleFile(f);
     });
 
-    ['dragenter','dragover'].forEach(n => $('uploadPanel').addEventListener(n, e => {
+    ['dragenter','dragover'].forEach(n => $('uploadPanel')?.addEventListener(n, e => {
       e.preventDefault(); $('uploadPanel').classList.add('drag');
     }));
-    ['dragleave','drop'].forEach(n => $('uploadPanel').addEventListener(n, e => {
+    ['dragleave','drop'].forEach(n => $('uploadPanel')?.addEventListener(n, e => {
       e.preventDefault(); $('uploadPanel').classList.remove('drag');
     }));
-    $('uploadPanel').addEventListener('drop', e => {
+    $('uploadPanel')?.addEventListener('drop', e => {
       const f = e.dataTransfer?.files?.[0];
       if(f) handleFile(f);
     });
 
-    $('removeBtn').addEventListener('click', doRemove);
+    $('removeBtn')?.addEventListener('click', doRemove);
 
-    $('downloadBtn').addEventListener('click', () => {
+    $('downloadBtn')?.addEventListener('click', () => {
       if(!resultBlob){ toast('لا يوجد ملف', 'err'); return; }
       downloadBlob(resultBlob, `removebg-${Date.now()}.png`);
       toast('تم التحميل ✓', 'ok');
     });
+
+    /* Background view buttons */
+    $('openBgBtn')?.addEventListener('click', () => switchView('background'));
+    $('bgGoStudio')?.addEventListener('click', () => switchView('studio'));
   }
 
   return { showAuth, showApp, enterApp, switchView, bindUI, setResultBlob };
 })();
 
-/* ========== ADMIN ========== */
+/* ============================================================
+   ADMIN
+   ============================================================ */
 const Admin = (() => {
   let usersCache = [], opsCache = [];
 
   async function refresh(){
     if(!Auth.isDev()) return;
     const list = $('usersList');
+    if(!list) return;
     list.innerHTML = `<div class="empty"><div class="empty-icon">⌛</div><h3>جاري التحميل...</h3></div>`;
     try{
       const tk = Auth.session.access_token;
@@ -1359,10 +1477,10 @@ const Admin = (() => {
       const today = new Date(); today.setHours(0,0,0,0);
       const to = opsCache.filter(o => new Date(o.created_at) >= today);
       const act = new Set(to.map(o => o.user_id));
-      $('mUsers').textContent = usersCache.length;
-      $('mOps').textContent = opsCache.length;
-      $('mToday').textContent = to.length;
-      $('mActive').textContent = act.size;
+      if($('mUsers')) $('mUsers').textContent = usersCache.length;
+      if($('mOps')) $('mOps').textContent = opsCache.length;
+      if($('mToday')) $('mToday').textContent = to.length;
+      if($('mActive')) $('mActive').textContent = act.size;
 
       renderUsers();
       await renderOps();
@@ -1375,8 +1493,10 @@ const Admin = (() => {
     const q = $('adminSearch').value.trim().toLowerCase();
     const list = usersCache.filter(p => !q ||
       [p.username,p.email,p.id].join(' ').toLowerCase().includes(q));
-    $('usersLabel').textContent = `${list.length} حساب`;
+    const ul = $('usersLabel');
+    if(ul) ul.textContent = `${list.length} حساب`;
     const wrap = $('usersList');
+    if(!wrap) return;
     wrap.innerHTML = '';
     if(!list.length){
       wrap.innerHTML = `<div class="empty"><div class="empty-icon">⌕</div><h3>لا نتائج</h3></div>`;
@@ -1407,6 +1527,7 @@ const Admin = (() => {
 
   async function renderOps(){
     const wrap = $('opsList');
+    if(!wrap) return;
     wrap.innerHTML = '';
     if(!opsCache.length){
       wrap.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><h3>لا عمليات</h3></div>`;
@@ -1526,23 +1647,25 @@ const Admin = (() => {
   function closeModal(){ $('modal').classList.remove('show'); }
 
   function init(){
-    $('modalClose').addEventListener('click', closeModal);
-    $('modal').addEventListener('click', e => {
+    $('modalClose')?.addEventListener('click', closeModal);
+    $('modal')?.addEventListener('click', e => {
       if(e.target === $('modal')) closeModal();
     });
-    $('adminSearch').addEventListener('input', renderUsers);
-    $('adminRefresh').addEventListener('click', async e => {
+    $('adminSearch')?.addEventListener('input', renderUsers);
+    $('adminRefresh')?.addEventListener('click', async e => {
       e.currentTarget.disabled = true;
       try{ await refresh(); toast('تم التحديث ✓', 'ok'); }
       finally{ e.currentTarget.disabled = false; }
     });
-    $('adminBack').addEventListener('click', () => App.switchView('studio'));
+    $('adminBack')?.addEventListener('click', () => App.switchView('studio'));
   }
 
   return { init, refresh };
 })();
 
-/* ========== BOOT ========== */
+/* ============================================================
+   BOOT
+   ============================================================ */
 (async function boot(){
   AuthUI.init();
   App.bindUI();
