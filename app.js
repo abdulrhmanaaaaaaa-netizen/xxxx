@@ -27,9 +27,6 @@ const initials = v => {
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
-/* ============================================================
-   PRESET BACKGROUNDS
-   ============================================================ */
 const PRESET_BACKGROUNDS = [
   'https://i.postimg.cc/SsY3CNhB/06b2725f5d4eaed9019cdd45727369cb.jpg',
   'https://i.postimg.cc/zBH6KXrP/189db98cca60bfab2425301f9554e569.jpg',
@@ -57,7 +54,6 @@ const BG_COLOR_SWATCHES = [
   '#2dd4bf','#f472b6','#1a130c','#2a2015','#f5e8d4'
 ];
 
-/* ========== TOAST ========== */
 const toastEl = $('toast');
 function toast(msg, type=''){
   if(!toastEl) return;
@@ -67,14 +63,12 @@ function toast(msg, type=''){
   toast._t = setTimeout(() => toastEl.classList.remove('show'), 3800);
 }
 
-/* ========== EMAIL ========== */
 const isEmailValid = e => {
   if(!e || e.length > 254) return false;
   const RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   return RE.test(e);
 };
 
-/* ========== PASSWORD ========== */
 const checkPwd = p => {
   const r = {
     len: p.length >= 8,
@@ -94,9 +88,7 @@ const checkPwd = p => {
   return { reqs:r, lvl, label:labels[lvl], valid };
 };
 
-/* ============================================================
-   LOADER — Gear mechanism
-   ============================================================ */
+/* ========== LOADER ========== */
 const Loader = (() => {
   const START = performance.now();
   let raf;
@@ -144,7 +136,6 @@ const Loader = (() => {
 
   async function run(){
     particles();
-
     let p = 0;
     const fill = $('ldFill'), pct = $('ldPct');
     const tick = setInterval(() => {
@@ -168,11 +159,8 @@ const Loader = (() => {
   return { run };
 })();
 
-/* ============================================================
-   API
-   ============================================================ */
+/* ========== API ========== */
 const API = (() => {
-
   async function req(path, opt={}, token=null){
     const headers = {
       apikey: CONFIG.SUPABASE_KEY,
@@ -217,9 +205,7 @@ const API = (() => {
       method:'POST',
       body: JSON.stringify({ email, password, data:{ username } })
     });
-    if(!d?.access_token){
-      return { needsConfirmation:true, user:d?.user||null };
-    }
+    if(!d?.access_token) return { needsConfirmation:true, user:d?.user||null };
     return norm(d);
   };
 
@@ -427,9 +413,7 @@ const API = (() => {
   };
 })();
 
-/* ============================================================
-   AUTH
-   ============================================================ */
+/* ========== AUTH ========== */
 const Auth = (() => {
   let session = null, profile = null;
 
@@ -493,9 +477,7 @@ const Auth = (() => {
   };
 })();
 
-/* ============================================================
-   AUTH UI — Modern switch-link style
-   ============================================================ */
+/* ========== AUTH UI ========== */
 const AuthUI = (() => {
   let mode = 'login';
 
@@ -532,27 +514,22 @@ const AuthUI = (() => {
     clearErr(); clearMsg();
     const reg = m === 'register';
 
-    // Titles
     $('formTitle').textContent = reg ? 'أنشئ حسابك' : 'أهلًا بعودتك';
     $('formSub').textContent = reg
       ? 'ابدأ رحلتك الإبداعية في أقل من دقيقة'
       : 'سجّل دخولك لمتابعة رحلتك الإبداعية';
 
-    // Toggle register-only fields
     $('fUsername').classList.toggle('hidden', !reg);
     $('fConfirm').classList.toggle('hidden', !reg);
     $('reqs').classList.toggle('hidden', !reg);
     $('strength').classList.toggle('hidden', !reg);
 
-    // Submit button
     $('submitBtn').querySelector('.btn-text').textContent =
       reg ? 'إنشاء الحساب' : 'تسجيل الدخول';
 
-    // Password field
     $('password').placeholder = reg ? '8 أحرف + رقم + حرف كبير' : '••••••••';
     $('password').setAttribute('autocomplete', reg ? 'new-password' : 'current-password');
 
-    // Switch link (bottom)
     const st = document.getElementById('switchText');
     const sb = document.getElementById('switchBtn');
     if (st) st.textContent = reg ? 'لديك حساب بالفعل؟' : 'ليس لديك حساب؟';
@@ -620,16 +597,13 @@ const AuthUI = (() => {
   function init(){
     setMode('login');
 
-    // Modern switch link
     document.getElementById('switchBtn')?.addEventListener('click', () => {
       setMode(mode === 'login' ? 'register' : 'login');
     });
 
-    // Eye buttons
     $('eyePass').addEventListener('click', () => eye($('password'), $('eyePass')));
     $('eyeConfirm').addEventListener('click', () => eye($('confirm'), $('eyeConfirm')));
 
-    // Live validation
     const emailI = $('email');
     emailI.addEventListener('input', () => {
       if(isEmailValid(emailI.value.trim())){
@@ -655,7 +629,6 @@ const AuthUI = (() => {
 
     $('username').addEventListener('input', checkSubmit);
 
-    // Forgot password
     $('forgotBtn').addEventListener('click', async () => {
       const email = emailI.value.trim();
       if(!isEmailValid(email)){
@@ -670,7 +643,6 @@ const AuthUI = (() => {
       }
     });
 
-    // Submit
     $('authForm').addEventListener('submit', async e => {
       e.preventDefault();
       clearErr(); clearMsg();
@@ -748,9 +720,7 @@ const AuthUI = (() => {
   return { init, checkSubmit };
 })();
 
-/* ============================================================
-   BACKGROUND CHANGER v2 — Dedicated view + drag
-   ============================================================ */
+/* ========== BACKGROUND CHANGER ========== */
 const BgChanger = (() => {
   let sourceBlob = null;
   let sourceImg = null;
@@ -773,7 +743,6 @@ const BgChanger = (() => {
     if(initDone) return;
     initDone = true;
 
-    /* Presets */
     const presetsWrap = $c('bgPresets');
     if (presetsWrap){
       PRESET_BACKGROUNDS.forEach(url => {
@@ -787,7 +756,6 @@ const BgChanger = (() => {
     }
     if ($c('bgCount')) $c('bgCount').textContent = PRESET_BACKGROUNDS.length;
 
-    /* Colors */
     const swWrap = $c('bgColorSwatches');
     if (swWrap){
       BG_COLOR_SWATCHES.forEach(c => {
@@ -806,7 +774,6 @@ const BgChanger = (() => {
       });
     }
 
-    /* Tabs */
     document.querySelectorAll('.bg-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         const mode = tab.dataset.bgmode;
@@ -817,7 +784,6 @@ const BgChanger = (() => {
       });
     });
 
-    /* Upload */
     const uz = $c('bgUploadZone');
     const fi = $c('bgFileInput');
     $c('bgChooseBtn')?.addEventListener('click', e => { e.stopPropagation(); fi.click(); });
@@ -833,13 +799,11 @@ const BgChanger = (() => {
       if (f) handleBgUpload(f);
     });
 
-    /* Color picker */
     $c('bgColorPicker')?.addEventListener('input', e => {
       bgColor = e.target.value;
       setBg({ type:'color', value:bgColor });
     });
 
-    /* Sliders */
     $c('bgScale')?.addEventListener('input', e => {
       scale = e.target.value / 100;
       $c('bgScaleVal').textContent = e.target.value + '%';
@@ -851,7 +815,6 @@ const BgChanger = (() => {
       drawPreview();
     });
 
-    /* Reset */
     $c('bgResetBtn')?.addEventListener('click', () => {
       currentBg = null; bgImage = null;
       opacity = 1; scale = 1; offsetX = 0; offsetY = 0;
@@ -865,10 +828,8 @@ const BgChanger = (() => {
       toast('تم إعادة ضبط الخلفية', 'ok');
     });
 
-    /* Apply */
     $c('bgApplyBtn')?.addEventListener('click', applyBackground);
 
-    /* Drag canvas */
     const canvas = $c('bgEditCanvas');
     if (canvas){
       canvas.addEventListener('pointerdown', onPointerDown);
@@ -878,8 +839,9 @@ const BgChanger = (() => {
       canvas.addEventListener('wheel', onWheel, { passive: false });
     }
 
-    /* Empty state button */
     $c('bgEmptyStudio')?.addEventListener('click', () => App.switchView('studio'));
+
+    initQuickUpload();
   }
 
   function onPointerDown(e){
@@ -964,7 +926,6 @@ const BgChanger = (() => {
     if ($c('bgCanvasStatus')) $c('bgCanvasStatus').textContent = '● جاهز';
 
     const ctx = canvas.getContext('2d');
-
     const maxW = 500, maxH = 500;
     previewScale = Math.min(maxW / sourceImg.width, maxH / sourceImg.height, 1);
     canvas.width = Math.round(sourceImg.width * previewScale);
@@ -1015,6 +976,9 @@ const BgChanger = (() => {
     sourceImg.onload = () => {
       offsetX = 0; offsetY = 0;
       $('bgBadge')?.classList.remove('hidden');
+      $c('bgEmptyState')?.classList.add('hidden');
+      $c('bgDragHint')?.classList.remove('hidden');
+      if ($c('bgCanvasStatus')) $c('bgCanvasStatus').textContent = '● جاهز';
       drawPreview();
     };
     sourceImg.src = url;
@@ -1075,6 +1039,96 @@ const BgChanger = (() => {
     }
   }
 
+  /* ===== QUICK UPLOAD ===== */
+  function initQuickUpload(){
+    const chooseBtn = $c('bgQuickChoose');
+    const fileInput = $c('bgQuickFile');
+    const inner = $c('bgQuickInner');
+    const loading = $c('bgQuickLoading');
+    const wrap = $c('bgQuickUpload');
+    if (!chooseBtn || !fileInput) return;
+
+    chooseBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    wrap?.addEventListener('click', e => {
+      if (e.target.closest('.bg-quick-loading')) return;
+      if (e.target.closest('button')) return;
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', async () => {
+      const f = fileInput.files?.[0];
+      fileInput.value = '';
+      if (!f) return;
+      await handleQuickUpload(f, { inner, loading, wrap });
+    });
+  }
+
+  async function handleQuickUpload(file, ui){
+    const allowed = ['image/png','image/jpeg','image/webp'];
+    if (!allowed.includes(file.type)){
+      return toast('صيغة غير مدعومة', 'err');
+    }
+    if (file.size > (CONFIG.MAX_FILE_MB * 1024 * 1024)){
+      return toast(`الحجم > ${CONFIG.MAX_FILE_MB}MB`, 'err');
+    }
+
+    ui.inner?.classList.add('hidden');
+    ui.loading?.classList.remove('hidden');
+
+    try {
+      const s = await Auth.valid();
+      if (!s?.access_token || !s?.user?.id){
+        toast('انتهت الجلسة', 'err');
+        App.showAuth();
+        return;
+      }
+      Auth.session = s;
+      if (!Auth.profile) Auth.profile = await API.getProfile(s.user.id, s.access_token);
+      if (Auth.profile?.is_banned) {
+        toast('الحساب موقوف', 'err');
+        return;
+      }
+
+      if (!Auth.isPro()){
+        const today = await API.countToday(s.access_token, s.user.id).catch(()=>0);
+        const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
+        if (lim > 0 && today >= lim){
+          toast(`وصلت للحد اليومي (${lim})`, 'err');
+          return;
+        }
+      }
+
+      const orig = await API.upload(s.access_token, s.user.id, file, 'orig');
+      const blob = await API.removeBg(file);
+      const res = await API.upload(s.access_token, s.user.id, blob, 'res');
+      await API.saveOp(s.access_token, orig, res).catch(()=>{});
+
+      await setSource(blob);
+      if (App.refreshUsage) App.refreshUsage();
+
+      ui.wrap?.classList.add('hidden');
+
+      toast('تمت إزالة الخلفية ✓ اختر خلفية جديدة', 'ok');
+    } catch (e) {
+      console.error(e);
+      toast(e.message || 'فشلت المعالجة', 'err');
+    } finally {
+      ui.inner?.classList.remove('hidden');
+      ui.loading?.classList.add('hidden');
+    }
+  }
+
+  function showQuickUpload(show = true){
+    const w = $c('bgQuickUpload');
+    if (!w) return;
+    if (show) w.classList.remove('hidden');
+    else w.classList.add('hidden');
+  }
+
   function reset(){
     sourceBlob = null; sourceImg = null;
     currentBg = null; bgImage = null;
@@ -1086,19 +1140,18 @@ const BgChanger = (() => {
     $c('bgEditCanvas')?.classList.add('hidden');
     $c('bgEmptyState')?.classList.remove('hidden');
     $c('bgDragHint')?.classList.add('hidden');
+    if ($c('bgCanvasStatus')) $c('bgCanvasStatus').textContent = '● فارغ';
     document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
     $('bgBadge')?.classList.add('hidden');
+    showQuickUpload(true);
   }
 
-  return { init, setSource, reset, applyBackground };
+  return { init, setSource, reset, applyBackground, showQuickUpload };
 })();
 
-/* ============================================================
-   APP
-   ============================================================ */
+/* ========== APP ========== */
 const App = (() => {
-
   let selectedFile = null, resultBlob = null, opsCache = [];
 
   const showAuth = () => {
@@ -1133,7 +1186,6 @@ const App = (() => {
     if(name === 'history') refreshHistory();
     if(name === 'profile') refreshProfile();
     if(name === 'admin') Admin.refresh();
-    if(name === 'background' && BgChanger.refresh) BgChanger.refresh();
     scrollTo({top:0, behavior:'smooth'});
   }
 
@@ -1159,7 +1211,7 @@ const App = (() => {
     if(!s?.user) return;
     try{
       const t = await API.countToday(s.access_token, s.user.id);
-      if(Auth.isPro()){ 
+      if(Auth.isPro()){
         const sr = $('statRemain');
         if(sr) sr.textContent = '∞';
         return;
@@ -1445,17 +1497,14 @@ const App = (() => {
       toast('تم التحميل ✓', 'ok');
     });
 
-    /* Background view buttons */
     $('openBgBtn')?.addEventListener('click', () => switchView('background'));
     $('bgGoStudio')?.addEventListener('click', () => switchView('studio'));
   }
 
-  return { showAuth, showApp, enterApp, switchView, bindUI, setResultBlob };
+  return { showAuth, showApp, enterApp, switchView, bindUI, setResultBlob, refreshUsage };
 })();
 
-/* ============================================================
-   ADMIN
-   ============================================================ */
+/* ========== ADMIN ========== */
 const Admin = (() => {
   let usersCache = [], opsCache = [];
 
@@ -1663,9 +1712,7 @@ const Admin = (() => {
   return { init, refresh };
 })();
 
-/* ============================================================
-   BOOT
-   ============================================================ */
+/* ========== BOOT ========== */
 (async function boot(){
   AuthUI.init();
   App.bindUI();
