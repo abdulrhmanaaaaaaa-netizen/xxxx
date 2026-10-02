@@ -98,7 +98,6 @@ const Loader = (() => {
     const ctx = c.getContext('2d');
     const dpr = Math.min(devicePixelRatio, 2);
     let w, h, parts = [];
-
     const resize = () => {
       w = c.width = innerWidth * dpr;
       h = c.height = innerHeight * dpr;
@@ -107,7 +106,6 @@ const Loader = (() => {
     };
     resize();
     addEventListener('resize', resize);
-
     const n = Math.min(50, Math.floor(innerWidth/22));
     for(let i=0;i<n;i++){
       parts.push({
@@ -117,7 +115,6 @@ const Loader = (() => {
         hue: 32 + Math.random()*14
       });
     }
-
     function loop(){
       ctx.clearRect(0,0,w,h);
       for(const p of parts){
@@ -143,10 +140,8 @@ const Loader = (() => {
       if(fill) fill.style.width = p + '%';
       if(pct) pct.textContent = Math.round(p) + '%';
     }, 120);
-
     const el = performance.now() - START;
     await wait(Math.max(0, CONFIG.LOADER_MIN_MS - el));
-
     clearInterval(tick);
     if(fill) fill.style.width = '100%';
     if(pct) pct.textContent = '100%';
@@ -168,15 +163,12 @@ const API = (() => {
       ...(opt.headers || {})
     };
     if(token) headers.Authorization = `Bearer ${token}`;
-
     let res;
     try{ res = await fetch(CONFIG.SUPABASE_URL + path, {...opt, headers}); }
     catch{ const e = new Error('فشل الاتصال'); e.status = 0; throw e; }
-
     const text = await res.text();
     let data = null;
     try{ data = text ? JSON.parse(text) : null; }catch{ data = text; }
-
     if(!res.ok){
       const msg = data?.message || data?.msg || data?.error_description ||
                   data?.error || data?.hint || `HTTP ${res.status}`;
@@ -517,7 +509,7 @@ const AuthUI = (() => {
     $('formTitle').textContent = reg ? 'أنشئ حسابك' : 'أهلًا بعودتك';
     $('formSub').textContent = reg
       ? 'ابدأ رحلتك الإبداعية في أقل من دقيقة'
-      : 'سجّل دخولك لمتابعة رحلتك الإبداعية';
+      : 'سجّل دخولك لمتابعة رحلتك';
 
     $('fUsername').classList.toggle('hidden', !reg);
     $('fConfirm').classList.toggle('hidden', !reg);
@@ -546,12 +538,10 @@ const AuthUI = (() => {
     const { reqs, lvl, label } = checkPwd(p);
     const match = c && c === p;
     const all = {...reqs, match};
-
     const bars = document.querySelector('.bars');
     if(bars) bars.dataset.lvl = lvl;
     const st = $('strengthTxt');
     if(st) st.textContent = label;
-
     document.querySelectorAll('.reqs li').forEach(li => {
       li.classList.toggle('ok', !!all[li.dataset.r]);
     });
@@ -596,11 +586,9 @@ const AuthUI = (() => {
 
   function init(){
     setMode('login');
-
     document.getElementById('switchBtn')?.addEventListener('click', () => {
       setMode(mode === 'login' ? 'register' : 'login');
     });
-
     $('eyePass').addEventListener('click', () => eye($('password'), $('eyePass')));
     $('eyeConfirm').addEventListener('click', () => eye($('confirm'), $('eyeConfirm')));
 
@@ -616,17 +604,9 @@ const AuthUI = (() => {
     });
 
     const pwdI = $('password');
-    pwdI.addEventListener('input', () => {
-      updateReqs();
-      checkSubmit();
-    });
-
+    pwdI.addEventListener('input', () => { updateReqs(); checkSubmit(); });
     const confirmI = $('confirm');
-    confirmI.addEventListener('input', () => {
-      updateReqs();
-      checkSubmit();
-    });
-
+    confirmI.addEventListener('input', () => { updateReqs(); checkSubmit(); });
     $('username').addEventListener('input', checkSubmit);
 
     $('forgotBtn').addEventListener('click', async () => {
@@ -638,23 +618,18 @@ const AuthUI = (() => {
       try{
         await API.forgot(email);
         msg('تم إرسال رابط إعادة التعيين إلى بريدك ✓', 'ok');
-      }catch(e){
-        msg(translateError(e), 'err');
-      }
+      }catch(e){ msg(translateError(e), 'err'); }
     });
 
     $('authForm').addEventListener('submit', async e => {
       e.preventDefault();
       clearErr(); clearMsg();
-
       const email = emailI.value.trim();
       const pwd = pwdI.value;
-
       if(!isEmailValid(email)){
         setErr(emailI, $('errEmail'), 'بريد غير صحيح');
         return;
       }
-
       if(mode === 'register'){
         const un = $('username').value.trim();
         if(!/^[a-zA-Z0-9_]{3,20}$/.test(un)){
@@ -702,10 +677,8 @@ const AuthUI = (() => {
           toast('تم إنشاء الحساب 🏜️', 'ok');
           await App.enterApp();
         }
-
         ['email','password','username','confirm'].forEach(k => {
-          const el = $(k);
-          if(el) el.value = '';
+          const el = $(k); if(el) el.value = '';
         });
       }catch(err){
         msg(translateError(err), 'err');
@@ -736,6 +709,7 @@ const BgChanger = (() => {
   let dragging = false;
   let dragStart = { x: 0, y: 0 };
   let startOffset = { x: 0, y: 0 };
+  let finalBlob = null;
 
   const $c = id => document.getElementById(id);
 
@@ -743,6 +717,7 @@ const BgChanger = (() => {
     if(initDone) return;
     initDone = true;
 
+    /* Presets */
     const presetsWrap = $c('bgPresets');
     if (presetsWrap){
       PRESET_BACKGROUNDS.forEach(url => {
@@ -756,6 +731,7 @@ const BgChanger = (() => {
     }
     if ($c('bgCount')) $c('bgCount').textContent = PRESET_BACKGROUNDS.length;
 
+    /* Colors */
     const swWrap = $c('bgColorSwatches');
     if (swWrap){
       BG_COLOR_SWATCHES.forEach(c => {
@@ -774,16 +750,19 @@ const BgChanger = (() => {
       });
     }
 
+    /* Tabs */
     document.querySelectorAll('.bg-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         const mode = tab.dataset.bgmode;
         document.querySelectorAll('.bg-tab').forEach(t => t.classList.toggle('active', t === tab));
         ['preset','upload','color'].forEach(m => {
-          $c(`bg${m.charAt(0).toUpperCase()+m.slice(1)}Content`)?.classList.toggle('hidden', m !== mode);
+          const id = m === 'preset' ? 'bgPresetContent' : (m === 'upload' ? 'bgUploadContentTab' : 'bgColorContentTab');
+          $c(id)?.classList.toggle('hidden', m !== mode);
         });
       });
     });
 
+    /* Upload background */
     const uz = $c('bgUploadZone');
     const fi = $c('bgFileInput');
     $c('bgChooseBtn')?.addEventListener('click', e => { e.stopPropagation(); fi.click(); });
@@ -799,11 +778,13 @@ const BgChanger = (() => {
       if (f) handleBgUpload(f);
     });
 
+    /* Color picker */
     $c('bgColorPicker')?.addEventListener('input', e => {
       bgColor = e.target.value;
       setBg({ type:'color', value:bgColor });
     });
 
+    /* Sliders */
     $c('bgScale')?.addEventListener('input', e => {
       scale = e.target.value / 100;
       $c('bgScaleVal').textContent = e.target.value + '%';
@@ -815,21 +796,23 @@ const BgChanger = (() => {
       drawPreview();
     });
 
+    /* Reset button — return to upload stage */
     $c('bgResetBtn')?.addEventListener('click', () => {
-      currentBg = null; bgImage = null;
-      opacity = 1; scale = 1; offsetX = 0; offsetY = 0;
-      $c('bgScale').value = 100;
-      $c('bgOpacity').value = 100;
-      $c('bgScaleVal').textContent = '100%';
-      $c('bgOpacityVal').textContent = '100%';
-      document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
-      document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
-      drawPreview();
-      toast('تم إعادة ضبط الخلفية', 'ok');
+      reset();
+      toast('ابدأ صورة جديدة', 'ok');
     });
 
+    /* Apply */
     $c('bgApplyBtn')?.addEventListener('click', applyBackground);
 
+    /* Download button */
+    $c('bgDownloadBtn')?.addEventListener('click', () => {
+      if (!finalBlob) return toast('لا يوجد ملف محفوظ', 'err');
+      downloadBlob(finalBlob, `removebg-bg-${Date.now()}.png`);
+      toast('تم التحميل ✓', 'ok');
+    });
+
+    /* Canvas drag */
     const canvas = $c('bgEditCanvas');
     if (canvas){
       canvas.addEventListener('pointerdown', onPointerDown);
@@ -839,11 +822,112 @@ const BgChanger = (() => {
       canvas.addEventListener('wheel', onWheel, { passive: false });
     }
 
-    $c('bgEmptyStudio')?.addEventListener('click', () => App.switchView('studio'));
-
+    /* Quick upload */
     initQuickUpload();
   }
 
+  /* ===== QUICK UPLOAD ===== */
+  function initQuickUpload(){
+    const chooseBtn = $c('bgQuickChoose');
+    const fileInput = $c('bgQuickFile');
+    const uploadStage = $c('bgUploadStage');
+    if (!chooseBtn || !fileInput) return;
+
+    chooseBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    uploadStage?.addEventListener('click', e => {
+      if (e.target.closest('.bg-upload-loading')) return;
+      if (e.target.closest('button')) return;
+      fileInput.click();
+    });
+
+    ['dragenter','dragover'].forEach(n => uploadStage?.addEventListener(n, e => {
+      e.preventDefault();
+      uploadStage.style.borderColor = 'var(--sand)';
+      uploadStage.style.boxShadow = '0 0 0 3px rgba(224,184,132,.15), 0 30px 80px rgba(0,0,0,.5), 0 0 60px rgba(224,184,132,.15)';
+    }));
+    ['dragleave','drop'].forEach(n => uploadStage?.addEventListener(n, e => {
+      e.preventDefault();
+      uploadStage.style.borderColor = '';
+      uploadStage.style.boxShadow = '';
+    }));
+    uploadStage?.addEventListener('drop', e => {
+      const f = e.dataTransfer?.files?.[0];
+      if (f) handleQuickUpload(f);
+    });
+
+    fileInput.addEventListener('change', () => {
+      const f = fileInput.files?.[0];
+      fileInput.value = '';
+      if (!f) return;
+      handleQuickUpload(f);
+    });
+  }
+
+  async function handleQuickUpload(file){
+    const uploadStage = $c('bgUploadStage');
+    const editorStage = $c('bgEditorStage');
+    const content = $c('bgUploadContent');
+    const loading = $c('bgUploadLoading');
+
+    const allowed = ['image/png','image/jpeg','image/webp'];
+    if (!allowed.includes(file.type)) return toast('صيغة غير مدعومة', 'err');
+    if (file.size > (CONFIG.MAX_FILE_MB * 1024 * 1024)) {
+      return toast(`الحجم > ${CONFIG.MAX_FILE_MB}MB`, 'err');
+    }
+
+    content?.classList.add('hidden');
+    loading?.classList.remove('hidden');
+
+    try {
+      const s = await Auth.valid();
+      if (!s?.access_token || !s?.user?.id){
+        toast('انتهت الجلسة', 'err'); App.showAuth(); return;
+      }
+      Auth.session = s;
+      if (!Auth.profile) Auth.profile = await API.getProfile(s.user.id, s.access_token);
+      if (Auth.profile?.is_banned) {
+        content?.classList.remove('hidden');
+        loading?.classList.add('hidden');
+        return toast('الحساب موقوف', 'err');
+      }
+
+      if (!Auth.isPro()){
+        const today = await API.countToday(s.access_token, s.user.id).catch(()=>0);
+        const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
+        if (lim > 0 && today >= lim){
+          content?.classList.remove('hidden');
+          loading?.classList.add('hidden');
+          return toast(`وصلت للحد اليومي (${lim})`, 'err');
+        }
+      }
+
+      const orig = await API.upload(s.access_token, s.user.id, file, 'orig');
+      const blob = await API.removeBg(file);
+      const res = await API.upload(s.access_token, s.user.id, blob, 'res');
+      await API.saveOp(s.access_token, orig, res).catch(()=>{});
+
+      await setSource(blob);
+
+      uploadStage?.classList.add('hidden');
+      editorStage?.classList.remove('hidden');
+      $c('bgDownloadBtn')?.classList.add('hidden');
+      finalBlob = null;
+
+      if (App.refreshUsage) App.refreshUsage();
+      toast('تمت إزالة الخلفية ✓ اختر خلفية جديدة', 'ok');
+    } catch (e) {
+      console.error(e);
+      content?.classList.remove('hidden');
+      loading?.classList.add('hidden');
+      toast(e.message || 'فشلت المعالجة', 'err');
+    }
+  }
+
+  /* ===== POINTER DRAG ===== */
   function onPointerDown(e){
     if (!sourceImg) return;
     dragging = true;
@@ -877,6 +961,7 @@ const BgChanger = (() => {
     drawPreview();
   }
 
+  /* ===== BACKGROUND SELECT ===== */
   function setBg(bg){
     currentBg = bg;
     if (bg.type === 'preset'){
@@ -910,20 +995,11 @@ const BgChanger = (() => {
     toast('تم تحميل الخلفية ✓', 'ok');
   }
 
+  /* ===== DRAW PREVIEW ===== */
   function drawPreview(){
     const canvas = $c('bgEditCanvas');
     if (!canvas) return;
-    if (!sourceImg){
-      canvas.classList.add('hidden');
-      $c('bgEmptyState')?.classList.remove('hidden');
-      $c('bgDragHint')?.classList.add('hidden');
-      if ($c('bgCanvasStatus')) $c('bgCanvasStatus').textContent = '● فارغ';
-      return;
-    }
-    canvas.classList.remove('hidden');
-    $c('bgEmptyState')?.classList.add('hidden');
-    $c('bgDragHint')?.classList.remove('hidden');
-    if ($c('bgCanvasStatus')) $c('bgCanvasStatus').textContent = '● جاهز';
+    if (!sourceImg) return;
 
     const ctx = canvas.getContext('2d');
     const maxW = 500, maxH = 500;
@@ -969,21 +1045,20 @@ const BgChanger = (() => {
     }
   }
 
+  /* ===== SET SOURCE ===== */
   async function setSource(blob){
     sourceBlob = blob;
     const url = URL.createObjectURL(blob);
     sourceImg = new Image();
     sourceImg.onload = () => {
       offsetX = 0; offsetY = 0;
-      $('bgBadge')?.classList.remove('hidden');
-      $c('bgEmptyState')?.classList.add('hidden');
-      $c('bgDragHint')?.classList.remove('hidden');
       if ($c('bgCanvasStatus')) $c('bgCanvasStatus').textContent = '● جاهز';
       drawPreview();
     };
     sourceImg.src = url;
   }
 
+  /* ===== APPLY (Save) ===== */
   async function applyBackground(){
     if (!sourceImg) return toast('لا توجد صورة', 'err');
     if (!currentBg) return toast('اختر خلفية أولاً', 'err');
@@ -1020,17 +1095,10 @@ const BgChanger = (() => {
       ctx.restore();
 
       const outBlob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+      finalBlob = outBlob;
 
-      const resultImg = $('previewResult');
-      if (resultImg){
-        const old = resultImg.src;
-        resultImg.src = URL.createObjectURL(outBlob);
-        if (old?.startsWith('blob:')) URL.revokeObjectURL(old);
-      }
-      App.setResultBlob(outBlob);
-      $('downloadBtn')?.classList.remove('hidden');
-
-      toast('تم حفظ الصورة ✓', 'ok');
+      $c('bgDownloadBtn')?.classList.remove('hidden');
+      toast('تم حفظ الصورة ✓ اضغط تحميل', 'ok');
     } catch(e){
       console.error(e);
       toast('فشل الحفظ', 'err');
@@ -1039,115 +1107,40 @@ const BgChanger = (() => {
     }
   }
 
-  /* ===== QUICK UPLOAD ===== */
-  function initQuickUpload(){
-    const chooseBtn = $c('bgQuickChoose');
-    const fileInput = $c('bgQuickFile');
-    const inner = $c('bgQuickInner');
-    const loading = $c('bgQuickLoading');
-    const wrap = $c('bgQuickUpload');
-    if (!chooseBtn || !fileInput) return;
-
-    chooseBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      fileInput.click();
-    });
-
-    wrap?.addEventListener('click', e => {
-      if (e.target.closest('.bg-quick-loading')) return;
-      if (e.target.closest('button')) return;
-      fileInput.click();
-    });
-
-    fileInput.addEventListener('change', async () => {
-      const f = fileInput.files?.[0];
-      fileInput.value = '';
-      if (!f) return;
-      await handleQuickUpload(f, { inner, loading, wrap });
-    });
+  /* ===== DOWNLOAD ===== */
+  function downloadBlob(blob, name){
+    if(!blob){ toast('لا يوجد ملف', 'err'); return; }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    a.style.display = 'none';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
 
-  async function handleQuickUpload(file, ui){
-    const allowed = ['image/png','image/jpeg','image/webp'];
-    if (!allowed.includes(file.type)){
-      return toast('صيغة غير مدعومة', 'err');
-    }
-    if (file.size > (CONFIG.MAX_FILE_MB * 1024 * 1024)){
-      return toast(`الحجم > ${CONFIG.MAX_FILE_MB}MB`, 'err');
-    }
-
-    ui.inner?.classList.add('hidden');
-    ui.loading?.classList.remove('hidden');
-
-    try {
-      const s = await Auth.valid();
-      if (!s?.access_token || !s?.user?.id){
-        toast('انتهت الجلسة', 'err');
-        App.showAuth();
-        return;
-      }
-      Auth.session = s;
-      if (!Auth.profile) Auth.profile = await API.getProfile(s.user.id, s.access_token);
-      if (Auth.profile?.is_banned) {
-        toast('الحساب موقوف', 'err');
-        return;
-      }
-
-      if (!Auth.isPro()){
-        const today = await API.countToday(s.access_token, s.user.id).catch(()=>0);
-        const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
-        if (lim > 0 && today >= lim){
-          toast(`وصلت للحد اليومي (${lim})`, 'err');
-          return;
-        }
-      }
-
-      const orig = await API.upload(s.access_token, s.user.id, file, 'orig');
-      const blob = await API.removeBg(file);
-      const res = await API.upload(s.access_token, s.user.id, blob, 'res');
-      await API.saveOp(s.access_token, orig, res).catch(()=>{});
-
-      await setSource(blob);
-      if (App.refreshUsage) App.refreshUsage();
-
-      ui.wrap?.classList.add('hidden');
-
-      toast('تمت إزالة الخلفية ✓ اختر خلفية جديدة', 'ok');
-    } catch (e) {
-      console.error(e);
-      toast(e.message || 'فشلت المعالجة', 'err');
-    } finally {
-      ui.inner?.classList.remove('hidden');
-      ui.loading?.classList.add('hidden');
-    }
-  }
-
-  function showQuickUpload(show = true){
-    const w = $c('bgQuickUpload');
-    if (!w) return;
-    if (show) w.classList.remove('hidden');
-    else w.classList.add('hidden');
-  }
-
+  /* ===== RESET ===== */
   function reset(){
     sourceBlob = null; sourceImg = null;
     currentBg = null; bgImage = null;
+    finalBlob = null;
     opacity = 1; scale = 1; offsetX = 0; offsetY = 0;
+
     if($c('bgScale')) $c('bgScale').value = 100;
     if($c('bgOpacity')) $c('bgOpacity').value = 100;
     if($c('bgScaleVal')) $c('bgScaleVal').textContent = '100%';
     if($c('bgOpacityVal')) $c('bgOpacityVal').textContent = '100%';
-    $c('bgEditCanvas')?.classList.add('hidden');
-    $c('bgEmptyState')?.classList.remove('hidden');
-    $c('bgDragHint')?.classList.add('hidden');
-    if ($c('bgCanvasStatus')) $c('bgCanvasStatus').textContent = '● فارغ';
+
     document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
-    $('bgBadge')?.classList.add('hidden');
-    showQuickUpload(true);
+
+    $c('bgUploadStage')?.classList.remove('hidden');
+    $c('bgEditorStage')?.classList.add('hidden');
+    $c('bgUploadContent')?.classList.remove('hidden');
+    $c('bgUploadLoading')?.classList.add('hidden');
+    $c('bgDownloadBtn')?.classList.add('hidden');
   }
 
-  return { init, setSource, reset, applyBackground, showQuickUpload };
+  return { init, setSource, reset, applyBackground };
 })();
 
 /* ========== APP ========== */
@@ -1266,8 +1259,7 @@ const App = (() => {
         const op = opsCache.find(o => String(o.id) === String(b.dataset.id));
         if(!op) return;
         if(b.dataset.act === 'dl'){
-          b.disabled = true;
-          b.textContent = '...';
+          b.disabled = true; b.textContent = '...';
           try{
             const u = await API.resolveImg(op.result_url, s.access_token);
             if(!u) throw new Error('تعذر تجهيز الصورة');
@@ -1275,8 +1267,7 @@ const App = (() => {
           }catch(err){
             toast(err.message || 'فشل التحميل', 'err');
           }finally{
-            b.disabled = false;
-            b.textContent = '⬇ تحميل';
+            b.disabled = false; b.textContent = '⬇ تحميل';
           }
         }
         if(b.dataset.act === 'del'){
@@ -1338,8 +1329,6 @@ const App = (() => {
     const pr = $('previewResult'); if(pr) pr.src = '';
     $('resultCard')?.classList.add('hidden');
     $('downloadBtn')?.classList.add('hidden');
-    $('openBgBtn')?.classList.add('hidden');
-    BgChanger.reset();
   }
 
   function setResultBlob(b){ resultBlob = b; }
@@ -1403,9 +1392,6 @@ const App = (() => {
       if(pr) pr.src = URL.createObjectURL(blob);
       $('resultCard')?.classList.remove('hidden');
       $('downloadBtn')?.classList.remove('hidden');
-      $('openBgBtn')?.classList.remove('hidden');
-
-      BgChanger.setSource(blob);
 
       toast('تمت إزالة الخلفية ✓', 'ok');
       await refreshUsage();
@@ -1422,12 +1408,9 @@ const App = (() => {
     if(!blob){ toast('لا يوجد ملف', 'err'); return; }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = name;
+    a.href = url; a.download = name;
     a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
 
@@ -1497,7 +1480,6 @@ const App = (() => {
       toast('تم التحميل ✓', 'ok');
     });
 
-    $('openBgBtn')?.addEventListener('click', () => switchView('background'));
     $('bgGoStudio')?.addEventListener('click', () => switchView('studio'));
   }
 
