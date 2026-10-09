@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08060a">
+<meta name="theme-color" content="#070509">
 <meta name="color-scheme" content="dark">
 <title>RemoveBG · Sandstorm Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,29 +15,34 @@
 
 <!-- ==================== LOADER ==================== -->
 <div id="loader">
-  <div class="ld-ambient a1"></div>
-  <div class="ld-ambient a2"></div>
+  <div class="ld-glow g1"></div>
+  <div class="ld-glow g2"></div>
+  <div class="ld-glow g3"></div>
   <canvas id="fx"></canvas>
 
-  <div class="ld-stage">
-    <svg class="ld-ring base" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="none" stroke="rgba(224,184,132,.06)" stroke-width="1"/></svg>
-    <svg class="ld-ring r1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="73.8 295.2"/></svg>
-    <svg class="ld-ring r2" viewBox="0 0 100 100"><circle cx="50" cy="50" r="39" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="61.3 245"/></svg>
-    <svg class="ld-ring r3" viewBox="0 0 100 100"><circle cx="50" cy="50" r="31" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="48.7 194.8"/></svg>
-    <svg class="ld-ring r4" viewBox="0 0 100 100"><circle cx="50" cy="50" r="23" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="36.2 144.5"/></svg>
-    <svg class="ld-ring r5" viewBox="0 0 100 100"><circle cx="50" cy="50" r="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="23.6 94.2"/></svg>
+  <div class="ld-orbit">
+    <div class="ld-ring r1"></div>
+    <div class="ld-ring r2"></div>
+    <div class="ld-ring r3"></div>
+    <div class="ld-ring r4"></div>
+    <div class="ld-ring r5"></div>
+    <div class="ld-dot d1"></div>
+    <div class="ld-dot d2"></div>
+    <div class="ld-dot d3"></div>
 
     <div class="ld-core">
-      <div class="ld-halo"></div>
-      <div class="ld-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
+      <div class="ld-pulse"></div>
+      <div class="ld-inner"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
     </div>
   </div>
 
   <div class="ld-info">
     <div class="ld-eyebrow">◆ SANDSTORM STUDIO ◆</div>
     <div class="ld-title">Remove<span>BG</span></div>
-    <div class="ld-tag">PREMIUM BACKGROUND ENGINE</div>
-    <div class="ld-track"><div class="ld-fill" id="ldFill"></div></div>
+    <div class="ld-sub">PREMIUM BACKGROUND ENGINE</div>
+    <div class="ld-progress">
+      <div class="ld-progress-fill" id="ldFill"></div>
+    </div>
     <div class="ld-pct" id="ldPct">0%</div>
   </div>
 </div>
@@ -46,26 +51,25 @@
 <section id="authScreen" class="auth hidden">
   <div class="auth-orb oa"></div>
   <div class="auth-orb ob"></div>
-  <div class="auth-grid-bg"></div>
+  <div class="auth-orb oc"></div>
+  <div class="auth-grid"></div>
 
   <div class="auth-card">
-    <span class="corner c-tl"></span>
-    <span class="corner c-tr"></span>
-    <span class="corner c-bl"></span>
-    <span class="corner c-br"></span>
-    <span class="edge-glow"></span>
+    <span class="corner c-tl"></span><span class="corner c-tr"></span>
+    <span class="corner c-bl"></span><span class="corner c-br"></span>
+    <span class="glow-edge"></span>
 
-    <div class="auth-brand">
+    <div class="auth-logo-wrap">
       <div class="auth-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
-      <h1 class="auth-brand-name">Remove<span>BG</span></h1>
+      <div class="auth-logo-glow"></div>
     </div>
 
     <div class="auth-head">
-      <h2 id="formTitle">أهلًا بعودتك</h2>
-      <p id="formSub">سجّل دخولك لمتابعة رحلتك</p>
+      <h1 id="formTitle">أهلًا بعودتك</h1>
+      <p id="formSub">سجّل دخولك لمتابعة رحلتك الإبداعية</p>
     </div>
 
-    <div class="auth-hr"></div>
+    <div class="auth-line"></div>
 
     <form id="authForm" autocomplete="on" novalidate>
       <div class="field hidden" id="fUsername">
@@ -117,8 +121,7 @@
         <li data-r="match"><i></i>الكلمتان متطابقتان</li>
       </ul>
 
-      <div class="row-between">
-        <label class="check"><input type="checkbox" id="remember" checked><span class="box"></span><span>تذكرني</span></label>
+      <div class="forgot-row">
         <button type="button" class="link" id="forgotBtn">نسيت كلمة المرور؟</button>
       </div>
 
@@ -163,9 +166,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9V6a2 2 0 0 1 2-2h3M15 4h3a2 2 0 0 1 2 2v3M20 15v3a2 2 0 0 1-2 2h-3M9 20H6a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="12" r="3"/></svg>
         <span>الاستوديو</span>
       </button>
-      <button class="nav-btn" data-view="background" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-        <span>الخلفيات</span>
+      <button class="nav-btn" data-view="editor" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span>المحرر</span>
       </button>
       <button class="nav-btn" data-view="history" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l4 2"/></svg>
@@ -191,7 +194,7 @@
         <div class="hero-inner">
           <div class="hero-badge"><i></i> SANDSTORM ENGINE</div>
           <h1>استوديو <span>إزالة الخلفية</span></h1>
-          <p class="hero-desc">محرك ذكي لإزالة خلفيات الصور بدقة عالية خلال ثوانٍ</p>
+          <p class="hero-desc">ارفع صورة، أزل خلفيتها فوراً، ثم انتقل للمحرر الكامل</p>
         </div>
       </div>
       <div class="workspace">
@@ -215,6 +218,7 @@
           <div class="pv-actions">
             <button id="removeBtn" class="btn-main small" type="button"><span class="btn-glow"></span><span class="btn-text">✂️ إزالة الخلفية</span></button>
             <button id="changeBtn" class="btn-ghost" type="button">تغيير</button>
+            <button id="editBtn" class="btn-accent hidden" type="button">✎ افتح المحرر</button>
             <button id="downloadBtn" class="btn-success hidden" type="button">⬇ تحميل</button>
           </div>
           <div id="processing" class="processing hidden"><div class="proc-ring"><span></span></div><strong>جاري المعالجة...</strong></div>
@@ -222,119 +226,295 @@
       </div>
     </section>
 
-    <!-- BACKGROUND VIEW -->
-    <section id="backgroundView" class="view hidden">
-      <div class="bg-view-head">
+    <!-- EDITOR -->
+    <section id="editorView" class="view hidden">
+      <div class="ed-head">
         <div>
-          <div class="sec-title">استوديو <span>الخلفيات</span></div>
-          <p class="bg-view-sub">ارفع صورة → نُزيل خلفيتها تلقائياً → ضعها على الخلفية التي تريدها</p>
+          <div class="sec-title">المحرر <span>الاحترافي</span></div>
+          <p class="ed-head-sub">ارفع صورتك كما هي، ثم اختر ما تريد: إزالة الخلفية، تعديل، كتابة، رسم، خلفيات</p>
         </div>
-        <button id="bgGoStudio" class="btn-ghost" type="button">← الاستوديو</button>
+        <button id="edBackStudio" class="btn-ghost" type="button">← الاستوديو</button>
       </div>
 
-      <!-- UPLOAD STAGE -->
-      <div id="bgUploadStage" class="bg-upload-stage">
+      <!-- START STAGE -->
+      <div id="edStartStage" class="ed-start">
         <span class="corner c-tl"></span><span class="corner c-tr"></span>
         <span class="corner c-bl"></span><span class="corner c-br"></span>
-        <input id="bgQuickFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+        <input id="edQuickFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
 
-        <div class="bg-upload-content" id="bgUploadContent">
-          <div class="bg-upload-badge"><i></i> خطوة 1 من 3</div>
-          <div class="bg-upload-icon">
+        <div class="ed-start-content">
+          <div class="ed-start-badge"><i></i> جاهز للانطلاق</div>
+          <div class="ed-start-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <path d="m21 15-5-5L5 21"/>
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
             </svg>
           </div>
-          <h3 class="bg-upload-title">ارفع صورتك لبدء التصميم</h3>
-          <p class="bg-upload-sub">سنقوم بإزالة الخلفية تلقائياً — ثم يمكنك اختيار أي خلفية جديدة وضبط موضع صورتك</p>
-          <div class="bg-upload-formats">PNG · JPG · WEBP — حتى 20MB</div>
-          <button id="bgQuickChoose" class="btn-main" type="button">
+          <h3>ابدأ رحلتك الإبداعية</h3>
+          <p>ارفع صورتك كما هي، ثم حرّرها كيفما تشاء</p>
+          <div class="ed-start-formats">PNG · JPG · WEBP — حتى 20MB</div>
+          <button id="edStartBtn" class="btn-main" type="button">
             <span class="btn-glow"></span>
-            <span class="btn-text">اختيار صورة</span>
+            <span class="btn-text">ابدأ التحرير</span>
+            <span class="btn-arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg></span>
           </button>
-          <div class="bg-upload-hint">أو اسحب وأفلت الصورة هنا</div>
+          <div class="ed-start-hint">أو اسحب وأفلت الصورة هنا</div>
         </div>
-
-        <div class="bg-upload-loading hidden" id="bgUploadLoading">
+        <div class="ed-start-loading hidden" id="edStartLoading">
           <div class="bg-loading-spinner">
             <svg viewBox="0 0 100 100" class="bl-ring br1"><circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="72 217" stroke-linecap="round"/></svg>
             <svg viewBox="0 0 100 100" class="bl-ring br2"><circle cx="50" cy="50" r="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="53 161" stroke-linecap="round"/></svg>
             <svg viewBox="0 0 100 100" class="bl-ring br3"><circle cx="50" cy="50" r="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="35 104" stroke-linecap="round"/></svg>
           </div>
-          <h3>جاري إزالة الخلفية...</h3>
-          <p>يستغرق بضع ثوان فقط</p>
+          <h3>جاري فتح المحرر...</h3>
         </div>
       </div>
 
       <!-- EDITOR STAGE -->
-      <div id="bgEditorStage" class="bg-editor-stage hidden">
-        <div class="bg-editor">
-          <div class="bg-canvas-area">
+      <div id="edEditorStage" class="ed-editor-stage hidden">
+        <div class="ed-toolbar">
+          <button class="ed-tool active" data-tool="move" title="تحريك">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
+            <span>تحريك</span>
+          </button>
+          <button class="ed-tool" data-tool="brush" title="فرشاة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>
+            <span>فرشاة</span>
+          </button>
+          <button class="ed-tool" data-tool="eraser" title="ممحاة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+            <span>ممحاة</span>
+          </button>
+          <button class="ed-tool" data-tool="text" title="نص">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+            <span>نص</span>
+          </button>
+          <button class="ed-tool" data-tool="picker" title="قطارة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m2 22 1-1h3l9-9M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.5 1.5L21 13l-3 3-2.5-2.5L14 14l-2-2Z"/></svg>
+            <span>قطارة</span>
+          </button>
+        </div>
+
+        <div class="ed-shell">
+          <div class="ed-canvas-area">
             <span class="corner c-tl"></span><span class="corner c-tr"></span>
             <span class="corner c-bl"></span><span class="corner c-br"></span>
-            <div class="bg-canvas-head">
-              <div class="bg-canvas-title"><i></i> مساحة التصميم</div>
-              <div class="bg-canvas-status" id="bgCanvasStatus">● جاهز</div>
+            <div class="ed-canvas-head">
+              <div class="ed-canvas-title"><i></i> مساحة العمل</div>
+              <div class="ed-canvas-status" id="edStatus">● جاهز</div>
             </div>
-            <div class="bg-canvas-wrap" id="bgCanvasWrap">
-              <canvas id="bgEditCanvas"></canvas>
+            <div class="ed-canvas-wrap" id="edCanvasWrap">
+              <canvas id="edMainCanvas"></canvas>
+              <div id="edCanvasLoading" class="ed-canvas-loading hidden">
+                <div class="proc-ring"><span></span></div>
+                <strong id="edCanvasLoadingText">جاري المعالجة...</strong>
+              </div>
             </div>
-            <div class="bg-drag-hint" id="bgDragHint">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
-              اسحب الصورة لتغيير موضعها · عجلة الفأرة للتكبير
+            <div class="ed-zoom-bar">
+              <button id="edZoomOut" class="ed-zoom-btn" type="button">−</button>
+              <span id="edZoomVal">100%</span>
+              <button id="edZoomIn" class="ed-zoom-btn" type="button">+</button>
+              <button id="edZoomReset" class="ed-zoom-btn" type="button">↻</button>
             </div>
           </div>
 
-          <div class="bg-panel-side">
+          <div class="ed-panel">
             <span class="corner c-tl"></span><span class="corner c-tr"></span>
             <span class="corner c-bl"></span><span class="corner c-br"></span>
 
-            <div class="bg-side-head">
-              <div class="bg-side-title">اختر خلفية</div>
-              <div class="bg-side-count" id="bgCount">0</div>
+            <div class="ed-tabs">
+              <button class="ed-tab active" data-tab="background" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                خلفية
+              </button>
+              <button class="ed-tab" data-tab="adjust" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M4.2 4.2l4.3 4.3m7 7 4.3 4.3M1 12h6m10 0h6M4.2 19.8l4.3-4.3m7-7 4.3-4.3"/></svg>
+                تعديلات
+              </button>
+              <button class="ed-tab" data-tab="draw" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>
+                رسم
+              </button>
+              <button class="ed-tab" data-tab="text" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+                نص
+              </button>
             </div>
 
-            <div class="bg-tabs">
-              <button class="bg-tab active" data-bgmode="preset" type="button">مكتبة</button>
-              <button class="bg-tab" data-bgmode="upload" type="button">رفع</button>
-              <button class="bg-tab" data-bgmode="color" type="button">لون</button>
-            </div>
+            <!-- ===== BACKGROUND TAB ===== -->
+            <div class="ed-tab-content" data-content="background">
+              <button id="edRemoveBgBtn" class="ed-primary-action">
+                <div class="ed-primary-icon">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/>
+                    <path d="M9 9l6 6M15 9l-6 6"/>
+                  </svg>
+                </div>
+                <div class="ed-primary-text">
+                  <strong>إزالة الخلفية</strong>
+                  <span>حذف ذكي فوري بالذكاء الاصطناعي</span>
+                </div>
+                <div class="ed-primary-arrow">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
+                </div>
+              </button>
 
-            <div class="bg-tab-content" id="bgPresetContent"><div class="bg-presets" id="bgPresets"></div></div>
-            <div class="bg-tab-content hidden" id="bgUploadContentTab">
-              <div class="bg-upload-zone" id="bgUploadZone">
-                <input id="bgFileInput" type="file" accept="image/*" hidden>
-                <div class="bg-upload-inner">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+              <div class="ed-divider"><span>أو اختر خلفية جديدة</span></div>
+
+              <div class="ed-subtabs">
+                <button class="ed-subtab active" data-bgmode="preset" type="button">مكتبة</button>
+                <button class="ed-subtab" data-bgmode="upload" type="button">رفع</button>
+                <button class="ed-subtab" data-bgmode="color" type="button">لون</button>
+                <button class="ed-subtab" data-bgmode="transparent" type="button">شفاف</button>
+                <button class="ed-subtab" data-bgmode="original" type="button">الأصل</button>
+              </div>
+
+              <div class="ed-bg-content" data-bgcontent="preset">
+                <div class="ed-presets" id="edPresets"></div>
+              </div>
+              <div class="ed-bg-content hidden" data-bgcontent="upload">
+                <div class="ed-bg-upload" id="edBgUploadZone">
+                  <input id="edBgFile" type="file" accept="image/*" hidden>
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
                   <strong>ارفع صورة خلفية</strong>
-                  <span>PNG · JPG · WEBP — حتى 10MB</span>
-                  <button id="bgChooseBtn" class="btn-ghost small" type="button">اختيار ملف</button>
+                  <span>PNG · JPG — حتى 10MB</span>
+                  <button id="edBgChoose" class="btn-ghost small" type="button">اختيار ملف</button>
+                </div>
+              </div>
+              <div class="ed-bg-content hidden" data-bgcontent="color">
+                <input type="color" id="edBgColor" value="#e0b884" class="ed-color-big">
+                <div class="ed-swatches ed-swatches-big" id="edBgSwatches"></div>
+              </div>
+              <div class="ed-bg-content hidden" data-bgcontent="transparent">
+                <div class="ed-note">
+                  <div class="ed-note-icon">◌</div>
+                  <p>خلفية شفافة (PNG)</p>
+                </div>
+              </div>
+              <div class="ed-bg-content hidden" data-bgcontent="original">
+                <div class="ed-note">
+                  <div class="ed-note-icon">📷</div>
+                  <p>الصورة الأصلية كما هي</p>
+                </div>
+              </div>
+
+              <div class="ed-bg-move-controls">
+                <div class="ed-group">
+                  <label>حجم الصورة: <span id="edScaleVal">100%</span></label>
+                  <input type="range" id="edScale" min="30" max="300" value="100" class="ed-range">
+                </div>
+                <div class="ed-group">
+                  <label>شفافية الصورة: <span id="edAlphaVal">100%</span></label>
+                  <input type="range" id="edAlpha" min="0" max="100" value="100" class="ed-range">
                 </div>
               </div>
             </div>
-            <div class="bg-tab-content hidden" id="bgColorContentTab">
-              <div class="bg-color-row">
-                <input type="color" id="bgColorPicker" value="#e0b884">
-                <div class="bg-color-swatches" id="bgColorSwatches"></div>
+
+            <!-- ===== ADJUST TAB ===== -->
+            <div class="ed-tab-content hidden" data-content="adjust">
+              <div class="ed-group">
+                <label>السطوع: <span id="edBrightnessVal">100%</span></label>
+                <input type="range" id="edBrightness" min="20" max="200" value="100" class="ed-range">
+              </div>
+              <div class="ed-group">
+                <label>التباين: <span id="edContrastVal">100%</span></label>
+                <input type="range" id="edContrast" min="20" max="200" value="100" class="ed-range">
+              </div>
+              <div class="ed-group">
+                <label>التشبع: <span id="edSaturationVal">100%</span></label>
+                <input type="range" id="edSaturation" min="0" max="200" value="100" class="ed-range">
+              </div>
+              <div class="ed-group">
+                <label>درجة اللون: <span id="edHueVal">0°</span></label>
+                <input type="range" id="edHue" min="-180" max="180" value="0" class="ed-range">
+              </div>
+              <div class="ed-group">
+                <label>الضباب: <span id="edBlurVal">0px</span></label>
+                <input type="range" id="edBlur" min="0" max="20" value="0" class="ed-range">
+              </div>
+              <div class="ed-group">
+                <label>الرمادي: <span id="edGrayVal">0%</span></label>
+                <input type="range" id="edGray" min="0" max="100" value="0" class="ed-range">
+              </div>
+              <div class="ed-group">
+                <label>البنّي (Sepia): <span id="edSepiaVal">0%</span></label>
+                <input type="range" id="edSepia" min="0" max="100" value="0" class="ed-range">
+              </div>
+              <div class="ed-group">
+                <label>عكس الألوان: <span id="edInvertVal">0%</span></label>
+                <input type="range" id="edInvert" min="0" max="100" value="0" class="ed-range">
+              </div>
+              <div class="ed-actions-row">
+                <button id="edResetAdjust" class="btn-ghost small" type="button">↻ ضبط الكل</button>
               </div>
             </div>
 
-            <div class="bg-controls-section">
-              <div class="bg-control-group"><label>حجم الصورة: <span id="bgScaleVal">100%</span></label><input type="range" id="bgScale" min="30" max="300" value="100" class="bg-range"></div>
-              <div class="bg-control-group"><label>الشفافية: <span id="bgOpacityVal">100%</span></label><input type="range" id="bgOpacity" min="0" max="100" value="100" class="bg-range"></div>
+            <!-- ===== DRAW TAB ===== -->
+            <div class="ed-tab-content hidden" data-content="draw">
+              <div class="ed-group">
+                <label>حجم الفرشاة: <span id="edBrushSizeVal">8</span> px</label>
+                <input type="range" id="edBrushSize" min="1" max="80" value="8" class="ed-range">
+              </div>
+              <div class="ed-group">
+                <label>لون الفرشاة</label>
+                <div class="ed-color-row">
+                  <input type="color" id="edBrushColor" value="#e0b884">
+                  <div class="ed-swatches" id="edBrushSwatches"></div>
+                </div>
+              </div>
+              <div class="ed-group">
+                <label>شفافية الفرشاة: <span id="edBrushOpacityVal">100%</span></label>
+                <input type="range" id="edBrushOpacity" min="10" max="100" value="100" class="ed-range">
+              </div>
+              <div class="ed-actions-row">
+                <button id="edUndo" class="btn-ghost small" type="button">↶ تراجع</button>
+                <button id="edClearDraw" class="btn-ghost small" type="button">🗑 امسح الكل</button>
+              </div>
             </div>
 
-            <div class="bg-actions-row">
-              <button id="bgResetBtn" class="btn-ghost small" type="button">↻ جدد</button>
-              <button id="bgApplyBtn" class="btn-success small" type="button">✓ حفظ</button>
+            <!-- ===== TEXT TAB ===== -->
+            <div class="ed-tab-content hidden" data-content="text">
+              <div class="ed-group">
+                <label>نصك</label>
+                <textarea id="edTextInput" class="ed-textarea" placeholder="اكتب شيئاً إبداعياً..."></textarea>
+              </div>
+              <div class="ed-group">
+                <label>الخط</label>
+                <select id="edTextFont" class="ed-select">
+                  <option value="'Readex Pro',sans-serif">Readex Pro</option>
+                  <option value="'Cairo',sans-serif">Cairo</option>
+                  <option value="'Fraunces',serif">Fraunces</option>
+                  <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
+                  <option value="Arial,sans-serif">Arial</option>
+                </select>
+              </div>
+              <div class="ed-group">
+                <label>الحجم: <span id="edTextSizeVal">48px</span></label>
+                <input type="range" id="edTextSize" min="12" max="200" value="48" class="ed-range">
+              </div>
+              <div class="ed-group">
+                <label>اللون</label>
+                <input type="color" id="edTextColor" value="#ffffff">
+              </div>
+              <div class="ed-group">
+                <label>الظل</label>
+                <select id="edTextShadow" class="ed-select">
+                  <option value="none">بدون</option>
+                  <option value="rgba(0,0,0,.6)">ظل خفيف</option>
+                  <option value="rgba(224,184,132,.8)">ظل ذهبي</option>
+                  <option value="rgba(224,174,176,.8)">ظل وردي</option>
+                </select>
+              </div>
+              <button id="edAddText" class="btn-main small" type="button"><span class="btn-glow"></span><span class="btn-text">أضف النص</span></button>
             </div>
 
-            <button id="bgDownloadBtn" class="btn-download hidden" type="button">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
-              تحميل الصورة النهائية
-            </button>
+            <div class="ed-actions-main">
+              <button id="edSaveBtn" class="btn-success" type="button">✓ حفظ التعديلات</button>
+              <button id="edDownloadBtn" class="btn-download hidden" type="button">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+                تحميل الصورة
+              </button>
+              <button id="edNewBtn" class="btn-ghost" type="button">↻ صورة جديدة</button>
+            </div>
           </div>
         </div>
       </div>
@@ -356,8 +536,7 @@
         <div class="profile-card">
           <span class="corner c-tl"></span><span class="corner c-tr"></span>
           <span class="corner c-bl"></span><span class="corner c-br"></span>
-          <div class="pc-glow"></div>
-          <div class="pc-grid"></div>
+          <div class="pc-glow"></div><div class="pc-grid"></div>
           <div class="avatar-ring"><div id="avatar" class="avatar">?</div></div>
           <div id="pUsername" class="p-name">—</div>
           <div id="pEmail" class="p-email">—</div>
@@ -419,4 +598,4 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 </body>
-                                                                                                                                                                                                       </html>
+          </html>
