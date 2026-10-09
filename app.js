@@ -1,30 +1,12 @@
 /* ============================================================
-   RemoveBG · Sandstorm Studio · MAIN
+   RemoveBG · Sandstorm Studio · MAIN + EDITOR
    ============================================================ */
 
 const $ = id => document.getElementById(id);
-
-const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({
-  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-}[c]));
-
-const fmtDate = v => {
-  if(!v) return '—';
-  try{
-    const d = new Date(v);
-    return d.toLocaleDateString('ar-EG',{year:'numeric',month:'short',day:'numeric'}) +
-      ' · ' +
-      d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-  }catch{ return String(v); }
-};
-
-const todayISO = () => { const d = new Date(); d.setHours(0,0,0,0); return d.toISOString(); };
-
-const initials = v => {
-  const t = String(v || '?').trim();
-  return t ? t.split(/\s+/).slice(0,2).map(x => x[0]).join('').toUpperCase() : '?';
-};
-
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate = v => { if(!v) return '—'; try{ const d=new Date(v); return d.toLocaleDateString('ar-EG',{year:'numeric',month:'short',day:'numeric'})+' · '+d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}); }catch{ return String(v); } };
+const todayISO = () => { const d=new Date(); d.setHours(0,0,0,0); return d.toISOString(); };
+const initials = v => { const t=String(v||'?').trim(); return t?t.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase():'?'; };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 const PRESET_BACKGROUNDS = [
@@ -47,12 +29,8 @@ const PRESET_BACKGROUNDS = [
   'https://i.postimg.cc/RFJyKVBd/ef21469b3e8c02e7566287c25ec70c92.jpg',
   'https://i.postimg.cc/vBxkfHsK/ff31ed3961d79e2488345ca2c089050d.jpg'
 ];
-
-const BG_COLOR_SWATCHES = [
-  '#ffffff','#000000','#e0b884','#d4a5a5','#c4783a',
-  '#84d896','#e88c7a','#8ab4f8','#c084fc','#fbbf24',
-  '#2dd4bf','#f472b6','#1a130c','#2a2015','#f5e8d4'
-];
+const BG_COLOR_SWATCHES = ['#ffffff','#000000','#e0b884','#d4a5a5','#c4783a','#84d896','#e88c7a','#8ab4f8','#c084fc','#fbbf24','#2dd4bf','#f472b6','#1a130c','#2a2015','#f5e8d4','#e0aeb0'];
+const BRUSH_SWATCHES = ['#ffffff','#000000','#e0b884','#c4783a','#d4a5a5','#84d896','#e88c7a','#8ab4f8','#c084fc','#fbbf24','#2dd4bf','#f472b6'];
 
 const toastEl = $('toast');
 function toast(msg, type=''){
@@ -62,513 +40,177 @@ function toast(msg, type=''){
   clearTimeout(toast._t);
   toast._t = setTimeout(() => toastEl.classList.remove('show'), 3800);
 }
-
-const isEmailValid = e => {
-  if(!e || e.length > 254) return false;
-  const RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  return RE.test(e);
-};
-
+const isEmailValid = e => { if(!e || e.length > 254) return false; return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e); };
 const checkPwd = p => {
-  const r = {
-    len: p.length >= 8,
-    num: /\d/.test(p),
-    upper: /[A-Z]/.test(p),
-    lower: /[a-z]/.test(p)
-  };
+  const r = { len: p.length>=8, num:/\d/.test(p), upper:/[A-Z]/.test(p), lower:/[a-z]/.test(p) };
   const valid = r.len && r.num && r.upper && r.lower;
   let lvl = 0;
-  const cnt = [r.len, r.num, r.upper, r.lower].filter(Boolean).length;
-  if(cnt <= 1) lvl = 1;
-  else if(cnt === 2) lvl = 2;
-  else if(cnt === 3) lvl = 3;
-  else if(cnt === 4 && p.length >= 10) lvl = 4;
-  else lvl = 3;
+  const cnt = [r.len,r.num,r.upper,r.lower].filter(Boolean).length;
+  if(cnt<=1) lvl=1; else if(cnt===2) lvl=2; else if(cnt===3) lvl=3; else if(cnt===4 && p.length>=10) lvl=4; else lvl=3;
   const labels = ['','ضعيفة','متوسطة','قوية','ممتازة'];
   return { reqs:r, lvl, label:labels[lvl], valid };
 };
 
 /* ========== LOADER ========== */
 const Loader = (() => {
-  const START = performance.now();
-  let raf;
-
+  const START = performance.now(); let raf;
   function particles(){
     const c = $('fx'); if(!c) return;
     const ctx = c.getContext('2d');
     const dpr = Math.min(devicePixelRatio, 2);
     let w, h, parts = [];
-    const resize = () => {
-      w = c.width = innerWidth * dpr;
-      h = c.height = innerHeight * dpr;
-      c.style.width = innerWidth + 'px';
-      c.style.height = innerHeight + 'px';
-    };
-    resize();
-    addEventListener('resize', resize);
-    const n = Math.min(50, Math.floor(innerWidth/22));
-    for(let i=0;i<n;i++){
-      parts.push({
-        x: Math.random()*w, y: Math.random()*h,
-        vx:(Math.random()-.5)*.28*dpr, vy:(Math.random()-.5)*.28*dpr,
-        r:(Math.random()*1.4+.4)*dpr, a:Math.random()*.5+.3,
-        hue: 32 + Math.random()*14
-      });
-    }
+    const resize = () => { w=c.width=innerWidth*dpr; h=c.height=innerHeight*dpr; c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px'; };
+    resize(); addEventListener('resize', resize);
+    const n = Math.min(40, Math.floor(innerWidth/28));
+    for(let i=0;i<n;i++) parts.push({ x:Math.random()*w, y:Math.random()*h, vx:(Math.random()-.5)*.22*dpr, vy:(Math.random()-.5)*.22*dpr, r:(Math.random()*1.3+.4)*dpr, a:Math.random()*.5+.3, hue: 32+Math.random()*14 });
     function loop(){
       ctx.clearRect(0,0,w,h);
       for(const p of parts){
         p.x+=p.vx; p.y+=p.vy;
-        if(p.x<0||p.x>w)p.vx*=-1;
-        if(p.y<0||p.y>h)p.vy*=-1;
-        ctx.beginPath();
-        ctx.fillStyle = `hsla(${p.hue},75%,62%,${p.a})`;
-        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        ctx.fill();
+        if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1;
+        ctx.beginPath(); ctx.fillStyle = `hsla(${p.hue},75%,62%,${p.a})`; ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
       }
       raf = requestAnimationFrame(loop);
     }
     loop();
   }
-
   async function run(){
     particles();
-    let p = 0;
-    const fill = $('ldFill'), pct = $('ldPct');
-    const tick = setInterval(() => {
-      p = Math.min(98, p + Math.random()*8 + 4);
-      if(fill) fill.style.width = p + '%';
-      if(pct) pct.textContent = Math.round(p) + '%';
-    }, 120);
+    let p = 0; const fill = $('ldFill'), pct = $('ldPct');
+    const tick = setInterval(() => { p = Math.min(98, p + Math.random()*7 + 3); if(fill) fill.style.width = p + '%'; if(pct) pct.textContent = Math.round(p) + '%'; }, 130);
     const el = performance.now() - START;
     await wait(Math.max(0, CONFIG.LOADER_MIN_MS - el));
-    clearInterval(tick);
-    if(fill) fill.style.width = '100%';
-    if(pct) pct.textContent = '100%';
-    await wait(280);
-    $('loader')?.classList.add('hide');
+    clearInterval(tick); if(fill) fill.style.width = '100%'; if(pct) pct.textContent = '100%';
+    await wait(320); $('loader')?.classList.add('hide');
     if(raf) cancelAnimationFrame(raf);
-    setTimeout(() => $('loader')?.remove(), 800);
+    setTimeout(() => $('loader')?.remove(), 900);
   }
-
   return { run };
 })();
 
 /* ========== API ========== */
 const API = (() => {
   async function req(path, opt={}, token=null){
-    const headers = {
-      apikey: CONFIG.SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      ...(opt.headers || {})
-    };
+    const headers = { apikey: CONFIG.SUPABASE_KEY, 'Content-Type': 'application/json', ...(opt.headers || {}) };
     if(token) headers.Authorization = `Bearer ${token}`;
     let res;
-    try{ res = await fetch(CONFIG.SUPABASE_URL + path, {...opt, headers}); }
-    catch{ const e = new Error('فشل الاتصال'); e.status = 0; throw e; }
+    try{ res = await fetch(CONFIG.SUPABASE_URL + path, {...opt, headers}); } catch{ const e = new Error('فشل الاتصال'); e.status = 0; throw e; }
     const text = await res.text();
     let data = null;
     try{ data = text ? JSON.parse(text) : null; }catch{ data = text; }
-    if(!res.ok){
-      const msg = data?.message || data?.msg || data?.error_description ||
-                  data?.error || data?.hint || `HTTP ${res.status}`;
-      const e = new Error(msg);
-      e.status = res.status; e.data = data;
-      throw e;
-    }
+    if(!res.ok){ const msg = data?.message || data?.msg || data?.error_description || data?.error || data?.hint || `HTTP ${res.status}`; const e = new Error(msg); e.status = res.status; e.data = data; throw e; }
     return data;
   }
-
-  const norm = d => ({
-    access_token: d.access_token,
-    refresh_token: d.refresh_token,
-    expires_in: d.expires_in,
-    expires_at: Date.now() + (d.expires_in || 3600) * 1000,
-    user: d.user || null
-  });
-
-  const login = async (email, password) =>
-    norm(await req('/auth/v1/token?grant_type=password', {
-      method:'POST', body: JSON.stringify({email, password})
-    }));
-
+  const norm = d => ({ access_token:d.access_token, refresh_token:d.refresh_token, expires_in:d.expires_in, expires_at: Date.now()+(d.expires_in||3600)*1000, user:d.user||null });
+  const login = async (email, password) => norm(await req('/auth/v1/token?grant_type=password', { method:'POST', body: JSON.stringify({email, password}) }));
   const signup = async (email, password, username) => {
-    const d = await req('/auth/v1/signup', {
-      method:'POST',
-      body: JSON.stringify({ email, password, data:{ username } })
-    });
+    const d = await req('/auth/v1/signup', { method:'POST', body: JSON.stringify({ email, password, data:{ username } }) });
     if(!d?.access_token) return { needsConfirmation:true, user:d?.user||null };
     return norm(d);
   };
-
-  const refresh = async s => {
-    if(!s?.refresh_token) return null;
-    try{
-      return norm(await req('/auth/v1/token?grant_type=refresh_token', {
-        method:'POST', body: JSON.stringify({ refresh_token: s.refresh_token })
-      }));
-    }catch{ return null; }
-  };
-
-  const getUser = async s => {
-    if(!s?.access_token) return null;
-    try{ return await req('/auth/v1/user', {method:'GET'}, s.access_token); }
-    catch{ return null; }
-  };
-
-  const signout = async s => {
-    if(!s?.access_token) return;
-    try{
-      await fetch(CONFIG.SUPABASE_URL + '/auth/v1/logout', {
-        method:'POST',
-        headers:{ apikey: CONFIG.SUPABASE_KEY, Authorization: `Bearer ${s.access_token}` }
-      });
-    }catch{}
-  };
-
-  const forgot = async email => req('/auth/v1/recover', {
-    method:'POST', body: JSON.stringify({ email })
-  });
-
-  const getProfile = async (uid, tk) => {
-    try{
-      const d = await req(`/rest/v1/profiles?id=eq.${encodeURIComponent(uid)}&select=*`, {method:'GET'}, tk);
-      return Array.isArray(d) ? d[0] || null : null;
-    }catch{ return null; }
-  };
-
-  const fetchOps = async (tk, uid) => {
-    const d = await req(
-      `/rest/v1/operations?user_id=eq.${encodeURIComponent(uid)}&deleted_at=is.null&select=*&order=created_at.desc&limit=100`,
-      {method:'GET'}, tk);
-    return Array.isArray(d) ? d : [];
-  };
-
-  const countToday = async (tk, uid) => {
-    const d = await req(
-      `/rest/v1/operations?user_id=eq.${encodeURIComponent(uid)}&created_at=gte.${encodeURIComponent(todayISO())}&select=id`,
-      {method:'GET'}, tk);
-    return Array.isArray(d) ? d.length : 0;
-  };
-
-  const saveOp = async (tk, op, rp) => {
-    const d = await req('/rest/v1/rpc/create_removebg_operation', {
-      method:'POST', body: JSON.stringify({ p_original_path: op, p_result_path: rp })
-    }, tk);
-    return Array.isArray(d) ? d[0] || null : d;
-  };
-
-  const delOp = async (tk, id) => req('/rest/v1/rpc/soft_delete_operation', {
-    method:'POST', body: JSON.stringify({ p_operation_id: id })
-  }, tk);
-
-  const extractPath = v => {
-    if(!v) return null;
-    const t = String(v);
-    const marks = [
-      `/storage/v1/object/public/${CONFIG.BUCKET}/`,
-      `/storage/v1/object/${CONFIG.BUCKET}/`
-    ];
-    for(const m of marks){ if(t.includes(m)) return t.split(m)[1]?.split('?')[0] || null; }
-    if(t.startsWith(`${CONFIG.BUCKET}/`)) return t.slice(CONFIG.BUCKET.length+1);
-    if(t.startsWith('http')) return null;
-    return t.replace(/^\/+/, '').split('?')[0];
-  };
-
-  const signedUrl = async (tk, path, sec = CONFIG.SIGNED_URL_SECONDS) => {
-    if(!path) return null;
-    const clean = String(path).replace(/^\/+/, '').split('?')[0];
-    const enc = clean.split('/').map(encodeURIComponent).join('/');
-    try{
-      const d = await req(`/storage/v1/object/sign/${CONFIG.BUCKET}/${enc}`, {
-        method:'POST', body: JSON.stringify({ expiresIn: sec })
-      }, tk);
-      const u = d?.signedURL || d?.signedUrl || d?.url || d?.signed_url;
-      if(!u) return null;
-      return u.startsWith('http') ? u : CONFIG.SUPABASE_URL + u;
-    }catch{ return null; }
-  };
-
-  const publicUrl = path => {
-    if(!path) return null;
-    const clean = String(path).replace(/^\/+/, '').split('?')[0];
-    const enc = clean.split('/').map(encodeURIComponent).join('/');
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.BUCKET}/${enc}`;
-  };
-
-  const resolveImg = async (v, tk) => {
-    if(!v) return null;
-    const p = extractPath(v);
-    if(!p) return v;
-    const s = await signedUrl(tk, p);
-    return s || publicUrl(p);
-  };
-
+  const refresh = async s => { if(!s?.refresh_token) return null; try{ return norm(await req('/auth/v1/token?grant_type=refresh_token', { method:'POST', body: JSON.stringify({ refresh_token: s.refresh_token }) })); }catch{ return null; } };
+  const getUser = async s => { if(!s?.access_token) return null; try{ return await req('/auth/v1/user', {method:'GET'}, s.access_token); }catch{ return null; } };
+  const signout = async s => { if(!s?.access_token) return; try{ await fetch(CONFIG.SUPABASE_URL+'/auth/v1/logout', {method:'POST', headers:{ apikey: CONFIG.SUPABASE_KEY, Authorization: `Bearer ${s.access_token}` }}); }catch{} };
+  const forgot = async email => req('/auth/v1/recover', { method:'POST', body: JSON.stringify({ email }) });
+  const getProfile = async (uid, tk) => { try{ const d = await req(`/rest/v1/profiles?id=eq.${encodeURIComponent(uid)}&select=*`, {method:'GET'}, tk); return Array.isArray(d)?d[0]||null:null; }catch{ return null; } };
+  const fetchOps = async (tk, uid) => { const d = await req(`/rest/v1/operations?user_id=eq.${encodeURIComponent(uid)}&deleted_at=is.null&select=*&order=created_at.desc&limit=100`, {method:'GET'}, tk); return Array.isArray(d)?d:[]; };
+  const countToday = async (tk, uid) => { const d = await req(`/rest/v1/operations?user_id=eq.${encodeURIComponent(uid)}&created_at=gte.${encodeURIComponent(todayISO())}&select=id`, {method:'GET'}, tk); return Array.isArray(d)?d.length:0; };
+  const saveOp = async (tk, op, rp) => { const d = await req('/rest/v1/rpc/create_removebg_operation', { method:'POST', body: JSON.stringify({ p_original_path: op, p_result_path: rp }) }, tk); return Array.isArray(d)?d[0]||null:d; };
+  const delOp = async (tk, id) => req('/rest/v1/rpc/soft_delete_operation', { method:'POST', body: JSON.stringify({ p_operation_id: id }) }, tk);
+  const extractPath = v => { if(!v) return null; const t = String(v); const marks = [`/storage/v1/object/public/${CONFIG.BUCKET}/`, `/storage/v1/object/${CONFIG.BUCKET}/`]; for(const m of marks){ if(t.includes(m)) return t.split(m)[1]?.split('?')[0]||null; } if(t.startsWith(`${CONFIG.BUCKET}/`)) return t.slice(CONFIG.BUCKET.length+1); if(t.startsWith('http')) return null; return t.replace(/^\/+/, '').split('?')[0]; };
+  const signedUrl = async (tk, path, sec = CONFIG.SIGNED_URL_SECONDS) => { if(!path) return null; const clean = String(path).replace(/^\/+/, '').split('?')[0]; const enc = clean.split('/').map(encodeURIComponent).join('/'); try{ const d = await req(`/storage/v1/object/sign/${CONFIG.BUCKET}/${enc}`, { method:'POST', body: JSON.stringify({ expiresIn: sec }) }, tk); const u = d?.signedURL || d?.signedUrl || d?.url || d?.signed_url; if(!u) return null; return u.startsWith('http')?u:CONFIG.SUPABASE_URL+u; }catch{ return null; } };
+  const publicUrl = path => { if(!path) return null; const clean = String(path).replace(/^\/+/, '').split('?')[0]; const enc = clean.split('/').map(encodeURIComponent).join('/'); return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.BUCKET}/${enc}`; };
+  const resolveImg = async (v, tk) => { if(!v) return null; const p = extractPath(v); if(!p) return v; const s = await signedUrl(tk, p); return s || publicUrl(p); };
   const upload = async (tk, uid, blob, folder) => {
     const name = `${uid}/${folder}-${Date.now()}-${Math.random().toString(36).slice(2,9)}.png`;
-    const r = await fetch(`${CONFIG.SUPABASE_URL}/storage/v1/object/${CONFIG.BUCKET}/${name}`, {
-      method:'POST',
-      headers:{
-        Authorization:`Bearer ${tk}`,
-        apikey: CONFIG.SUPABASE_KEY,
-        'Content-Type':'image/png',
-        'x-upsert':'false',
-        'cache-control':'3600'
-      },
-      body: blob
-    });
-    if(!r.ok){
-      const t = await r.text().catch(()=> '');
-      throw new Error(`فشل الرفع (${r.status}) ${t}`);
-    }
+    const r = await fetch(`${CONFIG.SUPABASE_URL}/storage/v1/object/${CONFIG.BUCKET}/${name}`, { method:'POST', headers:{ Authorization:`Bearer ${tk}`, apikey: CONFIG.SUPABASE_KEY, 'Content-Type':'image/png', 'x-upsert':'false', 'cache-control':'3600' }, body: blob });
+    if(!r.ok){ const t = await r.text().catch(()=> ''); throw new Error(`فشل الرفع (${r.status}) ${t}`); }
     return name;
   };
-
-  const removeFiles = async (tk, paths) => {
-    const clean = paths.map(extractPath).filter(Boolean);
-    if(!clean.length) return;
-    try{
-      await req(`/storage/v1/object/${CONFIG.BUCKET}`, {
-        method:'DELETE', body: JSON.stringify({ prefixes: clean })
-      }, tk);
-    }catch{}
-  };
-
+  const removeFiles = async (tk, paths) => { const clean = paths.map(extractPath).filter(Boolean); if(!clean.length) return; try{ await req(`/storage/v1/object/${CONFIG.BUCKET}`, { method:'DELETE', body: JSON.stringify({ prefixes: clean }) }, tk); }catch{} };
   const removeBg = async file => {
     const fd = new FormData();
-    fd.append('format','png');
-    fd.append('model','v1');
-    fd.append('image', file, file.name || 'image.png');
-
+    fd.append('format','png'); fd.append('model','v1'); fd.append('image', file, file.name || 'image.png');
     const endpoint = CONFIG.MATTE_PROXY || CONFIG.PIXELCUT_DIRECT;
-    const headers = {
-      Accept:'application/json,text/plain,*/*',
-      'x-locale':'en'
-    };
-    if(!CONFIG.MATTE_PROXY && CONFIG.PIXELCUT_CLIENT_VERSION){
-      headers['x-client-version'] = CONFIG.PIXELCUT_CLIENT_VERSION;
-    }
-
+    const headers = { Accept:'application/json,text/plain,*/*', 'x-locale':'en' };
+    if(!CONFIG.MATTE_PROXY && CONFIG.PIXELCUT_CLIENT_VERSION) headers['x-client-version'] = CONFIG.PIXELCUT_CLIENT_VERSION;
     const res = await fetch(endpoint, {method:'POST', headers, body: fd});
-    if(!res.ok){
-      let err = null; try{ err = await res.json(); }catch{}
-      throw new Error(err?.message || `فشل (${res.status})`);
-    }
-
+    if(!res.ok){ let err=null; try{ err = await res.json(); }catch{} throw new Error(err?.message || `فشل (${res.status})`); }
     const ct = res.headers.get('content-type') || '';
-    let blob = null, ext = null;
+    let blob=null, ext=null;
     if(ct.includes('image/')) blob = await res.blob();
-    else{
-      const data = await res.json();
-      ext = findImg(data);
-      if(ext){
-        const r2 = await fetch(ext);
-        if(!r2.ok) throw new Error('تعذر تحميل النتيجة');
-        blob = await r2.blob();
-      }
-    }
+    else{ const data = await res.json(); ext = findImg(data); if(ext){ const r2 = await fetch(ext); if(!r2.ok) throw new Error('تعذر تحميل النتيجة'); blob = await r2.blob(); } }
     if(!blob) throw new Error('لا توجد نتيجة');
     return blob;
   };
-
-  const findImg = data => {
-    const ks = ['url','image','output','result','image_url','imageUrl','output_url','outputUrl','download_url','downloadUrl'];
-    for(const k of ks){ const v = data?.[k]; if(typeof v === 'string' && v.trim()) return v.trim(); }
-    for(const k of ks){ const v = data?.data?.[k]; if(typeof v === 'string' && v.trim()) return v.trim(); }
-    return null;
-  };
-
-  const adminUsers = async (tk, s, lim=500) => {
-    const d = await req('/rest/v1/rpc/admin_list_profiles', {
-      method:'POST', body: JSON.stringify({ p_search: s || null, p_limit: lim })
-    }, tk);
-    return Array.isArray(d) ? d : [];
-  };
-
-  const adminOps = async (tk, uid=null) => {
-    const d = await req('/rest/v1/rpc/admin_list_operations', {
-      method:'POST', body: JSON.stringify({ p_user_id: uid, p_limit: uid ? 200 : 100 })
-    }, tk);
-    return Array.isArray(d) ? d : [];
-  };
-
-  const adminUpdate = async (tk, uid, plan, lim, ban) => req('/rest/v1/rpc/admin_update_user', {
-    method:'POST',
-    body: JSON.stringify({ p_user_id: uid, p_plan: plan, p_daily_limit: Number(lim), p_is_banned: !!ban })
-  }, tk);
-
-  return {
-    login, signup, refresh, getUser, signout, forgot,
-    getProfile, fetchOps, countToday, saveOp, delOp,
-    resolveImg, upload, removeFiles, removeBg,
-    adminUsers, adminOps, adminUpdate
-  };
+  const findImg = data => { const ks = ['url','image','output','result','image_url','imageUrl','output_url','outputUrl','download_url','downloadUrl']; for(const k of ks){ const v = data?.[k]; if(typeof v==='string' && v.trim()) return v.trim(); } for(const k of ks){ const v = data?.data?.[k]; if(typeof v==='string' && v.trim()) return v.trim(); } return null; };
+  const adminUsers = async (tk, s, lim=500) => { const d = await req('/rest/v1/rpc/admin_list_profiles', { method:'POST', body: JSON.stringify({ p_search: s||null, p_limit: lim }) }, tk); return Array.isArray(d)?d:[]; };
+  const adminOps = async (tk, uid=null) => { const d = await req('/rest/v1/rpc/admin_list_operations', { method:'POST', body: JSON.stringify({ p_user_id: uid, p_limit: uid?200:100 }) }, tk); return Array.isArray(d)?d:[]; };
+  const adminUpdate = async (tk, uid, plan, lim, ban) => req('/rest/v1/rpc/admin_update_user', { method:'POST', body: JSON.stringify({ p_user_id: uid, p_plan: plan, p_daily_limit: Number(lim), p_is_banned: !!ban }) }, tk);
+  return { login, signup, refresh, getUser, signout, forgot, getProfile, fetchOps, countToday, saveOp, delOp, resolveImg, upload, removeFiles, removeBg, adminUsers, adminOps, adminUpdate };
 })();
 
 /* ========== AUTH ========== */
 const Auth = (() => {
   let session = null, profile = null;
-
-  const save = s => {
-    session = s;
-    if(s) localStorage.setItem(CONFIG.SESSION_KEY, JSON.stringify(s));
-    else localStorage.removeItem(CONFIG.SESSION_KEY);
-  };
-
-  const saved = () => {
-    try{ const r = localStorage.getItem(CONFIG.SESSION_KEY); return r ? JSON.parse(r) : null; }
-    catch{ localStorage.removeItem(CONFIG.SESSION_KEY); return null; }
-  };
-
+  const save = s => { session = s; if(s) localStorage.setItem(CONFIG.SESSION_KEY, JSON.stringify(s)); else localStorage.removeItem(CONFIG.SESSION_KEY); };
+  const saved = () => { try{ const r = localStorage.getItem(CONFIG.SESSION_KEY); return r?JSON.parse(r):null; }catch{ localStorage.removeItem(CONFIG.SESSION_KEY); return null; } };
   async function valid(){
     const s = session || saved();
     if(!s) return null;
     const exp = s.expires_at || 0;
     if(exp && Date.now() < exp - 60000){ session = s; return s; }
-    const r = await API.refresh(s);
-    save(r);
-    return r;
+    const r = await API.refresh(s); save(r); return r;
   }
-
-  async function doLogin(email, pwd){
-    const s = await API.login(email, pwd);
-    if(!s.user) s.user = await API.getUser(s);
-    if(!s.user) throw new Error('تعذر التحقق');
-    save(s);
-    profile = await API.getProfile(s.user.id, s.access_token);
-    return s;
-  }
-
-  async function doSignup(email, pwd, username){
-    const r = await API.signup(email, pwd, username);
-    if(r.needsConfirmation) return r;
-    if(!r.user) r.user = await API.getUser(r);
-    if(!r.user) throw new Error('تعذر الإنشاء');
-    save(r);
-    profile = await API.getProfile(r.user.id, r.access_token);
-    return r;
-  }
-
-  async function doLogout(show = true){
-    const s = await valid();
-    await API.signout(s);
-    save(null);
-    session = null; profile = null;
-    App.showAuth();
-    if(show) toast('تم تسجيل الخروج');
-  }
-
-  return {
-    valid, doLogin, doSignup, doLogout, save,
-    get session(){ return session; },
-    set session(s){ session = s; },
-    get profile(){ return profile; },
-    set profile(p){ profile = p; },
-    isDev(){ return profile?.role === 'developer'; },
-    isPro(){ return profile?.plan === 'pro'; }
-  };
+  async function doLogin(email, pwd){ const s = await API.login(email, pwd); if(!s.user) s.user = await API.getUser(s); if(!s.user) throw new Error('تعذر التحقق'); save(s); profile = await API.getProfile(s.user.id, s.access_token); return s; }
+  async function doSignup(email, pwd, username){ const r = await API.signup(email, pwd, username); if(r.needsConfirmation) return r; if(!r.user) r.user = await API.getUser(r); if(!r.user) throw new Error('تعذر الإنشاء'); save(r); profile = await API.getProfile(r.user.id, r.access_token); return r; }
+  async function doLogout(show = true){ const s = await valid(); await API.signout(s); save(null); session = null; profile = null; App.showAuth(); if(show) toast('تم تسجيل الخروج'); }
+  return { valid, doLogin, doSignup, doLogout, save, get session(){ return session; }, set session(s){ session = s; }, get profile(){ return profile; }, set profile(p){ profile = p; }, isDev(){ return profile?.role === 'developer'; }, isPro(){ return profile?.plan === 'pro'; } };
 })();
 
 /* ========== AUTH UI ========== */
 const AuthUI = (() => {
   let mode = 'login';
-
-  const setErr = (input, el, msg) => {
-    input.classList.toggle('bad', !!msg);
-    el.textContent = msg;
-    el.classList.toggle('show', !!msg);
-  };
-
-  const clearErr = () => {
-    ['username','email','password','confirm'].forEach(k => {
-      const i = $(k), e = $('err' + k[0].toUpperCase() + k.slice(1));
-      if(i) i.classList.remove('bad','ok');
-      if(e){ e.textContent = ''; e.classList.remove('show'); }
-    });
-  };
-
-  const msg = (txt, type='') => {
-    const m = $('authMsg');
-    if(!m) return;
-    m.className = 'msg show ' + type;
-    m.textContent = txt;
-  };
-
-  const clearMsg = () => {
-    const m = $('authMsg');
-    if(!m) return;
-    m.className = 'msg';
-    m.textContent = '';
-  };
-
+  const setErr = (input, el, msg) => { input.classList.toggle('bad', !!msg); el.textContent = msg; el.classList.toggle('show', !!msg); };
+  const clearErr = () => { ['username','email','password','confirm'].forEach(k => { const i = $(k), e = $('err'+k[0].toUpperCase()+k.slice(1)); if(i) i.classList.remove('bad','ok'); if(e){ e.textContent=''; e.classList.remove('show'); } }); };
+  const msg = (txt, type='') => { const m = $('authMsg'); if(!m) return; m.className = 'msg show ' + type; m.textContent = txt; };
+  const clearMsg = () => { const m = $('authMsg'); if(!m) return; m.className = 'msg'; m.textContent = ''; };
   const setMode = m => {
-    mode = m;
-    clearErr(); clearMsg();
+    mode = m; clearErr(); clearMsg();
     const reg = m === 'register';
-
     $('formTitle').textContent = reg ? 'أنشئ حسابك' : 'أهلًا بعودتك';
-    $('formSub').textContent = reg
-      ? 'ابدأ رحلتك الإبداعية في أقل من دقيقة'
-      : 'سجّل دخولك لمتابعة رحلتك';
-
+    $('formSub').textContent = reg ? 'ابدأ رحلتك الإبداعية في أقل من دقيقة' : 'سجّل دخولك لمتابعة رحلتك';
     $('fUsername').classList.toggle('hidden', !reg);
     $('fConfirm').classList.toggle('hidden', !reg);
     $('reqs').classList.toggle('hidden', !reg);
     $('strength').classList.toggle('hidden', !reg);
-
-    $('submitBtn').querySelector('.btn-text').textContent =
-      reg ? 'إنشاء الحساب' : 'تسجيل الدخول';
-
+    $('submitBtn').querySelector('.btn-text').textContent = reg ? 'إنشاء الحساب' : 'تسجيل الدخول';
     $('password').placeholder = reg ? '8 أحرف + رقم + حرف كبير' : '••••••••';
     $('password').setAttribute('autocomplete', reg ? 'new-password' : 'current-password');
-
     const st = document.getElementById('switchText');
     const sb = document.getElementById('switchBtn');
     if (st) st.textContent = reg ? 'لديك حساب بالفعل؟' : 'ليس لديك حساب؟';
     if (sb) sb.textContent = reg ? 'سجّل الدخول' : 'أنشئ حساباً';
-
-    updateReqs();
-    checkSubmit();
+    updateReqs(); checkSubmit();
   };
-
   const updateReqs = () => {
     if(mode !== 'register') return;
-    const p = $('password').value;
-    const c = $('confirm').value;
+    const p = $('password').value; const c = $('confirm').value;
     const { reqs, lvl, label } = checkPwd(p);
-    const match = c && c === p;
-    const all = {...reqs, match};
-    const bars = document.querySelector('.bars');
-    if(bars) bars.dataset.lvl = lvl;
-    const st = $('strengthTxt');
-    if(st) st.textContent = label;
-    document.querySelectorAll('.reqs li').forEach(li => {
-      li.classList.toggle('ok', !!all[li.dataset.r]);
-    });
+    const all = {...reqs, match: c && c === p};
+    const bars = document.querySelector('.bars'); if(bars) bars.dataset.lvl = lvl;
+    const st = $('strengthTxt'); if(st) st.textContent = label;
+    document.querySelectorAll('.reqs li').forEach(li => li.classList.toggle('ok', !!all[li.dataset.r]));
   };
-
   const checkSubmit = () => {
-    const email = $('email').value.trim();
-    const pwd = $('password').value;
+    const email = $('email').value.trim(); const pwd = $('password').value;
     const reg = mode === 'register';
     let ok = isEmailValid(email);
-    if(reg){
-      const { valid } = checkPwd(pwd);
-      ok = ok && valid;
-      ok = ok && $('username').value.trim().length >= 3;
-      ok = ok && $('confirm').value === pwd && $('confirm').value.length > 0;
-    }else{
-      ok = ok && pwd.length >= 1;
-    }
+    if(reg){ const { valid } = checkPwd(pwd); ok = ok && valid; ok = ok && $('username').value.trim().length >= 3; ok = ok && $('confirm').value === pwd && $('confirm').value.length > 0; }
+    else { ok = ok && pwd.length >= 1; }
     $('submitBtn').disabled = !ok;
   };
-
-  const eye = (input, btn) => {
-    const v = input.type === 'text';
-    input.type = v ? 'password' : 'text';
-    btn.style.color = v ? '' : 'var(--sand)';
-  };
-
+  const eye = (input, btn) => { const v = input.type === 'text'; input.type = v?'password':'text'; btn.style.color = v ? '' : 'var(--sand)'; };
   function translateError(e){
     const m = String(e?.message || '').toLowerCase();
     if(m.includes('invalid login') || m.includes('invalid credentials')) return 'البريد أو كلمة المرور غير صحيحة';
@@ -583,446 +225,585 @@ const AuthUI = (() => {
     if(e?.status === 0) return 'فشل الاتصال بالإنترنت';
     return e?.message || 'حدث خطأ';
   }
-
   function init(){
     setMode('login');
-    document.getElementById('switchBtn')?.addEventListener('click', () => {
-      setMode(mode === 'login' ? 'register' : 'login');
-    });
+    document.getElementById('switchBtn')?.addEventListener('click', () => setMode(mode === 'login' ? 'register' : 'login'));
     $('eyePass').addEventListener('click', () => eye($('password'), $('eyePass')));
     $('eyeConfirm').addEventListener('click', () => eye($('confirm'), $('eyeConfirm')));
-
     const emailI = $('email');
-    emailI.addEventListener('input', () => {
-      if(isEmailValid(emailI.value.trim())){
-        emailI.classList.add('ok');
-        emailI.classList.remove('bad');
-      }else{
-        emailI.classList.remove('ok');
-      }
-      checkSubmit();
-    });
-
-    const pwdI = $('password');
-    pwdI.addEventListener('input', () => { updateReqs(); checkSubmit(); });
-    const confirmI = $('confirm');
-    confirmI.addEventListener('input', () => { updateReqs(); checkSubmit(); });
+    emailI.addEventListener('input', () => { if(isEmailValid(emailI.value.trim())){ emailI.classList.add('ok'); emailI.classList.remove('bad'); } else emailI.classList.remove('ok'); checkSubmit(); });
+    $('password').addEventListener('input', () => { updateReqs(); checkSubmit(); });
+    $('confirm').addEventListener('input', () => { updateReqs(); checkSubmit(); });
     $('username').addEventListener('input', checkSubmit);
-
     $('forgotBtn').addEventListener('click', async () => {
       const email = emailI.value.trim();
-      if(!isEmailValid(email)){
-        msg('أدخل بريدك الإلكتروني أولًا', 'err');
-        return;
-      }
-      try{
-        await API.forgot(email);
-        msg('تم إرسال رابط إعادة التعيين إلى بريدك ✓', 'ok');
-      }catch(e){ msg(translateError(e), 'err'); }
+      if(!isEmailValid(email)){ msg('أدخل بريدك الإلكتروني أولًا', 'err'); return; }
+      try{ await API.forgot(email); msg('تم إرسال رابط إعادة التعيين إلى بريدك ✓', 'ok'); }catch(e){ msg(translateError(e), 'err'); }
     });
-
     $('authForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      clearErr(); clearMsg();
-      const email = emailI.value.trim();
-      const pwd = pwdI.value;
-      if(!isEmailValid(email)){
-        setErr(emailI, $('errEmail'), 'بريد غير صحيح');
-        return;
-      }
+      e.preventDefault(); clearErr(); clearMsg();
+      const email = emailI.value.trim(); const pwd = $('password').value;
+      if(!isEmailValid(email)){ setErr(emailI, $('errEmail'), 'بريد غير صحيح'); return; }
       if(mode === 'register'){
         const un = $('username').value.trim();
-        if(!/^[a-zA-Z0-9_]{3,20}$/.test(un)){
-          setErr($('username'), $('errUsername'), 'أحرف وأرقام و _ فقط (3-20)');
-          return;
-        }
+        if(!/^[a-zA-Z0-9_]{3,20}$/.test(un)){ setErr($('username'), $('errUsername'), 'أحرف وأرقام و _ فقط (3-20)'); return; }
         const { valid } = checkPwd(pwd);
-        if(!valid){
-          setErr(pwdI, $('errPassword'), 'كلمة المرور لا تحقق الشروط');
-          return;
-        }
-        if($('confirm').value !== pwd){
-          setErr(confirmI, $('errConfirm'), 'كلمتا المرور غير متطابقتين');
-          return;
-        }
-      }else{
-        if(pwd.length < 1){
-          setErr(pwdI, $('errPassword'), 'أدخل كلمة المرور');
-          return;
-        }
-      }
-
-      const btn = $('submitBtn');
-      const txt = btn.querySelector('.btn-text');
-      const original = txt.textContent;
-      btn.disabled = true;
-      txt.textContent = mode === 'login' ? 'جاري الدخول...' : 'جاري الإنشاء...';
-
+        if(!valid){ setErr($('password'), $('errPassword'), 'كلمة المرور لا تحقق الشروط'); return; }
+        if($('confirm').value !== pwd){ setErr($('confirm'), $('errConfirm'), 'كلمتا المرور غير متطابقتين'); return; }
+      } else { if(pwd.length < 1){ setErr($('password'), $('errPassword'), 'أدخل كلمة المرور'); return; } }
+      const btn = $('submitBtn'); const txt = btn.querySelector('.btn-text'); const original = txt.textContent;
+      btn.disabled = true; txt.textContent = mode === 'login' ? 'جاري الدخول...' : 'جاري الإنشاء...';
       try{
         if(mode === 'login'){
           await Auth.doLogin(email, pwd);
-          if(Auth.profile?.is_banned){
-            await Auth.doLogout(false);
-            msg('هذا الحساب موقوف', 'err');
-            return;
-          }
+          if(Auth.profile?.is_banned){ await Auth.doLogout(false); msg('هذا الحساب موقوف', 'err'); return; }
           toast(`أهلًا ${Auth.profile?.username || ''} 🏜️`, 'ok');
           await App.enterApp();
-        }else{
+        } else {
           const r = await Auth.doSignup(email, pwd, $('username').value.trim());
-          if(r.needsConfirmation){
-            msg('تم إنشاء الحساب ✓\nتحقق من بريدك الإلكتروني لتفعيل الحساب.', 'ok');
-            return;
-          }
-          toast('تم إنشاء الحساب 🏜️', 'ok');
-          await App.enterApp();
+          if(r.needsConfirmation){ msg('تم إنشاء الحساب ✓\nتحقق من بريدك الإلكتروني لتفعيل الحساب.', 'ok'); return; }
+          toast('تم إنشاء الحساب 🏜️', 'ok'); await App.enterApp();
         }
-        ['email','password','username','confirm'].forEach(k => {
-          const el = $(k); if(el) el.value = '';
-        });
-      }catch(err){
-        msg(translateError(err), 'err');
-      }finally{
-        btn.disabled = false;
-        txt.textContent = original;
-        checkSubmit();
-      }
+        ['email','password','username','confirm'].forEach(k => { const el = $(k); if(el) el.value = ''; });
+      }catch(err){ msg(translateError(err), 'err'); }
+      finally{ btn.disabled = false; txt.textContent = original; checkSubmit(); }
     });
   }
-
   return { init, checkSubmit };
 })();
 
-/* ========== BACKGROUND CHANGER ========== */
-const BgChanger = (() => {
-  let sourceBlob = null;
-  let sourceImg = null;
-  let currentBg = null;
+/* ========== EDITOR ========== */
+const Editor = (() => {
+  let originalImage = null;
+  let currentImage = null;      // used for canvas
+  let bgRemoved = false;        // has user clicked remove bg?
+  let fgCanvas = document.createElement('canvas');
+  let mainCanvas = null;
+  let strokes = [];
+  let texts = [];
+  let adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, gray:0, sepia:0, invert:0 };
+  let currentTool = 'move';
+  let brushColor = '#e0b884';
+  let brushSize = 8;
+  let brushOpacity = 1;
+  let currentBg = { type:'original' };   // start with original
   let bgImage = null;
-  let bgColor = '#e0b884';
-  let opacity = 1;
-  let scale = 1;
-  let offsetX = 0;
-  let offsetY = 0;
-  let previewScale = 1;
+  let bgColorValue = '#e0b884';
+  let drawing = false;
+  let currentStroke = null;
+  let zoom = 1;
   let initDone = false;
-  let dragging = false;
-  let dragStart = { x: 0, y: 0 };
-  let startOffset = { x: 0, y: 0 };
   let finalBlob = null;
+  let imgScale = 1;
+  let imgAlpha = 1;
 
   const $c = id => document.getElementById(id);
 
   function init(){
-    if(initDone) return;
+    if (initDone) return;
     initDone = true;
+    mainCanvas = $c('edMainCanvas');
 
     /* Presets */
-    const presetsWrap = $c('bgPresets');
+    const presetsWrap = $c('edPresets');
     if (presetsWrap){
       PRESET_BACKGROUNDS.forEach(url => {
         const el = document.createElement('div');
-        el.className = 'bg-preset-item';
-        el.dataset.url = url;
-        el.innerHTML = `<img src="${url}" alt="" loading="lazy" crossorigin="anonymous"><div class="bg-check"></div>`;
-        el.addEventListener('click', () => selectPreset(url, el));
+        el.className = 'ed-preset';
+        el.innerHTML = `<img src="${url}" alt="" loading="lazy" crossorigin="anonymous">`;
+        el.addEventListener('click', () => {
+          document.querySelectorAll('.ed-preset').forEach(x => x.classList.remove('active'));
+          el.classList.add('active');
+          setBg({ type:'preset', value:url });
+        });
         presetsWrap.appendChild(el);
       });
     }
-    if ($c('bgCount')) $c('bgCount').textContent = PRESET_BACKGROUNDS.length;
 
-    /* Colors */
-    const swWrap = $c('bgColorSwatches');
-    if (swWrap){
+    /* Brush swatches */
+    const bs = $c('edBrushSwatches');
+    if (bs){
+      BRUSH_SWATCHES.forEach(c => {
+        const s = document.createElement('div');
+        s.className = 'ed-swatch';
+        s.style.background = c;
+        s.addEventListener('click', () => {
+          brushColor = c;
+          $c('edBrushColor').value = c;
+          document.querySelectorAll('#edBrushSwatches .ed-swatch').forEach(x => x.classList.remove('active'));
+          s.classList.add('active');
+        });
+        bs.appendChild(s);
+      });
+    }
+
+    /* Bg color swatches */
+    const bgs = $c('edBgSwatches');
+    if (bgs){
       BG_COLOR_SWATCHES.forEach(c => {
         const s = document.createElement('div');
-        s.className = 'bg-swatch';
+        s.className = 'ed-swatch';
         s.style.background = c;
-        s.dataset.color = c;
         s.addEventListener('click', () => {
-          $c('bgColorPicker').value = c;
-          bgColor = c;
-          document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
+          bgColorValue = c;
+          $c('edBgColor').value = c;
+          document.querySelectorAll('#edBgSwatches .ed-swatch').forEach(x => x.classList.remove('active'));
           s.classList.add('active');
           setBg({ type:'color', value:c });
         });
-        swWrap.appendChild(s);
+        bgs.appendChild(s);
       });
     }
 
-    /* Tabs */
-    document.querySelectorAll('.bg-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        const mode = tab.dataset.bgmode;
-        document.querySelectorAll('.bg-tab').forEach(t => t.classList.toggle('active', t === tab));
-        ['preset','upload','color'].forEach(m => {
-          const id = m === 'preset' ? 'bgPresetContent' : (m === 'upload' ? 'bgUploadContentTab' : 'bgColorContentTab');
-          $c(id)?.classList.toggle('hidden', m !== mode);
-        });
+    /* Tools */
+    document.querySelectorAll('.ed-tool').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ed-tool').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTool = btn.dataset.tool;
+        updateCanvasCursor();
       });
     });
 
-    /* Upload background */
-    const uz = $c('bgUploadZone');
-    const fi = $c('bgFileInput');
-    $c('bgChooseBtn')?.addEventListener('click', e => { e.stopPropagation(); fi.click(); });
+    /* Tabs */
+    document.querySelectorAll('.ed-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const t = tab.dataset.tab;
+        document.querySelectorAll('.ed-tab').forEach(x => x.classList.toggle('active', x === tab));
+        document.querySelectorAll('.ed-tab-content').forEach(c => c.classList.toggle('hidden', c.dataset.content !== t));
+      });
+    });
+
+    /* Bg subtabs */
+    document.querySelectorAll('.ed-subtab').forEach(sub => {
+      sub.addEventListener('click', () => {
+        const m = sub.dataset.bgmode;
+        document.querySelectorAll('.ed-subtab').forEach(x => x.classList.toggle('active', x === sub));
+        document.querySelectorAll('.ed-bg-content').forEach(c => c.classList.toggle('hidden', c.dataset.bgcontent !== m));
+        if (m === 'transparent') setBg({ type:'checker' });
+        if (m === 'original') setBg({ type:'original' });
+      });
+    });
+
+    /* Brush */
+    $c('edBrushSize')?.addEventListener('input', e => { brushSize = +e.target.value; $c('edBrushSizeVal').textContent = brushSize; });
+    $c('edBrushColor')?.addEventListener('input', e => { brushColor = e.target.value; });
+    $c('edBrushOpacity')?.addEventListener('input', e => { brushOpacity = e.target.value/100; $c('edBrushOpacityVal').textContent = e.target.value + '%'; });
+
+    /* Adjustments */
+    const adjMap = [
+      ['edBrightness','brightness','edBrightnessVal','%'],
+      ['edContrast','contrast','edContrastVal','%'],
+      ['edSaturation','saturation','edSaturationVal','%'],
+      ['edHue','hue','edHueVal','°'],
+      ['edBlur','blur','edBlurVal','px'],
+      ['edGray','gray','edGrayVal','%'],
+      ['edSepia','sepia','edSepiaVal','%'],
+      ['edInvert','invert','edInvertVal','%']
+    ];
+    adjMap.forEach(([id, key, valId, suffix]) => {
+      $c(id)?.addEventListener('input', e => {
+        const v = +e.target.value;
+        adjustments[key] = v;
+        if ($c(valId)) $c(valId).textContent = v + suffix;
+        render();
+      });
+    });
+
+    /* Image scale + alpha */
+    $c('edScale')?.addEventListener('input', e => {
+      imgScale = e.target.value / 100;
+      $c('edScaleVal').textContent = e.target.value + '%';
+      render();
+    });
+    $c('edAlpha')?.addEventListener('input', e => {
+      imgAlpha = e.target.value / 100;
+      $c('edAlphaVal').textContent = e.target.value + '%';
+      render();
+    });
+
+    /* Undo / Clear */
+    $c('edUndo')?.addEventListener('click', () => {
+      if (strokes.length){ strokes.pop(); render(); toast('تم التراجع'); }
+      else if (texts.length){ texts.pop(); render(); toast('تم التراجع'); }
+      else toast('لا يوجد شي للتراجع', 'err');
+    });
+    $c('edClearDraw')?.addEventListener('click', () => {
+      if (!strokes.length && !texts.length) return toast('لا يوجد رسم أو نص', 'err');
+      strokes = []; texts = []; render(); toast('تم مسح الرسم والنصوص', 'ok');
+    });
+
+    /* Reset adjustments */
+    $c('edResetAdjust')?.addEventListener('click', () => {
+      adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, gray:0, sepia:0, invert:0 };
+      ['Brightness','Contrast','Saturation','Hue','Blur','Gray','Sepia','Invert'].forEach(k => {
+        const id = 'ed'+k; const idV = id+'Val';
+        const defaults = { Brightness:100, Contrast:100, Saturation:100, Hue:0, Blur:0, Gray:0, Sepia:0, Invert:0 };
+        const suffixes = { Brightness:'%', Contrast:'%', Saturation:'%', Hue:'°', Blur:'px', Gray:'%', Sepia:'%', Invert:'%' };
+        if($c(id)) $c(id).value = defaults[k];
+        if($c(idV)) $c(idV).textContent = defaults[k] + suffixes[k];
+      });
+      render();
+      toast('تم إعادة التعديلات', 'ok');
+    });
+
+    /* Add text */
+    $c('edAddText')?.addEventListener('click', () => {
+      const text = $c('edTextInput').value.trim();
+      if (!text) return toast('اكتب نصاً أولاً', 'err');
+      const base = currentImage || originalImage;
+      if (!base) return;
+      const size = +$c('edTextSize').value;
+      const color = $c('edTextColor').value;
+      const font = $c('edTextFont').value;
+      const shadow = $c('edTextShadow').value;
+      texts.push({ text, x: base.naturalWidth/2, y: base.naturalHeight/2, size, color, font, shadow });
+      $c('edTextInput').value = '';
+      render();
+      toast('تمت إضافة النص ✓', 'ok');
+    });
+    $c('edTextSize')?.addEventListener('input', e => { $c('edTextSizeVal').textContent = e.target.value + 'px'; });
+
+    /* Bg upload */
+    const uz = $c('edBgUploadZone');
+    const fi = $c('edBgFile');
+    $c('edBgChoose')?.addEventListener('click', e => { e.stopPropagation(); fi.click(); });
     uz?.addEventListener('click', () => fi.click());
     ['dragenter','dragover'].forEach(n => uz?.addEventListener(n, e => { e.preventDefault(); uz.classList.add('drag'); }));
     ['dragleave','drop'].forEach(n => uz?.addEventListener(n, e => { e.preventDefault(); uz.classList.remove('drag'); }));
-    uz?.addEventListener('drop', e => {
-      const f = e.dataTransfer?.files?.[0];
-      if (f) handleBgUpload(f);
-    });
-    fi?.addEventListener('change', () => {
-      const f = fi.files?.[0]; fi.value = '';
-      if (f) handleBgUpload(f);
-    });
+    uz?.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) handleBgUpload(f); });
+    fi?.addEventListener('change', () => { const f = fi.files?.[0]; fi.value = ''; if (f) handleBgUpload(f); });
 
-    /* Color picker */
-    $c('bgColorPicker')?.addEventListener('input', e => {
-      bgColor = e.target.value;
-      setBg({ type:'color', value:bgColor });
-    });
+    /* Bg color */
+    $c('edBgColor')?.addEventListener('input', e => { bgColorValue = e.target.value; setBg({ type:'color', value:bgColorValue }); });
 
-    /* Sliders */
-    $c('bgScale')?.addEventListener('input', e => {
-      scale = e.target.value / 100;
-      $c('bgScaleVal').textContent = e.target.value + '%';
-      drawPreview();
-    });
-    $c('bgOpacity')?.addEventListener('input', e => {
-      opacity = e.target.value / 100;
-      $c('bgOpacityVal').textContent = e.target.value + '%';
-      drawPreview();
-    });
-
-    /* Reset button — return to upload stage */
-    $c('bgResetBtn')?.addEventListener('click', () => {
-      reset();
-      toast('ابدأ صورة جديدة', 'ok');
-    });
-
-    /* Apply */
-    $c('bgApplyBtn')?.addEventListener('click', applyBackground);
-
-    /* Download button */
-    $c('bgDownloadBtn')?.addEventListener('click', () => {
-      if (!finalBlob) return toast('لا يوجد ملف محفوظ', 'err');
-      downloadBlob(finalBlob, `removebg-bg-${Date.now()}.png`);
-      toast('تم التحميل ✓', 'ok');
-    });
-
-    /* Canvas drag */
-    const canvas = $c('bgEditCanvas');
-    if (canvas){
-      canvas.addEventListener('pointerdown', onPointerDown);
-      canvas.addEventListener('pointermove', onPointerMove);
-      canvas.addEventListener('pointerup', onPointerUp);
-      canvas.addEventListener('pointercancel', onPointerUp);
-      canvas.addEventListener('wheel', onWheel, { passive: false });
+    /* Canvas events */
+    if (mainCanvas){
+      mainCanvas.addEventListener('pointerdown', onPointerDown);
+      mainCanvas.addEventListener('pointermove', onPointerMove);
+      mainCanvas.addEventListener('pointerup', onPointerUp);
+      mainCanvas.addEventListener('pointercancel', onPointerUp);
     }
 
-    /* Quick upload */
-    initQuickUpload();
+    /* Zoom */
+    $c('edZoomIn')?.addEventListener('click', () => { zoom = Math.min(3, zoom + .1); applyZoom(); });
+    $c('edZoomOut')?.addEventListener('click', () => { zoom = Math.max(.3, zoom - .1); applyZoom(); });
+    $c('edZoomReset')?.addEventListener('click', () => { zoom = 1; applyZoom(); });
+
+    /* Save / Download / New */
+    $c('edSaveBtn')?.addEventListener('click', applySave);
+    $c('edDownloadBtn')?.addEventListener('click', () => {
+      if (!finalBlob) return toast('احفظ أولاً', 'err');
+      downloadBlob(finalBlob, `removebg-edited-${Date.now()}.png`);
+      toast('تم التحميل ✓', 'ok');
+    });
+    $c('edNewBtn')?.addEventListener('click', () => { reset(); toast('ابدأ صورة جديدة'); });
+    $c('edBackStudio')?.addEventListener('click', () => App.switchView('studio'));
+
+    /* Remove BG button */
+    $c('edRemoveBgBtn')?.addEventListener('click', removeBackgroundInEditor);
+
+    /* Start flow */
+    initStartFlow();
   }
 
-  /* ===== QUICK UPLOAD ===== */
-  function initQuickUpload(){
-    const chooseBtn = $c('bgQuickChoose');
-    const fileInput = $c('bgQuickFile');
-    const uploadStage = $c('bgUploadStage');
-    if (!chooseBtn || !fileInput) return;
-
-    chooseBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      fileInput.click();
-    });
-
-    uploadStage?.addEventListener('click', e => {
-      if (e.target.closest('.bg-upload-loading')) return;
+  function initStartFlow(){
+    const startBtn = $c('edStartBtn');
+    const fi = $c('edQuickFile');
+    const stage = $c('edStartStage');
+    if (!startBtn || !fi) return;
+    startBtn.addEventListener('click', e => { e.stopPropagation(); fi.click(); });
+    stage?.addEventListener('click', e => {
+      if (e.target.closest('.ed-start-loading')) return;
       if (e.target.closest('button')) return;
-      fileInput.click();
+      fi.click();
     });
-
-    ['dragenter','dragover'].forEach(n => uploadStage?.addEventListener(n, e => {
+    ['dragenter','dragover'].forEach(n => stage?.addEventListener(n, e => {
       e.preventDefault();
-      uploadStage.style.borderColor = 'var(--sand)';
-      uploadStage.style.boxShadow = '0 0 0 3px rgba(224,184,132,.15), 0 30px 80px rgba(0,0,0,.5), 0 0 60px rgba(224,184,132,.15)';
+      stage.style.borderColor = 'var(--sand)';
+      stage.style.boxShadow = '0 0 0 4px rgba(224,184,132,.15), 0 30px 80px rgba(0,0,0,.5), 0 0 60px rgba(224,184,132,.15)';
     }));
-    ['dragleave','drop'].forEach(n => uploadStage?.addEventListener(n, e => {
+    ['dragleave','drop'].forEach(n => stage?.addEventListener(n, e => {
       e.preventDefault();
-      uploadStage.style.borderColor = '';
-      uploadStage.style.boxShadow = '';
+      stage.style.borderColor = '';
+      stage.style.boxShadow = '';
     }));
-    uploadStage?.addEventListener('drop', e => {
-      const f = e.dataTransfer?.files?.[0];
-      if (f) handleQuickUpload(f);
-    });
-
-    fileInput.addEventListener('change', () => {
-      const f = fileInput.files?.[0];
-      fileInput.value = '';
-      if (!f) return;
-      handleQuickUpload(f);
-    });
+    stage?.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) startEditorWithFile(f); });
+    fi.addEventListener('change', () => { const f = fi.files?.[0]; fi.value = ''; if (f) startEditorWithFile(f); });
   }
 
-  async function handleQuickUpload(file){
-    const uploadStage = $c('bgUploadStage');
-    const editorStage = $c('bgEditorStage');
-    const content = $c('bgUploadContent');
-    const loading = $c('bgUploadLoading');
+  async function startEditorWithFile(file){
+    const stage = $c('edStartStage');
+    const editor = $c('edEditorStage');
+    const loading = $c('edStartLoading');
 
     const allowed = ['image/png','image/jpeg','image/webp'];
     if (!allowed.includes(file.type)) return toast('صيغة غير مدعومة', 'err');
-    if (file.size > (CONFIG.MAX_FILE_MB * 1024 * 1024)) {
-      return toast(`الحجم > ${CONFIG.MAX_FILE_MB}MB`, 'err');
+    if (file.size > (CONFIG.MAX_FILE_MB * 1024 * 1024)) return toast(`الحجم > ${CONFIG.MAX_FILE_MB}MB`, 'err');
+
+    loading?.classList.remove('hidden');
+    try {
+      await loadOriginal(file);
+      stage?.classList.add('hidden');
+      editor?.classList.remove('hidden');
+      $c('edDownloadBtn')?.classList.add('hidden');
+      finalBlob = null;
+      toast('الصورة جاهزة ✓ عدّلها كما تشاء', 'ok');
+    } catch(e){
+      console.error(e);
+      toast(e.message || 'فشل التحميل', 'err');
+    } finally {
+      loading?.classList.add('hidden');
+    }
+  }
+
+  function loadOriginal(file){
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        originalImage = img;
+        currentImage = img;         // ✅ original as-is
+        bgRemoved = false;
+        strokes = []; texts = [];
+        currentBg = { type:'original' };
+        adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, gray:0, sepia:0, invert:0 };
+        imgScale = 1; imgAlpha = 1;
+        if ($c('edScale')) $c('edScale').value = 100;
+        if ($c('edAlpha')) $c('edAlpha').value = 100;
+        if ($c('edScaleVal')) $c('edScaleVal').textContent = '100%';
+        if ($c('edAlphaVal')) $c('edAlphaVal').textContent = '100%';
+        render();
+        applyZoom();
+        resolve();
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  /* ===== Remove BG inside editor ===== */
+  async function removeBackgroundInEditor(){
+    const btn = $c('edRemoveBgBtn');
+    const canvas = $c('edMainCanvas');
+    const loading = $c('edCanvasLoading');
+    const loadingText = $c('edCanvasLoadingText');
+    const base = currentImage || originalImage;
+    if (!base) return toast('ارفع صورة أولاً', 'err');
+
+    const s = await Auth.valid();
+    if (!s?.access_token || !s?.user?.id){ toast('انتهت الجلسة', 'err'); App.showAuth(); return; }
+    Auth.session = s;
+    if (!Auth.profile) Auth.profile = await API.getProfile(s.user.id, s.access_token);
+    if (Auth.profile?.is_banned) return toast('الحساب موقوف', 'err');
+
+    if (!Auth.isPro()){
+      const today = await API.countToday(s.access_token, s.user.id).catch(()=>0);
+      const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
+      if (lim > 0 && today >= lim) return toast(`وصلت للحد اليومي (${lim})`, 'err');
     }
 
-    content?.classList.add('hidden');
+    if (btn) btn.disabled = true;
+    if (loadingText) loadingText.textContent = 'جاري إزالة الخلفية...';
     loading?.classList.remove('hidden');
 
     try {
-      const s = await Auth.valid();
-      if (!s?.access_token || !s?.user?.id){
-        toast('انتهت الجلسة', 'err'); App.showAuth(); return;
-      }
-      Auth.session = s;
-      if (!Auth.profile) Auth.profile = await API.getProfile(s.user.id, s.access_token);
-      if (Auth.profile?.is_banned) {
-        content?.classList.remove('hidden');
-        loading?.classList.add('hidden');
-        return toast('الحساب موقوف', 'err');
-      }
+      /* Convert base image to PNG blob */
+      const c = document.createElement('canvas');
+      c.width = base.naturalWidth;
+      c.height = base.naturalHeight;
+      c.getContext('2d').drawImage(base, 0, 0);
+      const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+      const file = new File([blob], 'source.png', { type: 'image/png' });
 
-      if (!Auth.isPro()){
-        const today = await API.countToday(s.access_token, s.user.id).catch(()=>0);
-        const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
-        if (lim > 0 && today >= lim){
-          content?.classList.remove('hidden');
-          loading?.classList.add('hidden');
-          return toast(`وصلت للحد اليومي (${lim})`, 'err');
-        }
-      }
+      const origPath = await API.upload(s.access_token, s.user.id, file, 'orig').catch(()=>null);
+      const resultBlob = await API.removeBg(file);
+      const resPath = await API.upload(s.access_token, s.user.id, resultBlob, 'res').catch(()=>null);
+      if (origPath && resPath) await API.saveOp(s.access_token, origPath, resPath).catch(()=>{});
 
-      const orig = await API.upload(s.access_token, s.user.id, file, 'orig');
-      const blob = await API.removeBg(file);
-      const res = await API.upload(s.access_token, s.user.id, blob, 'res');
-      await API.saveOp(s.access_token, orig, res).catch(()=>{});
+      /* Load processed */
+      await new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(resultBlob);
+        const img = new Image();
+        img.onload = () => { currentImage = img; bgRemoved = true; render(); resolve(); };
+        img.onerror = reject;
+        img.src = url;
+      });
 
-      await setSource(blob);
-
-      uploadStage?.classList.add('hidden');
-      editorStage?.classList.remove('hidden');
-      $c('bgDownloadBtn')?.classList.add('hidden');
-      finalBlob = null;
+      /* Switch to transparent after removal */
+      currentBg = { type:'checker' };
+      document.querySelectorAll('.ed-subtab').forEach(x => x.classList.toggle('active', x.dataset.bgmode === 'transparent'));
+      document.querySelectorAll('.ed-bg-content').forEach(c => c.classList.toggle('hidden', c.dataset.bgcontent !== 'transparent'));
+      render();
 
       if (App.refreshUsage) App.refreshUsage();
-      toast('تمت إزالة الخلفية ✓ اختر خلفية جديدة', 'ok');
-    } catch (e) {
+      toast('تمت إزالة الخلفية ✓ اختر خلفية جديدة أو اكتب', 'ok');
+    } catch(e){
       console.error(e);
-      content?.classList.remove('hidden');
+      toast(e.message || 'فشلت العملية', 'err');
+    } finally {
+      if (btn) btn.disabled = false;
       loading?.classList.add('hidden');
-      toast(e.message || 'فشلت المعالجة', 'err');
     }
   }
 
-  /* ===== POINTER DRAG ===== */
+  function updateCanvasCursor(){
+    if (!mainCanvas) return;
+    mainCanvas.classList.remove('tool-brush','tool-eraser','tool-text','tool-picker','tool-move');
+    mainCanvas.classList.add('tool-' + currentTool);
+  }
+  function applyZoom(){
+    if (mainCanvas) mainCanvas.style.transform = `scale(${zoom})`;
+    const el = $c('edZoomVal'); if (el) el.textContent = Math.round(zoom*100) + '%';
+  }
+
+  function getPointer(e){
+    const canvas = mainCanvas;
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width;
+    const sy = canvas.height / rect.height;
+    return { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy };
+  }
+
   function onPointerDown(e){
-    if (!sourceImg) return;
-    dragging = true;
-    dragStart = { x: e.clientX, y: e.clientY };
-    startOffset = { x: offsetX, y: offsetY };
-    e.target.setPointerCapture?.(e.pointerId);
-    e.target.classList.add('dragging');
+    const base = currentImage || originalImage;
+    if (!base) return;
+    const p = getPointer(e);
+    if (currentTool === 'picker'){
+      try{
+        const ctx = mainCanvas.getContext('2d');
+        const d = ctx.getImageData(Math.round(p.x), Math.round(p.y), 1, 1).data;
+        const hex = '#' + [d[0],d[1],d[2]].map(x => x.toString(16).padStart(2,'0')).join('');
+        brushColor = hex;
+        $c('edBrushColor').value = hex;
+        toast('اللون: ' + hex, 'ok');
+      }catch{}
+      return;
+    }
+    if (currentTool === 'text'){
+      const text = $c('edTextInput').value.trim() || 'نص';
+      const size = +$c('edTextSize').value;
+      const color = $c('edTextColor').value;
+      const font = $c('edTextFont').value;
+      const shadow = $c('edTextShadow').value;
+      texts.push({ text, x:p.x, y:p.y, size, color, font, shadow });
+      render();
+      toast('تمت إضافة النص');
+      return;
+    }
+    if (currentTool === 'brush' || currentTool === 'eraser'){
+      drawing = true;
+      currentStroke = { tool: currentTool, color: brushColor, size: brushSize, opacity: brushOpacity, points: [p] };
+      mainCanvas.classList.add('dragging');
+      try{ mainCanvas.setPointerCapture(e.pointerId); }catch{}
+    }
   }
   function onPointerMove(e){
-    if (!dragging || !sourceImg) return;
-    const canvas = $c('bgEditCanvas');
-    const rect = canvas.getBoundingClientRect();
-    const dx = (e.clientX - dragStart.x) * (canvas.width / rect.width);
-    const dy = (e.clientY - dragStart.y) * (canvas.height / rect.height);
-    offsetX = startOffset.x + dx;
-    offsetY = startOffset.y + dy;
-    drawPreview();
+    if (!drawing || !currentStroke) return;
+    const p = getPointer(e);
+    currentStroke.points.push(p);
+    render();
   }
   function onPointerUp(e){
-    dragging = false;
-    e.target.classList.remove('dragging');
-  }
-  function onWheel(e){
-    if (!sourceImg) return;
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.05 : 0.05;
-    scale = Math.max(0.3, Math.min(3, scale + delta));
-    const pct = Math.round(scale * 100);
-    if($c('bgScale')) $c('bgScale').value = pct;
-    if($c('bgScaleVal')) $c('bgScaleVal').textContent = pct + '%';
-    drawPreview();
-  }
-
-  /* ===== BACKGROUND SELECT ===== */
-  function setBg(bg){
-    currentBg = bg;
-    if (bg.type === 'preset'){
-      bgImage = new Image();
-      bgImage.crossOrigin = 'anonymous';
-      bgImage.onload = drawPreview;
-      bgImage.onerror = () => toast('تعذر تحميل الخلفية', 'err');
-      bgImage.src = bg.value;
-    } else {
-      bgImage = null;
+    if (drawing && currentStroke){
+      strokes.push(currentStroke);
+      currentStroke = null;
+      drawing = false;
+      mainCanvas.classList.remove('dragging');
     }
-    drawPreview();
   }
 
-  function selectPreset(url, el){
-    document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
-    el.classList.add('active');
-    setBg({ type:'preset', value:url });
-  }
+  function render(){
+    const base = currentImage || originalImage;
+    if (!base || !mainCanvas) return;
 
-  function handleBgUpload(file){
-    if (!file.type.startsWith('image/')) return toast('صيغة غير مدعومة', 'err');
-    if (file.size > 10 * 1024 * 1024) return toast('الحجم > 10MB', 'err');
-    const url = URL.createObjectURL(file);
-    bgImage = new Image();
-    bgImage.onload = () => {
-      currentBg = { type:'upload', value:file };
-      drawPreview();
-    };
-    bgImage.src = url;
-    toast('تم تحميل الخلفية ✓', 'ok');
-  }
+    const W = base.naturalWidth;
+    const H = base.naturalHeight;
+    mainCanvas.width = W;
+    mainCanvas.height = H;
 
-  /* ===== DRAW PREVIEW ===== */
-  function drawPreview(){
-    const canvas = $c('bgEditCanvas');
-    if (!canvas) return;
-    if (!sourceImg) return;
+    /* Foreground */
+    fgCanvas.width = W;
+    fgCanvas.height = H;
+    const fg = fgCanvas.getContext('2d');
+    fg.clearRect(0,0,W,H);
 
-    const ctx = canvas.getContext('2d');
-    const maxW = 500, maxH = 500;
-    previewScale = Math.min(maxW / sourceImg.width, maxH / sourceImg.height, 1);
-    canvas.width = Math.round(sourceImg.width * previewScale);
-    canvas.height = Math.round(sourceImg.height * previewScale);
+    const b = adjustments.brightness;
+    const c = adjustments.contrast;
+    const s = adjustments.saturation;
+    const h = adjustments.hue;
+    const blur = adjustments.blur;
+    const gray = adjustments.gray;
+    const sepia = adjustments.sepia;
+    const invert = adjustments.invert;
+    fg.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) hue-rotate(${h}deg) blur(${blur}px) grayscale(${gray}%) sepia(${sepia}%) invert(${invert}%)`;
+    fg.globalAlpha = imgAlpha;
+    const scaledW = W * imgScale;
+    const scaledH = H * imgScale;
+    const dx = (W - scaledW) / 2;
+    const dy = (H - scaledH) / 2;
+    fg.drawImage(base, dx, dy, scaledW, scaledH);
+    fg.filter = 'none';
+    fg.globalAlpha = 1;
 
-    if (currentBg?.type === 'color'){
+    /* Strokes */
+    for (const st of strokes) drawStroke(fg, st);
+    if (currentStroke) drawStroke(fg, currentStroke);
+
+    /* Texts */
+    for (const t of texts){
+      fg.save();
+      fg.font = `${t.size}px ${t.font}`;
+      fg.fillStyle = t.color;
+      fg.textAlign = 'center';
+      fg.textBaseline = 'middle';
+      if (t.shadow && t.shadow !== 'none'){
+        fg.shadowColor = t.shadow;
+        fg.shadowBlur = 12;
+        fg.shadowOffsetY = 3;
+      }
+      fg.fillText(t.text, t.x, t.y);
+      fg.restore();
+    }
+
+    /* Main canvas */
+    const ctx = mainCanvas.getContext('2d');
+    ctx.clearRect(0,0,W,H);
+
+    if (currentBg.type === 'color'){
       ctx.fillStyle = currentBg.value;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    } else if (bgImage?.complete && bgImage.naturalWidth){
-      drawCover(ctx, bgImage, canvas.width, canvas.height);
-    } else {
-      drawChecker(ctx, canvas.width, canvas.height);
+      ctx.fillRect(0,0,W,H);
+    } else if (currentBg.type === 'original'){
+      /* Original = no background (checker) */
+      drawChecker(ctx, W, H);
+    } else if ((currentBg.type === 'preset' || currentBg.type === 'upload') && bgImage?.complete && bgImage.naturalWidth){
+      drawCover(ctx, bgImage, W, H);
+    } else if (currentBg.type === 'checker'){
+      drawChecker(ctx, W, H);
     }
 
+    ctx.drawImage(fgCanvas, 0, 0);
+  }
+
+  function drawStroke(ctx, st){
     ctx.save();
-    ctx.globalAlpha = opacity;
-    const imgW = canvas.width * scale;
-    const imgH = canvas.height * scale;
-    const baseX = (canvas.width - imgW) / 2;
-    const baseY = (canvas.height - imgH) / 2;
-    ctx.drawImage(sourceImg, baseX + offsetX, baseY + offsetY, imgW, imgH);
+    if (st.tool === 'eraser') ctx.globalCompositeOperation = 'destination-out';
+    ctx.strokeStyle = st.color;
+    ctx.lineWidth = st.size;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = st.opacity ?? 1;
+    ctx.beginPath();
+    const pts = st.points;
+    if (pts.length === 1){
+      ctx.arc(pts[0].x, pts[0].y, st.size/2, 0, Math.PI*2);
+      ctx.fillStyle = st.color;
+      ctx.fill();
+    } else {
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.stroke();
+    }
     ctx.restore();
   }
 
@@ -1036,7 +817,7 @@ const BgChanger = (() => {
   }
 
   function drawChecker(ctx, w, h){
-    const s = 12;
+    const s = Math.max(12, Math.round(w/60));
     for (let y = 0; y < h; y += s){
       for (let x = 0; x < w; x += s){
         ctx.fillStyle = ((x/s + y/s) % 2 === 0) ? '#1a130c' : '#221a12';
@@ -1045,71 +826,56 @@ const BgChanger = (() => {
     }
   }
 
-  /* ===== SET SOURCE ===== */
-  async function setSource(blob){
-    sourceBlob = blob;
-    const url = URL.createObjectURL(blob);
-    sourceImg = new Image();
-    sourceImg.onload = () => {
-      offsetX = 0; offsetY = 0;
-      if ($c('bgCanvasStatus')) $c('bgCanvasStatus').textContent = '● جاهز';
-      drawPreview();
-    };
-    sourceImg.src = url;
+  function setBg(bg){
+    currentBg = bg;
+    if (bg.type === 'preset'){
+      bgImage = new Image();
+      bgImage.crossOrigin = 'anonymous';
+      bgImage.onload = render;
+      bgImage.onerror = () => toast('تعذر تحميل الخلفية', 'err');
+      bgImage.src = bg.value;
+    } else if (bg.type === 'upload'){
+      bgImage = new Image();
+      bgImage.onload = render;
+      bgImage.src = bg.value;
+    } else {
+      bgImage = null;
+    }
+    render();
   }
 
-  /* ===== APPLY (Save) ===== */
-  async function applyBackground(){
-    if (!sourceImg) return toast('لا توجد صورة', 'err');
-    if (!currentBg) return toast('اختر خلفية أولاً', 'err');
+  function handleBgUpload(file){
+    if (!file.type.startsWith('image/')) return toast('صيغة غير مدعومة', 'err');
+    if (file.size > 10*1024*1024) return toast('الحجم > 10MB', 'err');
+    const url = URL.createObjectURL(file);
+    setBg({ type:'upload', value:url });
+    toast('تم تحميل الخلفية ✓', 'ok');
+  }
 
-    const btn = $c('bgApplyBtn');
-    if(btn){ btn.disabled = true; }
-    const orig = btn?.textContent || '';
-    if(btn) btn.textContent = 'جاري الحفظ...';
-
+  async function applySave(){
+    const base = currentImage || originalImage;
+    if (!base) return toast('لا توجد صورة', 'err');
+    const btn = $c('edSaveBtn');
+    btn.disabled = true;
+    const orig = btn.textContent;
+    btn.textContent = 'جاري الحفظ...';
     try{
-      const canvas = document.createElement('canvas');
-      canvas.width = sourceImg.naturalWidth;
-      canvas.height = sourceImg.naturalHeight;
-      const ctx = canvas.getContext('2d');
-
-      if (currentBg.type === 'color'){
-        ctx.fillStyle = currentBg.value;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      } else if (bgImage?.complete && bgImage.naturalWidth){
-        drawCover(ctx, bgImage, canvas.width, canvas.height);
-      }
-
-      const factor = 1 / previewScale;
-      ctx.save();
-      ctx.globalAlpha = opacity;
-      const imgW = canvas.width * scale;
-      const imgH = canvas.height * scale;
-      const baseX = (canvas.width - imgW) / 2;
-      const baseY = (canvas.height - imgH) / 2;
-      ctx.drawImage(sourceImg,
-        baseX + offsetX * factor,
-        baseY + offsetY * factor,
-        imgW, imgH);
-      ctx.restore();
-
-      const outBlob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+      render();
+      const outBlob = await new Promise(r => mainCanvas.toBlob(r, 'image/png'));
       finalBlob = outBlob;
-
-      $c('bgDownloadBtn')?.classList.remove('hidden');
-      toast('تم حفظ الصورة ✓ اضغط تحميل', 'ok');
-    } catch(e){
+      $c('edDownloadBtn')?.classList.remove('hidden');
+      toast('تم حفظ التعديلات ✓ اضغط تحميل', 'ok');
+    }catch(e){
       console.error(e);
       toast('فشل الحفظ', 'err');
     } finally {
-      if(btn){ btn.disabled = false; btn.textContent = orig; }
+      btn.disabled = false;
+      btn.textContent = orig;
     }
   }
 
-  /* ===== DOWNLOAD ===== */
   function downloadBlob(blob, name){
-    if(!blob){ toast('لا يوجد ملف', 'err'); return; }
+    if (!blob){ toast('لا يوجد ملف', 'err'); return; }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = name;
@@ -1118,108 +884,87 @@ const BgChanger = (() => {
     setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
 
-  /* ===== RESET ===== */
   function reset(){
-    sourceBlob = null; sourceImg = null;
-    currentBg = null; bgImage = null;
-    finalBlob = null;
-    opacity = 1; scale = 1; offsetX = 0; offsetY = 0;
-
-    if($c('bgScale')) $c('bgScale').value = 100;
-    if($c('bgOpacity')) $c('bgOpacity').value = 100;
-    if($c('bgScaleVal')) $c('bgScaleVal').textContent = '100%';
-    if($c('bgOpacityVal')) $c('bgOpacityVal').textContent = '100%';
-
-    document.querySelectorAll('.bg-preset-item').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
-
-    $c('bgUploadStage')?.classList.remove('hidden');
-    $c('bgEditorStage')?.classList.add('hidden');
-    $c('bgUploadContent')?.classList.remove('hidden');
-    $c('bgUploadLoading')?.classList.add('hidden');
-    $c('bgDownloadBtn')?.classList.add('hidden');
+    originalImage = null; currentImage = null; finalBlob = null;
+    strokes = []; texts = [];
+    adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, gray:0, sepia:0, invert:0 };
+    currentBg = { type:'original' };
+    bgImage = null;
+    bgRemoved = false;
+    imgScale = 1; imgAlpha = 1;
+    $c('edStartStage')?.classList.remove('hidden');
+    $c('edEditorStage')?.classList.add('hidden');
+    $c('edStartLoading')?.classList.add('hidden');
+    $c('edDownloadBtn')?.classList.add('hidden');
+    $c('edTextInput').value = '';
   }
 
-  return { init, setSource, reset, applyBackground };
+  async function openWithBlob(blob){
+    await new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        originalImage = img;
+        currentImage = img;
+        bgRemoved = false;
+        strokes = []; texts = [];
+        currentBg = { type:'original' };
+        adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, gray:0, sepia:0, invert:0 };
+        imgScale = 1; imgAlpha = 1;
+        render(); applyZoom();
+        resolve();
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+    $c('edStartStage')?.classList.add('hidden');
+    $c('edEditorStage')?.classList.remove('hidden');
+    $c('edDownloadBtn')?.classList.add('hidden');
+    finalBlob = null;
+  }
+
+  return { init, openWithBlob, reset };
 })();
 
 /* ========== APP ========== */
 const App = (() => {
   let selectedFile = null, resultBlob = null, opsCache = [];
-
-  const showAuth = () => {
-    $('authScreen').classList.remove('hidden');
-    $('appScreen').classList.add('hidden');
-  };
-  const showApp = () => {
-    $('authScreen').classList.add('hidden');
-    $('appScreen').classList.remove('hidden');
-  };
-
+  const showAuth = () => { $('authScreen').classList.remove('hidden'); $('appScreen').classList.add('hidden'); };
+  const showApp = () => { $('authScreen').classList.add('hidden'); $('appScreen').classList.remove('hidden'); };
   async function enterApp(){
-    if(!Auth.profile && Auth.session?.user){
-      Auth.profile = await API.getProfile(Auth.session.user.id, Auth.session.access_token);
-    }
-    updateAdminVis();
-    updatePlanUI();
-    showApp();
-    switchView('studio');
-    await refreshUsage();
+    if(!Auth.profile && Auth.session?.user){ Auth.profile = await API.getProfile(Auth.session.user.id, Auth.session.access_token); }
+    updateAdminVis(); updatePlanUI(); showApp(); switchView('studio'); await refreshUsage();
   }
-
   function switchView(name){
     if(name === 'admin' && !Auth.isDev()){ toast('لا تملك صلاحية', 'err'); return; }
-    document.querySelectorAll('.nav-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.view === name);
-    });
-    ['studio','background','history','profile','admin'].forEach(v => {
-      const el = $(v + 'View');
-      if(el) el.classList.toggle('hidden', v !== name);
-    });
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+    ['studio','editor','history','profile','admin'].forEach(v => { const el = $(v+'View'); if(el) el.classList.toggle('hidden', v !== name); });
     if(name === 'history') refreshHistory();
     if(name === 'profile') refreshProfile();
     if(name === 'admin') Admin.refresh();
     scrollTo({top:0, behavior:'smooth'});
   }
-
-  function updateAdminVis(){
-    const d = Auth.isDev();
-    $('adminMini')?.classList.toggle('hidden', !d);
-    $('adminNav')?.classList.toggle('hidden', !d);
-  }
-
+  function updateAdminVis(){ const d = Auth.isDev(); $('adminMini')?.classList.toggle('hidden', !d); $('adminNav')?.classList.toggle('hidden', !d); }
   function updatePlanUI(){
     const p = Auth.isPro();
     $('planPill')?.classList.toggle('pro', p);
-    const pt = $('planTxt');
-    if(pt) pt.textContent = p ? 'Pro • ∞' : 'Free';
+    const pt = $('planTxt'); if(pt) pt.textContent = p ? 'Pro • ∞' : 'Free';
     const pr = Auth.profile;
     const pp = $('pPlan');
-    if(pp) pp.textContent = p ? 'Pro — بلا حدود'
-      : (pr?.plan === 'custom' ? `Custom — ${pr.daily_limit}` : 'Free — 5/يوم');
+    if(pp) pp.textContent = p ? 'Pro — بلا حدود' : (pr?.plan === 'custom' ? `Custom — ${pr.daily_limit}` : 'Free — 5/يوم');
   }
-
   async function refreshUsage(){
-    const s = Auth.session;
-    if(!s?.user) return;
+    const s = Auth.session; if(!s?.user) return;
     try{
       const t = await API.countToday(s.access_token, s.user.id);
-      if(Auth.isPro()){
-        const sr = $('statRemain');
-        if(sr) sr.textContent = '∞';
-        return;
-      }
+      if(Auth.isPro()){ const sr = $('statRemain'); if(sr) sr.textContent = '∞'; return; }
       const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
-      const sr = $('statRemain');
-      if(sr) sr.textContent = Math.max(0, lim - t);
+      const sr = $('statRemain'); if(sr) sr.textContent = Math.max(0, lim - t);
     }catch{}
   }
-
   async function refreshHistory(){
-    const s = Auth.session;
-    if(!s?.user) return;
-    const wrap = $('historyContent');
-    if(!wrap) return;
+    const s = Auth.session; if(!s?.user) return;
+    const wrap = $('historyContent'); if(!wrap) return;
     wrap.innerHTML = `<div class="empty"><div class="empty-icon">⌛</div><h3>جاري التحميل...</h3></div>`;
     try{
       const ops = await API.fetchOps(s.access_token, s.user.id);
@@ -1227,71 +972,26 @@ const App = (() => {
       const today = await API.countToday(s.access_token, s.user.id);
       const st = $('statTotal'); if(st) st.textContent = ops.length;
       const std = $('statToday'); if(std) std.textContent = today;
-
-      if(!ops.length){
-        wrap.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><h3>لا توجد عمليات</h3><p>ابدأ من الاستوديو</p></div>`;
-        return;
-      }
-
-      const grid = document.createElement('div');
-      grid.className = 'history-grid';
+      if(!ops.length){ wrap.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><h3>لا توجد عمليات</h3><p>ابدأ من الاستوديو</p></div>`; return; }
+      const grid = document.createElement('div'); grid.className = 'history-grid';
       for(const op of ops){
-        const c = document.createElement('div');
-        c.className = 'hist-card';
-        c.innerHTML = `
-          <div class="hist-date">${esc(fmtDate(op.created_at))}</div>
-          <div class="hist-thumb"><img alt="" loading="lazy"></div>
-          <div class="hist-actions">
-            <button class="btn-success" data-act="dl" data-id="${esc(op.id)}" type="button">⬇ تحميل</button>
-            <button class="btn-danger" data-act="del" data-id="${esc(op.id)}" type="button">🗑 حذف</button>
-          </div>
-        `;
+        const c = document.createElement('div'); c.className = 'hist-card';
+        c.innerHTML = `<div class="hist-date">${esc(fmtDate(op.created_at))}</div><div class="hist-thumb"><img alt="" loading="lazy"></div><div class="hist-actions"><button class="btn-success" data-act="dl" data-id="${esc(op.id)}" type="button">⬇ تحميل</button><button class="btn-danger" data-act="del" data-id="${esc(op.id)}" type="button">🗑 حذف</button></div>`;
         grid.appendChild(c);
         const url = await API.resolveImg(op.result_url, s.access_token);
         if(url) c.querySelector('img').src = url;
       }
-      wrap.innerHTML = '';
-      wrap.appendChild(grid);
-
+      wrap.innerHTML = ''; wrap.appendChild(grid);
       grid.addEventListener('click', async e => {
-        const b = e.target.closest('[data-act]');
-        if(!b) return;
-        const op = opsCache.find(o => String(o.id) === String(b.dataset.id));
-        if(!op) return;
-        if(b.dataset.act === 'dl'){
-          b.disabled = true; b.textContent = '...';
-          try{
-            const u = await API.resolveImg(op.result_url, s.access_token);
-            if(!u) throw new Error('تعذر تجهيز الصورة');
-            await downloadFromUrl(u, `removebg-${String(op.id).slice(0,8)}.png`);
-          }catch(err){
-            toast(err.message || 'فشل التحميل', 'err');
-          }finally{
-            b.disabled = false; b.textContent = '⬇ تحميل';
-          }
-        }
-        if(b.dataset.act === 'del'){
-          if(!confirm('حذف هذه العملية؟')) return;
-          b.disabled = true; b.textContent = '...';
-          try{
-            await API.delOp(s.access_token, op.id);
-            await API.removeFiles(s.access_token, [op.original_url, op.result_url]);
-            toast('تم الحذف ✓', 'ok');
-            await refreshHistory();
-          }catch(err){
-            toast(err.message || 'فشل الحذف', 'err');
-            b.disabled = false; b.textContent = '🗑 حذف';
-          }
-        }
+        const b = e.target.closest('[data-act]'); if(!b) return;
+        const op = opsCache.find(o => String(o.id) === String(b.dataset.id)); if(!op) return;
+        if(b.dataset.act === 'dl'){ b.disabled=true; b.textContent='...'; try{ const u = await API.resolveImg(op.result_url, s.access_token); if(!u) throw new Error('تعذر تجهيز الصورة'); await downloadFromUrl(u, `removebg-${String(op.id).slice(0,8)}.png`); }catch(err){ toast(err.message||'فشل التحميل','err'); } finally{ b.disabled=false; b.textContent='⬇ تحميل'; } }
+        if(b.dataset.act === 'del'){ if(!confirm('حذف هذه العملية؟')) return; b.disabled=true; b.textContent='...'; try{ await API.delOp(s.access_token, op.id); await API.removeFiles(s.access_token, [op.original_url, op.result_url]); toast('تم الحذف ✓','ok'); await refreshHistory(); }catch(err){ toast(err.message||'فشل الحذف','err'); b.disabled=false; b.textContent='🗑 حذف'; } }
       });
-    }catch(e){
-      wrap.innerHTML = `<div class="empty"><div class="empty-icon">!</div><h3>تعذر التحميل</h3><p>${esc(e.message)}</p></div>`;
-    }
+    }catch(e){ wrap.innerHTML = `<div class="empty"><div class="empty-icon">!</div><h3>تعذر التحميل</h3><p>${esc(e.message)}</p></div>`; }
   }
-
   async function refreshProfile(){
-    const s = Auth.session;
-    if(!s?.user) return;
+    const s = Auth.session; if(!s?.user) return;
     try{
       if(!Auth.profile) Auth.profile = await API.getProfile(s.user.id, s.access_token);
       const p = Auth.profile;
@@ -1299,47 +999,30 @@ const App = (() => {
       const today = await API.countToday(s.access_token, s.user.id);
       const un = p?.username || s.user.user_metadata?.username || s.user.email?.split('@')[0] || '?';
       const em = p?.email || s.user.email || '—';
-
       const av = $('avatar'); if(av) av.textContent = initials(un);
       const pu = $('pUsername'); if(pu) pu.textContent = un;
       const pe = $('pEmail'); if(pe) pe.textContent = em;
-      const pr = $('pRole');
-      if(pr){
-        pr.textContent = Auth.isDev() ? '✦ المطوّر' : '● مستخدم';
-        pr.classList.toggle('dev', Auth.isDev());
-      }
-      const pj = $('pJoined');
-      if(pj) pj.textContent = p?.created_at ? `انضم في ${fmtDate(p.created_at)}` : '';
+      const pr = $('pRole'); if(pr){ pr.textContent = Auth.isDev() ? '✦ المطوّر' : '● مستخدم'; pr.classList.toggle('dev', Auth.isDev()); }
+      const pj = $('pJoined'); if(pj) pj.textContent = p?.created_at ? `انضم في ${fmtDate(p.created_at)}` : '';
       const so = $('statOps'); if(so) so.textContent = ops.length;
       const sot = $('statOpsToday'); if(sot) sot.textContent = today;
       updatePlanUI();
-      if(Auth.isPro()){
-        const sr = $('statRemain'); if(sr) sr.textContent = '∞';
-      } else {
-        const lim = Number(p?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
-        const sr = $('statRemain'); if(sr) sr.textContent = Math.max(0, lim - today);
-      }
-      const ps = $('pStatus');
-      if(ps) ps.textContent = p?.is_banned ? 'موقوف' : 'نشط';
+      if(Auth.isPro()){ const sr = $('statRemain'); if(sr) sr.textContent = '∞'; }
+      else { const lim = Number(p?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT); const sr = $('statRemain'); if(sr) sr.textContent = Math.max(0, lim - today); }
+      const ps = $('pStatus'); if(ps) ps.textContent = p?.is_banned ? 'موقوف' : 'نشط';
     }catch(e){ toast(e.message, 'err'); }
   }
-
   function resetResult(){
     resultBlob = null;
     const pr = $('previewResult'); if(pr) pr.src = '';
     $('resultCard')?.classList.add('hidden');
     $('downloadBtn')?.classList.add('hidden');
+    $('editBtn')?.classList.add('hidden');
   }
-
-  function setResultBlob(b){ resultBlob = b; }
-
   function setFile(file){
     selectedFile = file;
     const prev = $('previewOriginal');
-    if(prev){
-      if(prev.src?.startsWith('blob:')) URL.revokeObjectURL(prev.src);
-      prev.src = URL.createObjectURL(file);
-    }
+    if(prev){ if(prev.src?.startsWith('blob:')) URL.revokeObjectURL(prev.src); prev.src = URL.createObjectURL(file); }
     resetResult();
     $('previewArea')?.classList.remove('hidden');
     $('uploadPanel')?.classList.add('hidden');
@@ -1347,7 +1030,6 @@ const App = (() => {
     const rb = $('removeBtn'); if(rb) rb.disabled = false;
     const cb = $('changeBtn'); if(cb) cb.disabled = false;
   }
-
   async function validateFile(f){
     if(!f) return {ok:false, msg:'اختر صورة'};
     const allowed = ['image/png','image/jpeg','image/webp'];
@@ -1355,13 +1037,7 @@ const App = (() => {
     if(f.size > CONFIG.MAX_FILE_MB * 1024 * 1024) return {ok:false, msg:`الحجم > ${CONFIG.MAX_FILE_MB}MB`};
     return {ok:true};
   }
-
-  async function handleFile(f){
-    const v = await validateFile(f);
-    if(!v.ok) return toast(v.msg, 'err');
-    setFile(f);
-  }
-
+  async function handleFile(f){ const v = await validateFile(f); if(!v.ok) return toast(v.msg, 'err'); setFile(f); }
   async function doRemove(){
     if(!selectedFile) return toast('اختر صورة أولًا', 'err');
     const s = await Auth.valid();
@@ -1369,142 +1045,80 @@ const App = (() => {
     Auth.session = s;
     if(!Auth.profile) Auth.profile = await API.getProfile(s.user.id, s.access_token);
     if(Auth.profile?.is_banned) return toast('الحساب موقوف', 'err');
-
     if(!Auth.isPro()){
       const today = await API.countToday(s.access_token, s.user.id).catch(()=>0);
       const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
       if(lim > 0 && today >= lim) return toast(`وصلت للحد اليومي (${lim})`, 'err');
     }
-
-    const btn = $('removeBtn');
-    if(btn) btn.disabled = true;
+    const btn = $('removeBtn'); if(btn) btn.disabled = true;
     $('processing')?.classList.remove('hidden');
     resetResult();
-
     try{
       const orig = await API.upload(s.access_token, s.user.id, selectedFile, 'orig');
       const blob = await API.removeBg(selectedFile);
       resultBlob = blob;
       const res = await API.upload(s.access_token, s.user.id, blob, 'res');
       await API.saveOp(s.access_token, orig, res);
-
-      const pr = $('previewResult');
-      if(pr) pr.src = URL.createObjectURL(blob);
+      const pr = $('previewResult'); if(pr) pr.src = URL.createObjectURL(blob);
       $('resultCard')?.classList.remove('hidden');
       $('downloadBtn')?.classList.remove('hidden');
-
+      $('editBtn')?.classList.remove('hidden');
       toast('تمت إزالة الخلفية ✓', 'ok');
       await refreshUsage();
-    }catch(e){
-      console.error(e);
-      toast(e.message || 'حدث خطأ', 'err');
-    }finally{
-      $('processing')?.classList.add('hidden');
-      if(btn) btn.disabled = false;
-    }
+    }catch(e){ console.error(e); toast(e.message || 'حدث خطأ', 'err'); }
+    finally{ $('processing')?.classList.add('hidden'); if(btn) btn.disabled = false; }
   }
-
   function downloadBlob(blob, name){
     if(!blob){ toast('لا يوجد ملف', 'err'); return; }
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = name;
-    a.style.display = 'none';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    const a = document.createElement('a'); a.href = url; a.download = name;
+    a.style.display = 'none'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
-
   async function downloadFromUrl(url, name){
-    try{
-      const r = await fetch(url, {mode:'cors'});
-      if(!r.ok) throw new Error();
-      const b = await r.blob();
-      downloadBlob(b, name);
-    }catch{
-      const a = document.createElement('a');
-      a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    }
+    try{ const r = await fetch(url, {mode:'cors'}); if(!r.ok) throw new Error(); const b = await r.blob(); downloadBlob(b, name); }
+    catch{ const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
   }
-
   function bindUI(){
-    document.querySelectorAll('.nav-btn').forEach(b => {
-      b.addEventListener('click', () => switchView(b.dataset.view));
-    });
+    document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
     $('adminMini')?.addEventListener('click', () => switchView('admin'));
-
-    $('historyRefresh')?.addEventListener('click', async e => {
-      e.currentTarget.disabled = true;
-      try{ await refreshHistory(); } finally{ e.currentTarget.disabled = false; }
-    });
-
+    $('historyRefresh')?.addEventListener('click', async e => { e.currentTarget.disabled = true; try{ await refreshHistory(); } finally{ e.currentTarget.disabled = false; } });
     $('refreshProfile')?.addEventListener('click', async e => {
       e.currentTarget.disabled = true;
-      try{
-        Auth.profile = await API.getProfile(Auth.session.user.id, Auth.session.access_token);
-        updateAdminVis();
-        await refreshProfile();
-        await refreshUsage();
-        toast('تم التحديث ✓', 'ok');
-      } finally{ e.currentTarget.disabled = false; }
+      try{ Auth.profile = await API.getProfile(Auth.session.user.id, Auth.session.access_token); updateAdminVis(); await refreshProfile(); await refreshUsage(); toast('تم التحديث ✓', 'ok'); }
+      finally{ e.currentTarget.disabled = false; }
     });
-
     $('logoutBtn')?.addEventListener('click', () => Auth.doLogout(true));
-
     $('chooseBtn')?.addEventListener('click', e => { e.stopPropagation(); $('fileInput').click(); });
     $('uploadPanel')?.addEventListener('click', () => $('fileInput').click());
     $('changeBtn')?.addEventListener('click', () => $('fileInput').click());
-
-    $('fileInput')?.addEventListener('change', () => {
-      const f = $('fileInput').files?.[0];
-      $('fileInput').value = '';
-      if(f) handleFile(f);
-    });
-
-    ['dragenter','dragover'].forEach(n => $('uploadPanel')?.addEventListener(n, e => {
-      e.preventDefault(); $('uploadPanel').classList.add('drag');
-    }));
-    ['dragleave','drop'].forEach(n => $('uploadPanel')?.addEventListener(n, e => {
-      e.preventDefault(); $('uploadPanel').classList.remove('drag');
-    }));
-    $('uploadPanel')?.addEventListener('drop', e => {
-      const f = e.dataTransfer?.files?.[0];
-      if(f) handleFile(f);
-    });
-
+    $('fileInput')?.addEventListener('change', () => { const f = $('fileInput').files?.[0]; $('fileInput').value = ''; if(f) handleFile(f); });
+    ['dragenter','dragover'].forEach(n => $('uploadPanel')?.addEventListener(n, e => { e.preventDefault(); $('uploadPanel').classList.add('drag'); }));
+    ['dragleave','drop'].forEach(n => $('uploadPanel')?.addEventListener(n, e => { e.preventDefault(); $('uploadPanel').classList.remove('drag'); }));
+    $('uploadPanel')?.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if(f) handleFile(f); });
     $('removeBtn')?.addEventListener('click', doRemove);
-
-    $('downloadBtn')?.addEventListener('click', () => {
-      if(!resultBlob){ toast('لا يوجد ملف', 'err'); return; }
-      downloadBlob(resultBlob, `removebg-${Date.now()}.png`);
-      toast('تم التحميل ✓', 'ok');
+    $('downloadBtn')?.addEventListener('click', () => { if(!resultBlob){ toast('لا يوجد ملف', 'err'); return; } downloadBlob(resultBlob, `removebg-${Date.now()}.png`); toast('تم التحميل ✓', 'ok'); });
+    $('editBtn')?.addEventListener('click', async () => {
+      if(!resultBlob){ toast('أزل الخلفية أولاً', 'err'); return; }
+      switchView('editor');
+      await Editor.openWithBlob(resultBlob);
     });
-
-    $('bgGoStudio')?.addEventListener('click', () => switchView('studio'));
   }
-
-  return { showAuth, showApp, enterApp, switchView, bindUI, setResultBlob, refreshUsage };
+  return { showAuth, showApp, enterApp, switchView, bindUI, refreshUsage };
 })();
 
 /* ========== ADMIN ========== */
 const Admin = (() => {
   let usersCache = [], opsCache = [];
-
   async function refresh(){
     if(!Auth.isDev()) return;
-    const list = $('usersList');
-    if(!list) return;
+    const list = $('usersList'); if(!list) return;
     list.innerHTML = `<div class="empty"><div class="empty-icon">⌛</div><h3>جاري التحميل...</h3></div>`;
     try{
       const tk = Auth.session.access_token;
       const search = $('adminSearch').value.trim() || null;
-      const [users, ops] = await Promise.all([
-        API.adminUsers(tk, search),
-        API.adminOps(tk)
-      ]);
-      usersCache = users;
-      opsCache = ops;
-
+      const [users, ops] = await Promise.all([API.adminUsers(tk, search), API.adminOps(tk)]);
+      usersCache = users; opsCache = ops;
       const today = new Date(); today.setHours(0,0,0,0);
       const to = opsCache.filter(o => new Date(o.created_at) >= today);
       const act = new Set(to.map(o => o.user_id));
@@ -1512,69 +1126,34 @@ const Admin = (() => {
       if($('mOps')) $('mOps').textContent = opsCache.length;
       if($('mToday')) $('mToday').textContent = to.length;
       if($('mActive')) $('mActive').textContent = act.size;
-
       renderUsers();
       await renderOps();
-    }catch(e){
-      list.innerHTML = `<div class="empty"><div class="empty-icon">!</div><h3>تعذر التحميل</h3><p>${esc(e.message)}</p></div>`;
-    }
+    }catch(e){ list.innerHTML = `<div class="empty"><div class="empty-icon">!</div><h3>تعذر التحميل</h3><p>${esc(e.message)}</p></div>`; }
   }
-
   function renderUsers(){
     const q = $('adminSearch').value.trim().toLowerCase();
-    const list = usersCache.filter(p => !q ||
-      [p.username,p.email,p.id].join(' ').toLowerCase().includes(q));
-    const ul = $('usersLabel');
-    if(ul) ul.textContent = `${list.length} حساب`;
-    const wrap = $('usersList');
-    if(!wrap) return;
+    const list = usersCache.filter(p => !q || [p.username,p.email,p.id].join(' ').toLowerCase().includes(q));
+    const ul = $('usersLabel'); if(ul) ul.textContent = `${list.length} حساب`;
+    const wrap = $('usersList'); if(!wrap) return;
     wrap.innerHTML = '';
-    if(!list.length){
-      wrap.innerHTML = `<div class="empty"><div class="empty-icon">⌕</div><h3>لا نتائج</h3></div>`;
-      return;
-    }
+    if(!list.length){ wrap.innerHTML = `<div class="empty"><div class="empty-icon">⌕</div><h3>لا نتائج</h3></div>`; return; }
     list.forEach(p => {
-      const r = document.createElement('div');
-      r.className = 'user-row';
+      const r = document.createElement('div'); r.className = 'user-row';
       const st = p.is_banned ? 'موقوف' : (p.plan === 'pro' ? 'Pro' : (p.plan === 'custom' ? 'Custom' : 'Free'));
       const sc = p.is_banned ? 'banned' : (p.plan === 'pro' ? 'pro' : '');
-      r.innerHTML = `
-        <div class="user-avatar">${esc(initials(p.username || p.email || '?'))}</div>
-        <div class="user-main">
-          <strong>${esc(p.username || 'بدون اسم')}</strong>
-          <span>${esc(p.email || p.id || '—')}</span>
-          <div class="user-state ${sc}">${esc(st)}</div>
-        </div>
-        <div class="user-meta">
-          <strong>${esc(p.operations_count || 0)}</strong>
-          <small>اليوم ${esc(p.today_operations || 0)}</small>
-        </div>
-        <button class="manage-btn" type="button">إدارة</button>
-      `;
+      r.innerHTML = `<div class="user-avatar">${esc(initials(p.username || p.email || '?'))}</div><div class="user-main"><strong>${esc(p.username || 'بدون اسم')}</strong><span>${esc(p.email || p.id || '—')}</span><div class="user-state ${sc}">${esc(st)}</div></div><div class="user-meta"><strong>${esc(p.operations_count || 0)}</strong><small>اليوم ${esc(p.today_operations || 0)}</small></div><button class="manage-btn" type="button">إدارة</button>`;
       r.querySelector('.manage-btn').addEventListener('click', () => openUser(p));
       wrap.appendChild(r);
     });
   }
-
   async function renderOps(){
-    const wrap = $('opsList');
-    if(!wrap) return;
+    const wrap = $('opsList'); if(!wrap) return;
     wrap.innerHTML = '';
-    if(!opsCache.length){
-      wrap.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><h3>لا عمليات</h3></div>`;
-      return;
-    }
+    if(!opsCache.length){ wrap.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><h3>لا عمليات</h3></div>`; return; }
     const map = new Map(usersCache.map(p => [String(p.id), p]));
     for(const op of opsCache){
-      const c = document.createElement('div');
-      c.className = 'op-card';
-      c.innerHTML = `
-        <div class="op-thumb"><img alt="" loading="lazy"></div>
-        <div class="op-body">
-          <strong>—</strong>
-          <span>${esc(fmtDate(op.created_at))}</span>
-        </div>
-      `;
+      const c = document.createElement('div'); c.className = 'op-card';
+      c.innerHTML = `<div class="op-thumb"><img alt="" loading="lazy"></div><div class="op-body"><strong>—</strong><span>${esc(fmtDate(op.created_at))}</span></div>`;
       const p = map.get(String(op.user_id));
       c.querySelector('strong').textContent = p?.username || p?.email || 'مستخدم';
       wrap.appendChild(c);
@@ -1582,115 +1161,39 @@ const Admin = (() => {
       if(u) c.querySelector('img').src = u;
     }
   }
-
   async function openUser(profile){
     const ops = await API.adminOps(Auth.session.access_token, profile.id);
     const curLim = Number(profile.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
     $('modalTitle').textContent = 'إدارة الحساب';
     $('modalBody').innerHTML = `
-      <div class="summary">
-        <div class="summary-av">${esc(initials(profile.username || profile.email || '?'))}</div>
-        <div>
-          <div class="summary-name">${esc(profile.username || 'بدون اسم')}</div>
-          <div class="summary-email">${esc(profile.email || '—')}</div>
-          <div class="summary-pills">
-            <div class="summary-pill">${esc(profile.plan || 'free')}</div>
-            <div class="summary-pill">${esc(profile.operations_count || 0)} عملية</div>
-            <div class="summary-pill">اليوم ${esc(profile.today_operations || 0)}</div>
-          </div>
-        </div>
-      </div>
-      <div class="mg-grid">
-        <div class="mg-box">
-          <label>الخطة</label>
-          <select id="aPlan" class="plan-select">
-            <option value="free" ${profile.plan==='free'?'selected':''}>Free</option>
-            <option value="pro" ${profile.plan==='pro'?'selected':''}>Pro — بلا حدود</option>
-            <option value="custom" ${profile.plan==='custom'?'selected':''}>Custom</option>
-          </select>
-        </div>
-        <div class="mg-box">
-          <label>الحد اليومي</label>
-          <input id="aLimit" class="limit-input" type="number" min="0" value="${curLim}">
-        </div>
-      </div>
-      <div class="ban-row">
-        <span>إيقاف الحساب</span>
-        <button id="aBan" class="switch ${profile.is_banned?'active':''}" type="button"></button>
-      </div>
-      <div class="modal-actions">
-        <button id="aSave" class="btn-main small" type="button"><span class="btn-text">حفظ</span></button>
-        <button id="aClose" class="btn-ghost" type="button">إغلاق</button>
-      </div>
-      <div class="modal-section-title">عمليات المستخدم</div>
-      <div id="aOps" class="ops-grid"></div>
+      <div class="summary"><div class="summary-av">${esc(initials(profile.username || profile.email || '?'))}</div><div><div class="summary-name">${esc(profile.username || 'بدون اسم')}</div><div class="summary-email">${esc(profile.email || '—')}</div><div class="summary-pills"><div class="summary-pill">${esc(profile.plan || 'free')}</div><div class="summary-pill">${esc(profile.operations_count || 0)} عملية</div><div class="summary-pill">اليوم ${esc(profile.today_operations || 0)}</div></div></div></div>
+      <div class="mg-grid"><div class="mg-box"><label>الخطة</label><select id="aPlan" class="plan-select"><option value="free" ${profile.plan==='free'?'selected':''}>Free</option><option value="pro" ${profile.plan==='pro'?'selected':''}>Pro — بلا حدود</option><option value="custom" ${profile.plan==='custom'?'selected':''}>Custom</option></select></div><div class="mg-box"><label>الحد اليومي</label><input id="aLimit" class="limit-input" type="number" min="0" value="${curLim}"></div></div>
+      <div class="ban-row"><span>إيقاف الحساب</span><button id="aBan" class="switch ${profile.is_banned?'active':''}" type="button"></button></div>
+      <div class="modal-actions"><button id="aSave" class="btn-main small" type="button"><span class="btn-text">حفظ</span></button><button id="aClose" class="btn-ghost" type="button">إغلاق</button></div>
+      <div class="modal-section-title">عمليات المستخدم</div><div id="aOps" class="ops-grid"></div>
     `;
     $('modal').classList.add('show');
-
-    const ban = $('aBan');
-    let banned = !!profile.is_banned;
+    const ban = $('aBan'); let banned = !!profile.is_banned;
     ban.addEventListener('click', () => { banned = !banned; ban.classList.toggle('active', banned); });
-
-    const plan = $('aPlan');
-    const lim = $('aLimit');
-    plan.addEventListener('change', () => {
-      if(plan.value === 'pro') lim.value = 0;
-      else if(plan.value === 'free') lim.value = 5;
-    });
-
+    const plan = $('aPlan'); const lim = $('aLimit');
+    plan.addEventListener('change', () => { if(plan.value === 'pro') lim.value = 0; else if(plan.value === 'free') lim.value = 5; });
     $('aClose').addEventListener('click', closeModal);
     $('aSave').addEventListener('click', async e => {
-      const b = e.currentTarget;
-      b.disabled = true;
-      try{
-        let l = Number(lim.value);
-        if(!Number.isFinite(l) || l < 0) throw new Error('الحد غير صحيح');
-        if(plan.value === 'free') l = 5;
-        if(plan.value === 'pro') l = 0;
-        await API.adminUpdate(Auth.session.access_token, profile.id, plan.value, l, banned);
-        toast('تم التحديث ✓', 'ok');
-        await refresh();
-      }catch(err){ toast(err.message, 'err'); }
-      finally{ b.disabled = false; }
+      const b = e.currentTarget; b.disabled = true;
+      try{ let l = Number(lim.value); if(!Number.isFinite(l) || l < 0) throw new Error('الحد غير صحيح'); if(plan.value === 'free') l = 5; if(plan.value === 'pro') l = 0; await API.adminUpdate(Auth.session.access_token, profile.id, plan.value, l, banned); toast('تم التحديث ✓','ok'); await refresh(); }catch(err){ toast(err.message,'err'); } finally{ b.disabled = false; }
     });
-
     const aw = $('aOps');
-    if(!ops.length){
-      aw.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><h3>لا عمليات</h3></div>`;
-    }else{
-      for(const op of ops.slice(0,20)){
-        const c = document.createElement('div');
-        c.className = 'op-card';
-        c.innerHTML = `
-          <div class="op-thumb"><img alt="" loading="lazy"></div>
-          <div class="op-body">
-            <strong>${esc(fmtDate(op.created_at))}</strong>
-            <span>RemoveBG</span>
-          </div>
-        `;
-        aw.appendChild(c);
-        const u = await API.resolveImg(op.result_url, Auth.session.access_token);
-        if(u) c.querySelector('img').src = u;
-      }
-    }
+    if(!ops.length) aw.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><h3>لا عمليات</h3></div>`;
+    else{ for(const op of ops.slice(0,20)){ const c = document.createElement('div'); c.className = 'op-card'; c.innerHTML = `<div class="op-thumb"><img alt="" loading="lazy"></div><div class="op-body"><strong>${esc(fmtDate(op.created_at))}</strong><span>RemoveBG</span></div>`; aw.appendChild(c); const u = await API.resolveImg(op.result_url, Auth.session.access_token); if(u) c.querySelector('img').src = u; } }
   }
-
   function closeModal(){ $('modal').classList.remove('show'); }
-
   function init(){
     $('modalClose')?.addEventListener('click', closeModal);
-    $('modal')?.addEventListener('click', e => {
-      if(e.target === $('modal')) closeModal();
-    });
+    $('modal')?.addEventListener('click', e => { if(e.target === $('modal')) closeModal(); });
     $('adminSearch')?.addEventListener('input', renderUsers);
-    $('adminRefresh')?.addEventListener('click', async e => {
-      e.currentTarget.disabled = true;
-      try{ await refresh(); toast('تم التحديث ✓', 'ok'); }
-      finally{ e.currentTarget.disabled = false; }
-    });
+    $('adminRefresh')?.addEventListener('click', async e => { e.currentTarget.disabled = true; try{ await refresh(); toast('تم التحديث ✓','ok'); } finally{ e.currentTarget.disabled = false; } });
     $('adminBack')?.addEventListener('click', () => App.switchView('studio'));
   }
-
   return { init, refresh };
 })();
 
@@ -1699,29 +1202,17 @@ const Admin = (() => {
   AuthUI.init();
   App.bindUI();
   Admin.init();
-  BgChanger.init();
+  Editor.init();
 
   let session = await Auth.valid();
-  let profile = null;
-  let user = null;
-
-  if(session){
-    user = await API.getUser(session);
-    if(user){
-      session.user = user;
-      Auth.save(session);
-      profile = await API.getProfile(user.id, session.access_token);
-    }
-  }
-
+  let profile = null, user = null;
+  if(session){ user = await API.getUser(session); if(user){ session.user = user; Auth.save(session); profile = await API.getProfile(user.id, session.access_token); } }
   await Loader.run();
-
   if(!session || !user || profile?.is_banned){
     if(profile?.is_banned) await Auth.doLogout(false);
     App.showAuth();
     return;
   }
-
   Auth.session = session;
   Auth.profile = profile;
   await App.enterApp();
