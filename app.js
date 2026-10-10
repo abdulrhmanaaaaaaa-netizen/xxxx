@@ -1,5 +1,5 @@
 /* ============================================================
-   RemoveBG · Sandstorm Studio · MAIN + EDITOR
+   RemoveBG · Sandstorm Studio — Unified Editor
    ============================================================ */
 
 const $ = id => document.getElementById(id);
@@ -9,7 +9,7 @@ const todayISO = () => { const d=new Date(); d.setHours(0,0,0,0); return d.toISO
 const initials = v => { const t=String(v||'?').trim(); return t?t.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase():'?'; };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
-const PRESET_BACKGROUNDS = [
+const PRESETS = [
   'https://i.postimg.cc/SsY3CNhB/06b2725f5d4eaed9019cdd45727369cb.jpg',
   'https://i.postimg.cc/zBH6KXrP/189db98cca60bfab2425301f9554e569.jpg',
   'https://i.postimg.cc/FRk83s4G/24120c0c61a7f0bea682cadbc2a2c864.jpg',
@@ -29,8 +29,19 @@ const PRESET_BACKGROUNDS = [
   'https://i.postimg.cc/RFJyKVBd/ef21469b3e8c02e7566287c25ec70c92.jpg',
   'https://i.postimg.cc/vBxkfHsK/ff31ed3961d79e2488345ca2c089050d.jpg'
 ];
-const BG_COLOR_SWATCHES = ['#ffffff','#000000','#e0b884','#d4a5a5','#c4783a','#84d896','#e88c7a','#8ab4f8','#c084fc','#fbbf24','#2dd4bf','#f472b6','#1a130c','#2a2015','#f5e8d4','#e0aeb0'];
+const BG_SWATCHES = ['#ffffff','#000000','#e0b884','#d4a5a5','#c4783a','#84d896','#e88c7a','#8ab4f8','#c084fc','#fbbf24','#2dd4bf','#f472b6','#1a130c','#2a2015','#f5e8d4','#e0aeb0'];
 const BRUSH_SWATCHES = ['#ffffff','#000000','#e0b884','#c4783a','#d4a5a5','#84d896','#e88c7a','#8ab4f8','#c084fc','#fbbf24','#2dd4bf','#f472b6'];
+const FILTERS = [
+  { id:'none', name:'الأصلي' },
+  { id:'grayscale', name:'رمادي' },
+  { id:'sepia', name:'دافئ' },
+  { id:'invert', name:'عكسي' },
+  { id:'vivid', name:'حيوي' },
+  { id:'cool', name:'بارد' },
+  { id:'warm', name:'دافئ' },
+  { id:'dramatic', name:'درامي' },
+  { id:'fade', name:'باهت' }
+];
 
 const toastEl = $('toast');
 function toast(msg, type=''){
@@ -38,7 +49,7 @@ function toast(msg, type=''){
   toastEl.className = 'toast show ' + type;
   toastEl.textContent = msg;
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => toastEl.classList.remove('show'), 3800);
+  toast._t = setTimeout(() => toastEl.classList.remove('show'), 3600);
 }
 const isEmailValid = e => { if(!e || e.length > 254) return false; return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e); };
 const checkPwd = p => {
@@ -178,8 +189,8 @@ const AuthUI = (() => {
   const setMode = m => {
     mode = m; clearErr(); clearMsg();
     const reg = m === 'register';
-    $('formTitle').textContent = reg ? 'أنشئ حسابك' : 'أهلًا بعودتك';
-    $('formSub').textContent = reg ? 'ابدأ رحلتك الإبداعية في أقل من دقيقة' : 'سجّل دخولك لمتابعة رحلتك';
+    $('formTitle').textContent = reg ? 'أنشئ حسابك' : 'مرحباً بك';
+    $('formSub').textContent = reg ? 'ابدأ رحلتك الإبداعية مجاناً' : 'سجّل دخولك لمتابعة إبداعك';
     $('fUsername').classList.toggle('hidden', !reg);
     $('fConfirm').classList.toggle('hidden', !reg);
     $('reqs').classList.toggle('hidden', !reg);
@@ -187,8 +198,8 @@ const AuthUI = (() => {
     $('submitBtn').querySelector('.btn-text').textContent = reg ? 'إنشاء الحساب' : 'تسجيل الدخول';
     $('password').placeholder = reg ? '8 أحرف + رقم + حرف كبير' : '••••••••';
     $('password').setAttribute('autocomplete', reg ? 'new-password' : 'current-password');
-    const st = document.getElementById('switchText');
-    const sb = document.getElementById('switchBtn');
+    const st = $('switchText');
+    const sb = $('switchBtn');
     if (st) st.textContent = reg ? 'لديك حساب بالفعل؟' : 'ليس لديك حساب؟';
     if (sb) sb.textContent = reg ? 'سجّل الدخول' : 'أنشئ حساباً';
     updateReqs(); checkSubmit();
@@ -216,10 +227,7 @@ const AuthUI = (() => {
     if(m.includes('invalid login') || m.includes('invalid credentials')) return 'البريد أو كلمة المرور غير صحيحة';
     if(m.includes('already registered') || m.includes('already been registered') || m.includes('user already')) return 'هذا البريد مسجّل بالفعل';
     if(m.includes('email not confirmed')) return 'يرجى تأكيد بريدك الإلكتروني أولًا';
-    if(m.includes('signup requires a valid password')) return 'كلمة المرور غير مقبولة';
     if(m.includes('password should be at least')) return 'كلمة المرور قصيرة جدًا (6+ أحرف)';
-    if(m.includes('password is too short')) return 'كلمة المرور قصيرة';
-    if(m.includes('unable to validate email')) return 'صيغة البريد غير صحيحة';
     if(m.includes('invalid email')) return 'البريد الإلكتروني غير صحيح';
     if(m.includes('rate limit') || m.includes('too many')) return 'محاولات كثيرة، حاول لاحقًا';
     if(e?.status === 0) return 'فشل الاتصال بالإنترنت';
@@ -227,9 +235,9 @@ const AuthUI = (() => {
   }
   function init(){
     setMode('login');
-    document.getElementById('switchBtn')?.addEventListener('click', () => setMode(mode === 'login' ? 'register' : 'login'));
-    $('eyePass').addEventListener('click', () => eye($('password'), $('eyePass')));
-    $('eyeConfirm').addEventListener('click', () => eye($('confirm'), $('eyeConfirm')));
+    $('switchBtn')?.addEventListener('click', () => setMode(mode === 'login' ? 'register' : 'login'));
+    $('eyePass')?.addEventListener('click', () => eye($('password'), $('eyePass')));
+    $('eyeConfirm')?.addEventListener('click', () => eye($('confirm'), $('eyeConfirm')));
     const emailI = $('email');
     emailI.addEventListener('input', () => { if(isEmailValid(emailI.value.trim())){ emailI.classList.add('ok'); emailI.classList.remove('bad'); } else emailI.classList.remove('ok'); checkSubmit(); });
     $('password').addEventListener('input', () => { updateReqs(); checkSubmit(); });
@@ -238,7 +246,7 @@ const AuthUI = (() => {
     $('forgotBtn').addEventListener('click', async () => {
       const email = emailI.value.trim();
       if(!isEmailValid(email)){ msg('أدخل بريدك الإلكتروني أولًا', 'err'); return; }
-      try{ await API.forgot(email); msg('تم إرسال رابط إعادة التعيين إلى بريدك ✓', 'ok'); }catch(e){ msg(translateError(e), 'err'); }
+      try{ await API.forgot(email); msg('تم إرسال رابط إعادة التعيين ✓', 'ok'); }catch(e){ msg(translateError(e), 'err'); }
     });
     $('authForm').addEventListener('submit', async e => {
       e.preventDefault(); clearErr(); clearMsg();
@@ -261,7 +269,7 @@ const AuthUI = (() => {
           await App.enterApp();
         } else {
           const r = await Auth.doSignup(email, pwd, $('username').value.trim());
-          if(r.needsConfirmation){ msg('تم إنشاء الحساب ✓\nتحقق من بريدك الإلكتروني لتفعيل الحساب.', 'ok'); return; }
+          if(r.needsConfirmation){ msg('تم إنشاء الحساب ✓\nتحقق من بريدك لتفعيله.', 'ok'); return; }
           toast('تم إنشاء الحساب 🏜️', 'ok'); await App.enterApp();
         }
         ['email','password','username','confirm'].forEach(k => { const el = $(k); if(el) el.value = ''; });
@@ -275,18 +283,19 @@ const AuthUI = (() => {
 /* ========== EDITOR ========== */
 const Editor = (() => {
   let originalImage = null;
-  let currentImage = null;      // used for canvas
-  let bgRemoved = false;        // has user clicked remove bg?
+  let currentImage = null;
   let fgCanvas = document.createElement('canvas');
   let mainCanvas = null;
   let strokes = [];
   let texts = [];
-  let adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, gray:0, sepia:0, invert:0 };
-  let currentTool = 'move';
+  let adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
+  let filterId = 'none';
+  let filterIntensity = 1;
   let brushColor = '#e0b884';
   let brushSize = 8;
   let brushOpacity = 1;
-  let currentBg = { type:'original' };   // start with original
+  let drawMode = 'brush';
+  let currentBg = { type:'original' };
   let bgImage = null;
   let bgColorValue = '#e0b884';
   let drawing = false;
@@ -296,58 +305,59 @@ const Editor = (() => {
   let finalBlob = null;
   let imgScale = 1;
   let imgAlpha = 1;
+  let activePanel = null;
 
   const $c = id => document.getElementById(id);
 
   function init(){
     if (initDone) return;
     initDone = true;
-    mainCanvas = $c('edMainCanvas');
+    mainCanvas = $c('mainCanvas');
 
     /* Presets */
-    const presetsWrap = $c('edPresets');
-    if (presetsWrap){
-      PRESET_BACKGROUNDS.forEach(url => {
+    const pw = $c('presets');
+    if (pw){
+      PRESETS.forEach(url => {
         const el = document.createElement('div');
-        el.className = 'ed-preset';
+        el.className = 'preset';
         el.innerHTML = `<img src="${url}" alt="" loading="lazy" crossorigin="anonymous">`;
         el.addEventListener('click', () => {
-          document.querySelectorAll('.ed-preset').forEach(x => x.classList.remove('active'));
+          document.querySelectorAll('.preset').forEach(x => x.classList.remove('active'));
           el.classList.add('active');
           setBg({ type:'preset', value:url });
         });
-        presetsWrap.appendChild(el);
+        pw.appendChild(el);
       });
     }
 
     /* Brush swatches */
-    const bs = $c('edBrushSwatches');
+    const bs = $c('brushSwatches');
     if (bs){
       BRUSH_SWATCHES.forEach(c => {
         const s = document.createElement('div');
-        s.className = 'ed-swatch';
+        s.className = 'swatch';
         s.style.background = c;
         s.addEventListener('click', () => {
           brushColor = c;
-          $c('edBrushColor').value = c;
-          document.querySelectorAll('#edBrushSwatches .ed-swatch').forEach(x => x.classList.remove('active'));
+          $c('brushColor').value = c;
+          document.querySelectorAll('#brushSwatches .swatch').forEach(x => x.classList.remove('active'));
           s.classList.add('active');
         });
         bs.appendChild(s);
       });
     }
 
-    /* Bg color swatches */
-    const bgs = $c('edBgSwatches');
+    /* Bg swatches */
+    const bgs = $c('bgSwatches');
     if (bgs){
-      BG_COLOR_SWATCHES.forEach(c => {
+      BG_SWATCHES.forEach(c => {
         const s = document.createElement('div');
-        s.className = 'ed-swatch';
+        s.className = 'swatch';
         s.style.background = c;
         s.addEventListener('click', () => {
           bgColorValue = c;
-          $c('edBgColor').value = c;
-          document.querySelectorAll('#edBgSwatches .ed-swatch').forEach(x => x.classList.remove('active'));
+          $c('bgColor').value = c;
+          document.querySelectorAll('#bgSwatches .swatch').forEach(x => x.classList.remove('active'));
           s.classList.add('active');
           setBg({ type:'color', value:c });
         });
@@ -355,53 +365,67 @@ const Editor = (() => {
       });
     }
 
-    /* Tools */
-    document.querySelectorAll('.ed-tool').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.ed-tool').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentTool = btn.dataset.tool;
-        updateCanvasCursor();
+    /* Filters grid */
+    const fg = $c('filtersGrid');
+    if (fg){
+      FILTERS.forEach(f => {
+        const el = document.createElement('div');
+        el.className = 'filter-item' + (f.id === 'none' ? ' active' : '');
+        el.textContent = f.name;
+        el.dataset.filter = f.id;
+        el.addEventListener('click', () => {
+          document.querySelectorAll('.filter-item').forEach(x => x.classList.remove('active'));
+          el.classList.add('active');
+          filterId = f.id;
+          render();
+        });
+        fg.appendChild(el);
       });
-    });
+    }
 
     /* Tabs */
-    document.querySelectorAll('.ed-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        const t = tab.dataset.tab;
-        document.querySelectorAll('.ed-tab').forEach(x => x.classList.toggle('active', x === tab));
-        document.querySelectorAll('.ed-tab-content').forEach(c => c.classList.toggle('hidden', c.dataset.content !== t));
-      });
+    document.querySelectorAll('.tool').forEach(btn => {
+      btn.addEventListener('click', () => openPanel(btn.dataset.tool));
+    });
+    document.querySelectorAll('.panel-close').forEach(btn => {
+      btn.addEventListener('click', () => closePanel(btn.dataset.closePanel));
     });
 
-    /* Bg subtabs */
-    document.querySelectorAll('.ed-subtab').forEach(sub => {
-      sub.addEventListener('click', () => {
-        const m = sub.dataset.bgmode;
-        document.querySelectorAll('.ed-subtab').forEach(x => x.classList.toggle('active', x === sub));
-        document.querySelectorAll('.ed-bg-content').forEach(c => c.classList.toggle('hidden', c.dataset.bgcontent !== m));
+    /* Subtabs bg */
+    document.querySelectorAll('.subtab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const m = tab.dataset.bg;
+        document.querySelectorAll('.subtab').forEach(x => x.classList.toggle('active', x === tab));
+        document.querySelectorAll('.bg-content').forEach(c => c.classList.toggle('hidden', c.dataset.bgcontent !== m));
         if (m === 'transparent') setBg({ type:'checker' });
         if (m === 'original') setBg({ type:'original' });
       });
     });
 
-    /* Brush */
-    $c('edBrushSize')?.addEventListener('input', e => { brushSize = +e.target.value; $c('edBrushSizeVal').textContent = brushSize; });
-    $c('edBrushColor')?.addEventListener('input', e => { brushColor = e.target.value; });
-    $c('edBrushOpacity')?.addEventListener('input', e => { brushOpacity = e.target.value/100; $c('edBrushOpacityVal').textContent = e.target.value + '%'; });
+    /* Draw mode */
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        drawMode = btn.dataset.drawmode;
+      });
+    });
 
-    /* Adjustments */
-    const adjMap = [
-      ['edBrightness','brightness','edBrightnessVal','%'],
-      ['edContrast','contrast','edContrastVal','%'],
-      ['edSaturation','saturation','edSaturationVal','%'],
-      ['edHue','hue','edHueVal','°'],
-      ['edBlur','blur','edBlurVal','px'],
-      ['edGray','gray','edGrayVal','%'],
-      ['edSepia','sepia','edSepiaVal','%'],
-      ['edInvert','invert','edInvertVal','%']
+    /* Brush controls */
+    $c('brushSize')?.addEventListener('input', e => { brushSize = +e.target.value; $c('valBrushSize').textContent = brushSize + 'px'; });
+    $c('brushColor')?.addEventListener('input', e => { brushColor = e.target.value; });
+    $c('brushOpacity')?.addEventListener('input', e => { brushOpacity = e.target.value/100; $c('valBrushOpacity').textContent = e.target.value + '%'; });
+
+    /* Adjust sliders */
+    const adj = [
+      ['rangeBrightness','brightness','valBrightness','%'],
+      ['rangeContrast','contrast','valContrast','%'],
+      ['rangeSaturation','saturation','valSaturation','%'],
+      ['rangeHue','hue','valHue','°'],
+      ['rangeBlur','blur','valBlur','px'],
+      ['rangeOpacity','opacity','valOpacity','%']
     ];
-    adjMap.forEach(([id, key, valId, suffix]) => {
+    adj.forEach(([id, key, valId, suffix]) => {
       $c(id)?.addEventListener('input', e => {
         const v = +e.target.value;
         adjustments[key] = v;
@@ -410,72 +434,55 @@ const Editor = (() => {
       });
     });
 
-    /* Image scale + alpha */
-    $c('edScale')?.addEventListener('input', e => {
+    /* Filter intensity */
+    $c('rangeFilterIntensity')?.addEventListener('input', e => {
+      filterIntensity = e.target.value / 100;
+      $c('valFilterIntensity').textContent = e.target.value + '%';
+      render();
+    });
+
+    /* Scale + alpha */
+    $c('rangeScale')?.addEventListener('input', e => {
       imgScale = e.target.value / 100;
-      $c('edScaleVal').textContent = e.target.value + '%';
+      $c('valScale').textContent = e.target.value + '%';
       render();
     });
-    $c('edAlpha')?.addEventListener('input', e => {
+    $c('rangeAlpha')?.addEventListener('input', e => {
       imgAlpha = e.target.value / 100;
-      $c('edAlphaVal').textContent = e.target.value + '%';
+      $c('valAlpha').textContent = e.target.value + '%';
       render();
     });
 
-    /* Undo / Clear */
-    $c('edUndo')?.addEventListener('click', () => {
-      if (strokes.length){ strokes.pop(); render(); toast('تم التراجع'); }
-      else if (texts.length){ texts.pop(); render(); toast('تم التراجع'); }
-      else toast('لا يوجد شي للتراجع', 'err');
-    });
-    $c('edClearDraw')?.addEventListener('click', () => {
-      if (!strokes.length && !texts.length) return toast('لا يوجد رسم أو نص', 'err');
-      strokes = []; texts = []; render(); toast('تم مسح الرسم والنصوص', 'ok');
-    });
-
-    /* Reset adjustments */
-    $c('edResetAdjust')?.addEventListener('click', () => {
-      adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, gray:0, sepia:0, invert:0 };
-      ['Brightness','Contrast','Saturation','Hue','Blur','Gray','Sepia','Invert'].forEach(k => {
-        const id = 'ed'+k; const idV = id+'Val';
-        const defaults = { Brightness:100, Contrast:100, Saturation:100, Hue:0, Blur:0, Gray:0, Sepia:0, Invert:0 };
-        const suffixes = { Brightness:'%', Contrast:'%', Saturation:'%', Hue:'°', Blur:'px', Gray:'%', Sepia:'%', Invert:'%' };
-        if($c(id)) $c(id).value = defaults[k];
-        if($c(idV)) $c(idV).textContent = defaults[k] + suffixes[k];
-      });
-      render();
-      toast('تم إعادة التعديلات', 'ok');
-    });
+    /* Text size */
+    $c('textSize')?.addEventListener('input', e => { $c('valTextSize').textContent = e.target.value + 'px'; });
 
     /* Add text */
-    $c('edAddText')?.addEventListener('click', () => {
-      const text = $c('edTextInput').value.trim();
+    $c('btnAddText')?.addEventListener('click', () => {
+      const text = $c('textInput').value.trim();
       if (!text) return toast('اكتب نصاً أولاً', 'err');
       const base = currentImage || originalImage;
       if (!base) return;
-      const size = +$c('edTextSize').value;
-      const color = $c('edTextColor').value;
-      const font = $c('edTextFont').value;
-      const shadow = $c('edTextShadow').value;
-      texts.push({ text, x: base.naturalWidth/2, y: base.naturalHeight/2, size, color, font, shadow });
-      $c('edTextInput').value = '';
+      const size = +$c('textSize').value;
+      const color = $c('textColor').value;
+      const font = $c('textFont').value;
+      const bg = $c('textBg').value;
+      texts.push({ text, x: base.naturalWidth/2, y: base.naturalHeight/2, size, color, font, bg });
+      $c('textInput').value = '';
       render();
       toast('تمت إضافة النص ✓', 'ok');
     });
-    $c('edTextSize')?.addEventListener('input', e => { $c('edTextSizeVal').textContent = e.target.value + 'px'; });
 
     /* Bg upload */
-    const uz = $c('edBgUploadZone');
-    const fi = $c('edBgFile');
-    $c('edBgChoose')?.addEventListener('click', e => { e.stopPropagation(); fi.click(); });
+    const uz = $c('bgUploadZone');
+    const fi = $c('bgFile');
+    $c('bgChoose')?.addEventListener('click', e => { e.stopPropagation(); fi.click(); });
     uz?.addEventListener('click', () => fi.click());
-    ['dragenter','dragover'].forEach(n => uz?.addEventListener(n, e => { e.preventDefault(); uz.classList.add('drag'); }));
-    ['dragleave','drop'].forEach(n => uz?.addEventListener(n, e => { e.preventDefault(); uz.classList.remove('drag'); }));
-    uz?.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) handleBgUpload(f); });
+    uz?.addEventListener('dragover', e => { e.preventDefault(); });
+    uz?.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer?.files?.[0]; if (f) handleBgUpload(f); });
     fi?.addEventListener('change', () => { const f = fi.files?.[0]; fi.value = ''; if (f) handleBgUpload(f); });
 
-    /* Bg color */
-    $c('edBgColor')?.addEventListener('input', e => { bgColorValue = e.target.value; setBg({ type:'color', value:bgColorValue }); });
+    /* Bg color picker */
+    $c('bgColor')?.addEventListener('input', e => { bgColorValue = e.target.value; setBg({ type:'color', value:bgColorValue }); });
 
     /* Canvas events */
     if (mainCanvas){
@@ -486,75 +493,131 @@ const Editor = (() => {
     }
 
     /* Zoom */
-    $c('edZoomIn')?.addEventListener('click', () => { zoom = Math.min(3, zoom + .1); applyZoom(); });
-    $c('edZoomOut')?.addEventListener('click', () => { zoom = Math.max(.3, zoom - .1); applyZoom(); });
-    $c('edZoomReset')?.addEventListener('click', () => { zoom = 1; applyZoom(); });
+    $c('zoomIn')?.addEventListener('click', () => { zoom = Math.min(3, zoom + .1); applyZoom(); });
+    $c('zoomOut')?.addEventListener('click', () => { zoom = Math.max(.3, zoom - .1); applyZoom(); });
+    $c('zoomReset')?.addEventListener('click', () => { zoom = 1; applyZoom(); });
+
+    /* Actions */
+    $c('btnUndo')?.addEventListener('click', () => {
+      if (strokes.length){ strokes.pop(); render(); return toast('تراجع'); }
+      if (texts.length){ texts.pop(); render(); return toast('تراجع'); }
+      toast('لا يوجد شي للتراجع', 'err');
+    });
+    $c('btnReset')?.addEventListener('click', () => {
+      if (!originalImage) return;
+      adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
+      filterId = 'none'; filterIntensity = 1;
+      strokes = []; texts = [];
+      imgScale = 1; imgAlpha = 1;
+      ['Brightness','Contrast','Saturation','Hue','Blur','Opacity'].forEach(k => {
+        const id = 'range'+k;
+        const vId = 'val'+k;
+        const defaults = { Brightness:100, Contrast:100, Saturation:100, Hue:0, Blur:0, Opacity:100 };
+        const sfx = { Brightness:'%', Contrast:'%', Saturation:'%', Hue:'°', Blur:'px', Opacity:'%' };
+        if($c(id)) $c(id).value = defaults[k];
+        if($c(vId)) $c(vId).textContent = defaults[k] + sfx[k];
+      });
+      if($c('rangeScale')) $c('rangeScale').value = 100;
+      if($c('rangeAlpha')) $c('rangeAlpha').value = 100;
+      if($c('rangeFilterIntensity')) $c('rangeFilterIntensity').value = 100;
+      if($c('valScale')) $c('valScale').textContent = '100%';
+      if($c('valAlpha')) $c('valAlpha').textContent = '100%';
+      if($c('valFilterIntensity')) $c('valFilterIntensity').textContent = '100%';
+      document.querySelectorAll('.filter-item').forEach(x => x.classList.toggle('active', x.dataset.filter === 'none'));
+      render();
+      toast('تم إعادة الضبط ✓', 'ok');
+    });
+    $c('btnClearDraw')?.addEventListener('click', () => {
+      if (!strokes.length && !texts.length) return toast('لا يوجد رسم أو نص', 'err');
+      strokes = []; texts = []; render(); toast('تم المسح ✓', 'ok');
+    });
+    $c('btnResetAdjust')?.addEventListener('click', () => {
+      adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
+      ['Brightness','Contrast','Saturation','Hue','Blur','Opacity'].forEach(k => {
+        const id = 'range'+k;
+        const vId = 'val'+k;
+        const defaults = { Brightness:100, Contrast:100, Saturation:100, Hue:0, Blur:0, Opacity:100 };
+        const sfx = { Brightness:'%', Contrast:'%', Saturation:'%', Hue:'°', Blur:'px', Opacity:'%' };
+        if($c(id)) $c(id).value = defaults[k];
+        if($c(vId)) $c(vId).textContent = defaults[k] + sfx[k];
+      });
+      render();
+      toast('تم إعادة التعديلات ✓', 'ok');
+    });
+
+    /* Remove BG */
+    $c('btnRemoveBg')?.addEventListener('click', removeBackground);
 
     /* Save / Download / New */
-    $c('edSaveBtn')?.addEventListener('click', applySave);
-    $c('edDownloadBtn')?.addEventListener('click', () => {
+    $c('btnSave')?.addEventListener('click', saveImage);
+    $c('btnDownload')?.addEventListener('click', () => {
       if (!finalBlob) return toast('احفظ أولاً', 'err');
-      downloadBlob(finalBlob, `removebg-edited-${Date.now()}.png`);
+      downloadBlob(finalBlob, `removebg-${Date.now()}.png`);
       toast('تم التحميل ✓', 'ok');
     });
-    $c('edNewBtn')?.addEventListener('click', () => { reset(); toast('ابدأ صورة جديدة'); });
-    $c('edBackStudio')?.addEventListener('click', () => App.switchView('studio'));
+    $c('btnNewImg')?.addEventListener('click', () => {
+      reset();
+      toast('ارفع صورة جديدة');
+    });
 
-    /* Remove BG button */
-    $c('edRemoveBgBtn')?.addEventListener('click', removeBackgroundInEditor);
-
-    /* Start flow */
-    initStartFlow();
-  }
-
-  function initStartFlow(){
-    const startBtn = $c('edStartBtn');
-    const fi = $c('edQuickFile');
-    const stage = $c('edStartStage');
-    if (!startBtn || !fi) return;
-    startBtn.addEventListener('click', e => { e.stopPropagation(); fi.click(); });
+    /* File input + drag */
+    const stage = $c('uploadStage');
+    const fileInput = $c('fileInput');
+    $c('chooseBtn')?.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
     stage?.addEventListener('click', e => {
-      if (e.target.closest('.ed-start-loading')) return;
       if (e.target.closest('button')) return;
-      fi.click();
+      fileInput.click();
     });
     ['dragenter','dragover'].forEach(n => stage?.addEventListener(n, e => {
-      e.preventDefault();
-      stage.style.borderColor = 'var(--sand)';
-      stage.style.boxShadow = '0 0 0 4px rgba(224,184,132,.15), 0 30px 80px rgba(0,0,0,.5), 0 0 60px rgba(224,184,132,.15)';
+      e.preventDefault(); stage.classList.add('drag');
     }));
     ['dragleave','drop'].forEach(n => stage?.addEventListener(n, e => {
-      e.preventDefault();
-      stage.style.borderColor = '';
-      stage.style.boxShadow = '';
+      e.preventDefault(); stage.classList.remove('drag');
     }));
-    stage?.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) startEditorWithFile(f); });
-    fi.addEventListener('change', () => { const f = fi.files?.[0]; fi.value = ''; if (f) startEditorWithFile(f); });
+    stage?.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) handleFile(f); });
+    fileInput.addEventListener('change', () => {
+      const f = fileInput.files?.[0]; fileInput.value = '';
+      if (f) handleFile(f);
+    });
   }
 
-  async function startEditorWithFile(file){
-    const stage = $c('edStartStage');
-    const editor = $c('edEditorStage');
-    const loading = $c('edStartLoading');
+  /* ===== PANEL MANAGEMENT ===== */
+  function openPanel(name){
+    if (activePanel === name){
+      closePanel(name);
+      return;
+    }
+    activePanel = name;
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
+    document.querySelectorAll('.tool').forEach(t => t.classList.toggle('active', t.dataset.tool === name));
+    if (name === 'draw') mainCanvas.classList.add('tool-brush');
+    else mainCanvas.classList.remove('tool-brush','tool-eraser');
+    document.querySelector('.ws-panels')?.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+  function closePanel(name){
+    activePanel = null;
+    document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+    document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
+    if (mainCanvas) mainCanvas.classList.remove('tool-brush','tool-eraser');
+  }
 
+  function applyZoom(){
+    if (mainCanvas) mainCanvas.style.transform = `scale(${zoom})`;
+    if ($c('zoomVal')) $c('zoomVal').textContent = Math.round(zoom*100) + '%';
+  }
+
+  /* ===== FILE HANDLING ===== */
+  async function handleFile(file){
     const allowed = ['image/png','image/jpeg','image/webp'];
     if (!allowed.includes(file.type)) return toast('صيغة غير مدعومة', 'err');
     if (file.size > (CONFIG.MAX_FILE_MB * 1024 * 1024)) return toast(`الحجم > ${CONFIG.MAX_FILE_MB}MB`, 'err');
 
-    loading?.classList.remove('hidden');
-    try {
-      await loadOriginal(file);
-      stage?.classList.add('hidden');
-      editor?.classList.remove('hidden');
-      $c('edDownloadBtn')?.classList.add('hidden');
-      finalBlob = null;
-      toast('الصورة جاهزة ✓ عدّلها كما تشاء', 'ok');
-    } catch(e){
-      console.error(e);
-      toast(e.message || 'فشل التحميل', 'err');
-    } finally {
-      loading?.classList.add('hidden');
-    }
+    await loadOriginal(file);
+    $c('uploadStage')?.classList.add('hidden');
+    $c('workspace')?.classList.remove('hidden');
+    $c('btnDownload')?.classList.add('hidden');
+    finalBlob = null;
+    toast('الصورة جاهزة ✓', 'ok');
   }
 
   function loadOriginal(file){
@@ -563,16 +626,17 @@ const Editor = (() => {
       const img = new Image();
       img.onload = () => {
         originalImage = img;
-        currentImage = img;         // ✅ original as-is
-        bgRemoved = false;
+        currentImage = img;
         strokes = []; texts = [];
         currentBg = { type:'original' };
-        adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, gray:0, sepia:0, invert:0 };
+        adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
+        filterId = 'none'; filterIntensity = 1;
         imgScale = 1; imgAlpha = 1;
-        if ($c('edScale')) $c('edScale').value = 100;
-        if ($c('edAlpha')) $c('edAlpha').value = 100;
-        if ($c('edScaleVal')) $c('edScaleVal').textContent = '100%';
-        if ($c('edAlphaVal')) $c('edAlphaVal').textContent = '100%';
+        if ($c('rangeScale')) $c('rangeScale').value = 100;
+        if ($c('rangeAlpha')) $c('rangeAlpha').value = 100;
+        if ($c('valScale')) $c('valScale').textContent = '100%';
+        if ($c('valAlpha')) $c('valAlpha').textContent = '100%';
+        closePanel();
         render();
         applyZoom();
         resolve();
@@ -582,12 +646,11 @@ const Editor = (() => {
     });
   }
 
-  /* ===== Remove BG inside editor ===== */
-  async function removeBackgroundInEditor(){
-    const btn = $c('edRemoveBgBtn');
-    const canvas = $c('edMainCanvas');
-    const loading = $c('edCanvasLoading');
-    const loadingText = $c('edCanvasLoadingText');
+  /* ===== REMOVE BACKGROUND ===== */
+  async function removeBackground(){
+    const btn = $c('btnRemoveBg');
+    const loading = $c('canvasLoading');
+    const loadingText = $c('canvasLoadingText');
     const base = currentImage || originalImage;
     if (!base) return toast('ارفع صورة أولاً', 'err');
 
@@ -596,7 +659,6 @@ const Editor = (() => {
     Auth.session = s;
     if (!Auth.profile) Auth.profile = await API.getProfile(s.user.id, s.access_token);
     if (Auth.profile?.is_banned) return toast('الحساب موقوف', 'err');
-
     if (!Auth.isPro()){
       const today = await API.countToday(s.access_token, s.user.id).catch(()=>0);
       const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
@@ -608,7 +670,6 @@ const Editor = (() => {
     loading?.classList.remove('hidden');
 
     try {
-      /* Convert base image to PNG blob */
       const c = document.createElement('canvas');
       c.width = base.naturalWidth;
       c.height = base.naturalHeight;
@@ -621,23 +682,22 @@ const Editor = (() => {
       const resPath = await API.upload(s.access_token, s.user.id, resultBlob, 'res').catch(()=>null);
       if (origPath && resPath) await API.saveOp(s.access_token, origPath, resPath).catch(()=>{});
 
-      /* Load processed */
       await new Promise((resolve, reject) => {
         const url = URL.createObjectURL(resultBlob);
         const img = new Image();
-        img.onload = () => { currentImage = img; bgRemoved = true; render(); resolve(); };
+        img.onload = () => { currentImage = img; render(); resolve(); };
         img.onerror = reject;
         img.src = url;
       });
 
-      /* Switch to transparent after removal */
+      /* Switch to transparent */
       currentBg = { type:'checker' };
-      document.querySelectorAll('.ed-subtab').forEach(x => x.classList.toggle('active', x.dataset.bgmode === 'transparent'));
-      document.querySelectorAll('.ed-bg-content').forEach(c => c.classList.toggle('hidden', c.dataset.bgcontent !== 'transparent'));
+      document.querySelectorAll('.subtab').forEach(x => x.classList.toggle('active', x.dataset.bg === 'transparent'));
+      document.querySelectorAll('.bg-content').forEach(c => c.classList.toggle('hidden', c.dataset.bgcontent !== 'transparent'));
       render();
 
       if (App.refreshUsage) App.refreshUsage();
-      toast('تمت إزالة الخلفية ✓ اختر خلفية جديدة أو اكتب', 'ok');
+      toast('تمت إزالة الخلفية ✓', 'ok');
     } catch(e){
       console.error(e);
       toast(e.message || 'فشلت العملية', 'err');
@@ -647,53 +707,33 @@ const Editor = (() => {
     }
   }
 
-  function updateCanvasCursor(){
-    if (!mainCanvas) return;
-    mainCanvas.classList.remove('tool-brush','tool-eraser','tool-text','tool-picker','tool-move');
-    mainCanvas.classList.add('tool-' + currentTool);
-  }
-  function applyZoom(){
-    if (mainCanvas) mainCanvas.style.transform = `scale(${zoom})`;
-    const el = $c('edZoomVal'); if (el) el.textContent = Math.round(zoom*100) + '%';
-  }
-
+  /* ===== CANVAS INTERACTION ===== */
   function getPointer(e){
-    const canvas = mainCanvas;
-    const rect = canvas.getBoundingClientRect();
-    const sx = canvas.width / rect.width;
-    const sy = canvas.height / rect.height;
+    const rect = mainCanvas.getBoundingClientRect();
+    const sx = mainCanvas.width / rect.width;
+    const sy = mainCanvas.height / rect.height;
     return { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy };
   }
-
   function onPointerDown(e){
     const base = currentImage || originalImage;
     if (!base) return;
+    if (activePanel !== 'draw' && activePanel !== 'text') return;
     const p = getPointer(e);
-    if (currentTool === 'picker'){
-      try{
-        const ctx = mainCanvas.getContext('2d');
-        const d = ctx.getImageData(Math.round(p.x), Math.round(p.y), 1, 1).data;
-        const hex = '#' + [d[0],d[1],d[2]].map(x => x.toString(16).padStart(2,'0')).join('');
-        brushColor = hex;
-        $c('edBrushColor').value = hex;
-        toast('اللون: ' + hex, 'ok');
-      }catch{}
-      return;
-    }
-    if (currentTool === 'text'){
-      const text = $c('edTextInput').value.trim() || 'نص';
-      const size = +$c('edTextSize').value;
-      const color = $c('edTextColor').value;
-      const font = $c('edTextFont').value;
-      const shadow = $c('edTextShadow').value;
-      texts.push({ text, x:p.x, y:p.y, size, color, font, shadow });
+
+    if (activePanel === 'text'){
+      const text = $c('textInput').value.trim() || 'نص';
+      const size = +$c('textSize').value;
+      const color = $c('textColor').value;
+      const font = $c('textFont').value;
+      const bg = $c('textBg').value;
+      texts.push({ text, x:p.x, y:p.y, size, color, font, bg });
       render();
       toast('تمت إضافة النص');
       return;
     }
-    if (currentTool === 'brush' || currentTool === 'eraser'){
+    if (activePanel === 'draw'){
       drawing = true;
-      currentStroke = { tool: currentTool, color: brushColor, size: brushSize, opacity: brushOpacity, points: [p] };
+      currentStroke = { tool: drawMode, color: brushColor, size: brushSize, opacity: brushOpacity, points: [p] };
       mainCanvas.classList.add('dragging');
       try{ mainCanvas.setPointerCapture(e.pointerId); }catch{}
     }
@@ -711,6 +751,49 @@ const Editor = (() => {
       drawing = false;
       mainCanvas.classList.remove('dragging');
     }
+  }
+
+  /* ===== RENDER ===== */
+  function applyFilter(id, intensity, ctx){
+    /* intensity between 0 and 1 */
+    const t = intensity;
+    if (id === 'none') return;
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-atop';
+    if (id === 'grayscale'){
+      ctx.fillStyle = `rgba(128,128,128,${t})`;
+      ctx.globalCompositeOperation = 'saturation';
+      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    } else if (id === 'sepia'){
+      ctx.globalCompositeOperation = 'overlay';
+      ctx.fillStyle = `rgba(200,150,80,${t*.6})`;
+      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    } else if (id === 'invert'){
+      ctx.globalCompositeOperation = 'difference';
+      ctx.fillStyle = `rgba(255,255,255,${t})`;
+      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    } else if (id === 'vivid'){
+      ctx.globalCompositeOperation = 'overlay';
+      ctx.fillStyle = `rgba(255,100,150,${t*.3})`;
+      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    } else if (id === 'cool'){
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.fillStyle = `rgba(150,200,255,${t*.4})`;
+      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    } else if (id === 'warm'){
+      ctx.globalCompositeOperation = 'overlay';
+      ctx.fillStyle = `rgba(255,180,100,${t*.5})`;
+      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    } else if (id === 'dramatic'){
+      ctx.globalCompositeOperation = 'overlay';
+      ctx.fillStyle = `rgba(0,0,0,${t*.3})`;
+      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    } else if (id === 'fade'){
+      ctx.globalCompositeOperation = 'source-atop';
+      ctx.fillStyle = `rgba(255,245,220,${t*.25})`;
+      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    }
+    ctx.restore();
   }
 
   function render(){
@@ -733,11 +816,9 @@ const Editor = (() => {
     const s = adjustments.saturation;
     const h = adjustments.hue;
     const blur = adjustments.blur;
-    const gray = adjustments.gray;
-    const sepia = adjustments.sepia;
-    const invert = adjustments.invert;
-    fg.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) hue-rotate(${h}deg) blur(${blur}px) grayscale(${gray}%) sepia(${sepia}%) invert(${invert}%)`;
-    fg.globalAlpha = imgAlpha;
+    const op = adjustments.opacity;
+    fg.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) hue-rotate(${h}deg) blur(${blur}px)`;
+    fg.globalAlpha = imgAlpha * (op/100);
     const scaledW = W * imgScale;
     const scaledH = H * imgScale;
     const dx = (W - scaledW) / 2;
@@ -746,6 +827,9 @@ const Editor = (() => {
     fg.filter = 'none';
     fg.globalAlpha = 1;
 
+    /* Apply filter on fg */
+    if (filterId !== 'none') applyFilter(filterId, filterIntensity, fg);
+
     /* Strokes */
     for (const st of strokes) drawStroke(fg, st);
     if (currentStroke) drawStroke(fg, currentStroke);
@@ -753,20 +837,22 @@ const Editor = (() => {
     /* Texts */
     for (const t of texts){
       fg.save();
-      fg.font = `${t.size}px ${t.font}`;
-      fg.fillStyle = t.color;
+      fg.font = `bold ${t.size}px ${t.font}`;
       fg.textAlign = 'center';
       fg.textBaseline = 'middle';
-      if (t.shadow && t.shadow !== 'none'){
-        fg.shadowColor = t.shadow;
-        fg.shadowBlur = 12;
-        fg.shadowOffsetY = 3;
+      const tw = fg.measureText(t.text).width;
+      if (t.bg && t.bg !== 'none'){
+        fg.fillStyle = t.bg;
+        const pad = t.size * .3;
+        roundRect(fg, t.x - tw/2 - pad, t.y - t.size/2 - pad*.6, tw + pad*2, t.size + pad*1.2, 8);
+        fg.fill();
       }
+      fg.fillStyle = t.color;
       fg.fillText(t.text, t.x, t.y);
       fg.restore();
     }
 
-    /* Main canvas */
+    /* Main */
     const ctx = mainCanvas.getContext('2d');
     ctx.clearRect(0,0,W,H);
 
@@ -774,7 +860,6 @@ const Editor = (() => {
       ctx.fillStyle = currentBg.value;
       ctx.fillRect(0,0,W,H);
     } else if (currentBg.type === 'original'){
-      /* Original = no background (checker) */
       drawChecker(ctx, W, H);
     } else if ((currentBg.type === 'preset' || currentBg.type === 'upload') && bgImage?.complete && bgImage.naturalWidth){
       drawCover(ctx, bgImage, W, H);
@@ -783,6 +868,16 @@ const Editor = (() => {
     }
 
     ctx.drawImage(fgCanvas, 0, 0);
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    ctx.closePath();
   }
 
   function drawStroke(ctx, st){
@@ -806,7 +901,6 @@ const Editor = (() => {
     }
     ctx.restore();
   }
-
   function drawCover(ctx, img, w, h){
     const ir = img.width / img.height;
     const cr = w / h;
@@ -815,12 +909,11 @@ const Editor = (() => {
     else { sw = img.width; sh = sw / cr; sx = 0; sy = (img.height - sh) / 2; }
     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
   }
-
   function drawChecker(ctx, w, h){
     const s = Math.max(12, Math.round(w/60));
     for (let y = 0; y < h; y += s){
       for (let x = 0; x < w; x += s){
-        ctx.fillStyle = ((x/s + y/s) % 2 === 0) ? '#1a130c' : '#221a12';
+        ctx.fillStyle = ((x/s + y/s) % 2 === 0) ? '#160d18' : '#1e1422';
         ctx.fillRect(x, y, s, s);
       }
     }
@@ -843,7 +936,6 @@ const Editor = (() => {
     }
     render();
   }
-
   function handleBgUpload(file){
     if (!file.type.startsWith('image/')) return toast('صيغة غير مدعومة', 'err');
     if (file.size > 10*1024*1024) return toast('الحجم > 10MB', 'err');
@@ -852,28 +944,28 @@ const Editor = (() => {
     toast('تم تحميل الخلفية ✓', 'ok');
   }
 
-  async function applySave(){
+  /* ===== SAVE / DOWNLOAD ===== */
+  async function saveImage(){
     const base = currentImage || originalImage;
     if (!base) return toast('لا توجد صورة', 'err');
-    const btn = $c('edSaveBtn');
+    const btn = $c('btnSave');
     btn.disabled = true;
-    const orig = btn.textContent;
-    btn.textContent = 'جاري الحفظ...';
+    const orig = btn.innerHTML;
+    btn.innerHTML = 'جاري الحفظ...';
     try{
       render();
       const outBlob = await new Promise(r => mainCanvas.toBlob(r, 'image/png'));
       finalBlob = outBlob;
-      $c('edDownloadBtn')?.classList.remove('hidden');
-      toast('تم حفظ التعديلات ✓ اضغط تحميل', 'ok');
+      $c('btnDownload')?.classList.remove('hidden');
+      toast('تم الحفظ ✓ اضغط تحميل', 'ok');
     }catch(e){
       console.error(e);
       toast('فشل الحفظ', 'err');
     } finally {
       btn.disabled = false;
-      btn.textContent = orig;
+      btn.innerHTML = orig;
     }
   }
-
   function downloadBlob(blob, name){
     if (!blob){ toast('لا يوجد ملف', 'err'); return; }
     const url = URL.createObjectURL(blob);
@@ -887,16 +979,15 @@ const Editor = (() => {
   function reset(){
     originalImage = null; currentImage = null; finalBlob = null;
     strokes = []; texts = [];
-    adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, gray:0, sepia:0, invert:0 };
+    adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
+    filterId = 'none'; filterIntensity = 1;
     currentBg = { type:'original' };
     bgImage = null;
-    bgRemoved = false;
     imgScale = 1; imgAlpha = 1;
-    $c('edStartStage')?.classList.remove('hidden');
-    $c('edEditorStage')?.classList.add('hidden');
-    $c('edStartLoading')?.classList.add('hidden');
-    $c('edDownloadBtn')?.classList.add('hidden');
-    $c('edTextInput').value = '';
+    $c('uploadStage')?.classList.remove('hidden');
+    $c('workspace')?.classList.add('hidden');
+    $c('btnDownload')?.classList.add('hidden');
+    closePanel();
   }
 
   async function openWithBlob(blob){
@@ -904,12 +995,11 @@ const Editor = (() => {
       const url = URL.createObjectURL(blob);
       const img = new Image();
       img.onload = () => {
-        originalImage = img;
-        currentImage = img;
-        bgRemoved = false;
+        originalImage = img; currentImage = img;
         strokes = []; texts = [];
         currentBg = { type:'original' };
-        adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, gray:0, sepia:0, invert:0 };
+        adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
+        filterId = 'none'; filterIntensity = 1;
         imgScale = 1; imgAlpha = 1;
         render(); applyZoom();
         resolve();
@@ -917,9 +1007,9 @@ const Editor = (() => {
       img.onerror = reject;
       img.src = url;
     });
-    $c('edStartStage')?.classList.add('hidden');
-    $c('edEditorStage')?.classList.remove('hidden');
-    $c('edDownloadBtn')?.classList.add('hidden');
+    $c('uploadStage')?.classList.add('hidden');
+    $c('workspace')?.classList.remove('hidden');
+    $c('btnDownload')?.classList.add('hidden');
     finalBlob = null;
   }
 
@@ -928,17 +1018,17 @@ const Editor = (() => {
 
 /* ========== APP ========== */
 const App = (() => {
-  let selectedFile = null, resultBlob = null, opsCache = [];
+  let opsCache = [];
   const showAuth = () => { $('authScreen').classList.remove('hidden'); $('appScreen').classList.add('hidden'); };
   const showApp = () => { $('authScreen').classList.add('hidden'); $('appScreen').classList.remove('hidden'); };
   async function enterApp(){
     if(!Auth.profile && Auth.session?.user){ Auth.profile = await API.getProfile(Auth.session.user.id, Auth.session.access_token); }
-    updateAdminVis(); updatePlanUI(); showApp(); switchView('studio'); await refreshUsage();
+    updateAdminVis(); updatePlanUI(); showApp(); switchView('editor'); await refreshUsage();
   }
   function switchView(name){
     if(name === 'admin' && !Auth.isDev()){ toast('لا تملك صلاحية', 'err'); return; }
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === name));
-    ['studio','editor','history','profile','admin'].forEach(v => { const el = $(v+'View'); if(el) el.classList.toggle('hidden', v !== name); });
+    ['editor','history','profile','admin'].forEach(v => { const el = $(v+'View'); if(el) el.classList.toggle('hidden', v !== name); });
     if(name === 'history') refreshHistory();
     if(name === 'profile') refreshProfile();
     if(name === 'admin') Admin.refresh();
@@ -985,7 +1075,7 @@ const App = (() => {
       grid.addEventListener('click', async e => {
         const b = e.target.closest('[data-act]'); if(!b) return;
         const op = opsCache.find(o => String(o.id) === String(b.dataset.id)); if(!op) return;
-        if(b.dataset.act === 'dl'){ b.disabled=true; b.textContent='...'; try{ const u = await API.resolveImg(op.result_url, s.access_token); if(!u) throw new Error('تعذر تجهيز الصورة'); await downloadFromUrl(u, `removebg-${String(op.id).slice(0,8)}.png`); }catch(err){ toast(err.message||'فشل التحميل','err'); } finally{ b.disabled=false; b.textContent='⬇ تحميل'; } }
+        if(b.dataset.act === 'dl'){ b.disabled=true; b.textContent='...'; try{ const u = await API.resolveImg(op.result_url, s.access_token); if(!u) throw new Error('تعذر التجهيز'); await downloadFromUrl(u, `removebg-${String(op.id).slice(0,8)}.png`); }catch(err){ toast(err.message||'فشل التحميل','err'); } finally{ b.disabled=false; b.textContent='⬇ تحميل'; } }
         if(b.dataset.act === 'del'){ if(!confirm('حذف هذه العملية؟')) return; b.disabled=true; b.textContent='...'; try{ await API.delOp(s.access_token, op.id); await API.removeFiles(s.access_token, [op.original_url, op.result_url]); toast('تم الحذف ✓','ok'); await refreshHistory(); }catch(err){ toast(err.message||'فشل الحذف','err'); b.disabled=false; b.textContent='🗑 حذف'; } }
       });
     }catch(e){ wrap.innerHTML = `<div class="empty"><div class="empty-icon">!</div><h3>تعذر التحميل</h3><p>${esc(e.message)}</p></div>`; }
@@ -1012,62 +1102,6 @@ const App = (() => {
       const ps = $('pStatus'); if(ps) ps.textContent = p?.is_banned ? 'موقوف' : 'نشط';
     }catch(e){ toast(e.message, 'err'); }
   }
-  function resetResult(){
-    resultBlob = null;
-    const pr = $('previewResult'); if(pr) pr.src = '';
-    $('resultCard')?.classList.add('hidden');
-    $('downloadBtn')?.classList.add('hidden');
-    $('editBtn')?.classList.add('hidden');
-  }
-  function setFile(file){
-    selectedFile = file;
-    const prev = $('previewOriginal');
-    if(prev){ if(prev.src?.startsWith('blob:')) URL.revokeObjectURL(prev.src); prev.src = URL.createObjectURL(file); }
-    resetResult();
-    $('previewArea')?.classList.remove('hidden');
-    $('uploadPanel')?.classList.add('hidden');
-    $('processing')?.classList.add('hidden');
-    const rb = $('removeBtn'); if(rb) rb.disabled = false;
-    const cb = $('changeBtn'); if(cb) cb.disabled = false;
-  }
-  async function validateFile(f){
-    if(!f) return {ok:false, msg:'اختر صورة'};
-    const allowed = ['image/png','image/jpeg','image/webp'];
-    if(!allowed.includes(f.type)) return {ok:false, msg:'صيغة غير مدعومة'};
-    if(f.size > CONFIG.MAX_FILE_MB * 1024 * 1024) return {ok:false, msg:`الحجم > ${CONFIG.MAX_FILE_MB}MB`};
-    return {ok:true};
-  }
-  async function handleFile(f){ const v = await validateFile(f); if(!v.ok) return toast(v.msg, 'err'); setFile(f); }
-  async function doRemove(){
-    if(!selectedFile) return toast('اختر صورة أولًا', 'err');
-    const s = await Auth.valid();
-    if(!s?.access_token || !s?.user?.id){ toast('انتهت الجلسة', 'err'); showAuth(); return; }
-    Auth.session = s;
-    if(!Auth.profile) Auth.profile = await API.getProfile(s.user.id, s.access_token);
-    if(Auth.profile?.is_banned) return toast('الحساب موقوف', 'err');
-    if(!Auth.isPro()){
-      const today = await API.countToday(s.access_token, s.user.id).catch(()=>0);
-      const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
-      if(lim > 0 && today >= lim) return toast(`وصلت للحد اليومي (${lim})`, 'err');
-    }
-    const btn = $('removeBtn'); if(btn) btn.disabled = true;
-    $('processing')?.classList.remove('hidden');
-    resetResult();
-    try{
-      const orig = await API.upload(s.access_token, s.user.id, selectedFile, 'orig');
-      const blob = await API.removeBg(selectedFile);
-      resultBlob = blob;
-      const res = await API.upload(s.access_token, s.user.id, blob, 'res');
-      await API.saveOp(s.access_token, orig, res);
-      const pr = $('previewResult'); if(pr) pr.src = URL.createObjectURL(blob);
-      $('resultCard')?.classList.remove('hidden');
-      $('downloadBtn')?.classList.remove('hidden');
-      $('editBtn')?.classList.remove('hidden');
-      toast('تمت إزالة الخلفية ✓', 'ok');
-      await refreshUsage();
-    }catch(e){ console.error(e); toast(e.message || 'حدث خطأ', 'err'); }
-    finally{ $('processing')?.classList.add('hidden'); if(btn) btn.disabled = false; }
-  }
   function downloadBlob(blob, name){
     if(!blob){ toast('لا يوجد ملف', 'err'); return; }
     const url = URL.createObjectURL(blob);
@@ -1089,20 +1123,6 @@ const App = (() => {
       finally{ e.currentTarget.disabled = false; }
     });
     $('logoutBtn')?.addEventListener('click', () => Auth.doLogout(true));
-    $('chooseBtn')?.addEventListener('click', e => { e.stopPropagation(); $('fileInput').click(); });
-    $('uploadPanel')?.addEventListener('click', () => $('fileInput').click());
-    $('changeBtn')?.addEventListener('click', () => $('fileInput').click());
-    $('fileInput')?.addEventListener('change', () => { const f = $('fileInput').files?.[0]; $('fileInput').value = ''; if(f) handleFile(f); });
-    ['dragenter','dragover'].forEach(n => $('uploadPanel')?.addEventListener(n, e => { e.preventDefault(); $('uploadPanel').classList.add('drag'); }));
-    ['dragleave','drop'].forEach(n => $('uploadPanel')?.addEventListener(n, e => { e.preventDefault(); $('uploadPanel').classList.remove('drag'); }));
-    $('uploadPanel')?.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if(f) handleFile(f); });
-    $('removeBtn')?.addEventListener('click', doRemove);
-    $('downloadBtn')?.addEventListener('click', () => { if(!resultBlob){ toast('لا يوجد ملف', 'err'); return; } downloadBlob(resultBlob, `removebg-${Date.now()}.png`); toast('تم التحميل ✓', 'ok'); });
-    $('editBtn')?.addEventListener('click', async () => {
-      if(!resultBlob){ toast('أزل الخلفية أولاً', 'err'); return; }
-      switchView('editor');
-      await Editor.openWithBlob(resultBlob);
-    });
   }
   return { showAuth, showApp, enterApp, switchView, bindUI, refreshUsage };
 })();
@@ -1126,8 +1146,7 @@ const Admin = (() => {
       if($('mOps')) $('mOps').textContent = opsCache.length;
       if($('mToday')) $('mToday').textContent = to.length;
       if($('mActive')) $('mActive').textContent = act.size;
-      renderUsers();
-      await renderOps();
+      renderUsers(); await renderOps();
     }catch(e){ list.innerHTML = `<div class="empty"><div class="empty-icon">!</div><h3>تعذر التحميل</h3><p>${esc(e.message)}</p></div>`; }
   }
   function renderUsers(){
@@ -1167,9 +1186,9 @@ const Admin = (() => {
     $('modalTitle').textContent = 'إدارة الحساب';
     $('modalBody').innerHTML = `
       <div class="summary"><div class="summary-av">${esc(initials(profile.username || profile.email || '?'))}</div><div><div class="summary-name">${esc(profile.username || 'بدون اسم')}</div><div class="summary-email">${esc(profile.email || '—')}</div><div class="summary-pills"><div class="summary-pill">${esc(profile.plan || 'free')}</div><div class="summary-pill">${esc(profile.operations_count || 0)} عملية</div><div class="summary-pill">اليوم ${esc(profile.today_operations || 0)}</div></div></div></div>
-      <div class="mg-grid"><div class="mg-box"><label>الخطة</label><select id="aPlan" class="plan-select"><option value="free" ${profile.plan==='free'?'selected':''}>Free</option><option value="pro" ${profile.plan==='pro'?'selected':''}>Pro — بلا حدود</option><option value="custom" ${profile.plan==='custom'?'selected':''}>Custom</option></select></div><div class="mg-box"><label>الحد اليومي</label><input id="aLimit" class="limit-input" type="number" min="0" value="${curLim}"></div></div>
+      <div class="mg-grid"><div class="mg-box"><label>الخطة</label><select id="aPlan" class="plan-select"><option value="free" ${profile.plan==='free'?'selected':''}>Free</option><option value="pro" ${profile.plan==='pro'?'selected':''}>Pro</option><option value="custom" ${profile.plan==='custom'?'selected':''}>Custom</option></select></div><div class="mg-box"><label>الحد اليومي</label><input id="aLimit" class="limit-input" type="number" min="0" value="${curLim}"></div></div>
       <div class="ban-row"><span>إيقاف الحساب</span><button id="aBan" class="switch ${profile.is_banned?'active':''}" type="button"></button></div>
-      <div class="modal-actions"><button id="aSave" class="btn-main small" type="button"><span class="btn-text">حفظ</span></button><button id="aClose" class="btn-ghost" type="button">إغلاق</button></div>
+      <div class="modal-actions"><button id="aSave" class="btn-primary" type="button" style="min-height:46px">حفظ</button><button id="aClose" class="btn-ghost" type="button">إغلاق</button></div>
       <div class="modal-section-title">عمليات المستخدم</div><div id="aOps" class="ops-grid"></div>
     `;
     $('modal').classList.add('show');
@@ -1192,7 +1211,7 @@ const Admin = (() => {
     $('modal')?.addEventListener('click', e => { if(e.target === $('modal')) closeModal(); });
     $('adminSearch')?.addEventListener('input', renderUsers);
     $('adminRefresh')?.addEventListener('click', async e => { e.currentTarget.disabled = true; try{ await refresh(); toast('تم التحديث ✓','ok'); } finally{ e.currentTarget.disabled = false; } });
-    $('adminBack')?.addEventListener('click', () => App.switchView('studio'));
+    $('adminBack')?.addEventListener('click', () => App.switchView('editor'));
   }
   return { init, refresh };
 })();
