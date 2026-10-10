@@ -8,94 +8,76 @@
 <title>RemoveBG · Sandstorm Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <!-- ==================== LOADER ==================== -->
 <div id="loader">
-  <div class="ld-glow g1"></div>
-  <div class="ld-glow g2"></div>
-  <div class="ld-glow g3"></div>
+  <div class="ld-bg-orb o1"></div>
+  <div class="ld-bg-orb o2"></div>
   <canvas id="fx"></canvas>
 
-  <div class="ld-orbit">
-    <div class="ld-ring r1"></div>
-    <div class="ld-ring r2"></div>
-    <div class="ld-ring r3"></div>
-    <div class="ld-ring r4"></div>
-    <div class="ld-ring r5"></div>
-    <div class="ld-dot d1"></div>
-    <div class="ld-dot d2"></div>
-    <div class="ld-dot d3"></div>
-
-    <div class="ld-core">
-      <div class="ld-pulse"></div>
-      <div class="ld-inner"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
+  <div class="ld-visual">
+    <div class="ld-halo"></div>
+    <svg class="ld-ring r1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="86 203"/></svg>
+    <svg class="ld-ring r2" viewBox="0 0 100 100"><circle cx="50" cy="50" r="36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="56 170"/></svg>
+    <svg class="ld-ring r3" viewBox="0 0 100 100"><circle cx="50" cy="50" r="27" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="42 128"/></svg>
+    <div class="ld-center">
+      <img src="https://up6.cc/2026/09/178886608408951.jpg" alt="">
     </div>
   </div>
 
-  <div class="ld-info">
-    <div class="ld-eyebrow">◆ SANDSTORM STUDIO ◆</div>
-    <div class="ld-title">Remove<span>BG</span></div>
-    <div class="ld-sub">PREMIUM BACKGROUND ENGINE</div>
-    <div class="ld-progress">
-      <div class="ld-progress-fill" id="ldFill"></div>
-    </div>
+  <div class="ld-text">
+    <div class="ld-tag">SANDSTORM STUDIO</div>
+    <div class="ld-name">Remove<span>BG</span></div>
+    <div class="ld-bar"><div class="ld-bar-fill" id="ldFill"></div></div>
     <div class="ld-pct" id="ldPct">0%</div>
   </div>
 </div>
 
 <!-- ==================== AUTH ==================== -->
 <section id="authScreen" class="auth hidden">
-  <div class="auth-orb oa"></div>
-  <div class="auth-orb ob"></div>
-  <div class="auth-orb oc"></div>
-  <div class="auth-grid"></div>
+  <div class="auth-bg">
+    <div class="auth-orb o1"></div>
+    <div class="auth-orb o2"></div>
+    <div class="auth-orb o3"></div>
+    <div class="auth-mesh"></div>
+  </div>
 
   <div class="auth-card">
-    <span class="corner c-tl"></span><span class="corner c-tr"></span>
-    <span class="corner c-bl"></span><span class="corner c-br"></span>
-    <span class="glow-edge"></span>
+    <span class="glass-line"></span>
 
-    <div class="auth-logo-wrap">
-      <div class="auth-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
-      <div class="auth-logo-glow"></div>
+    <div class="auth-logo">
+      <img src="https://up6.cc/2026/09/178886608408951.jpg" alt="">
     </div>
 
     <div class="auth-head">
-      <h1 id="formTitle">أهلًا بعودتك</h1>
-      <p id="formSub">سجّل دخولك لمتابعة رحلتك الإبداعية</p>
+      <h1 id="formTitle">مرحباً بك</h1>
+      <p id="formSub">سجّل دخولك لمتابعة إبداعك</p>
     </div>
-
-    <div class="auth-line"></div>
 
     <form id="authForm" autocomplete="on" novalidate>
       <div class="field hidden" id="fUsername">
         <label>اسم المستخدم</label>
-        <div class="input-wrap">
-          <input id="username" type="text" maxlength="20" placeholder="username_123" autocomplete="username" spellcheck="false">
-          <span class="input-icon right-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="7" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
-        </div>
+        <input id="username" type="text" maxlength="20" placeholder="username" autocomplete="username" spellcheck="false">
         <span class="err" id="errUsername"></span>
       </div>
 
       <div class="field">
         <label>البريد الإلكتروني</label>
-        <div class="input-wrap">
-          <input id="email" type="email" placeholder="you@example.com" autocomplete="email" spellcheck="false" required>
-          <span class="input-icon right-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
-        </div>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email" spellcheck="false" required>
         <span class="err" id="errEmail"></span>
       </div>
 
       <div class="field">
         <label>كلمة المرور</label>
-        <div class="input-wrap">
+        <div class="pw-wrap">
           <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
-          <button class="eye left-icon" id="eyePass" type="button" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
-          <span class="input-icon right-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+          <button type="button" class="eye" id="eyePass" tabindex="-1">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
         </div>
         <div class="strength hidden" id="strength">
           <div class="bars" data-lvl="0"><i></i><i></i><i></i><i></i></div>
@@ -106,10 +88,11 @@
 
       <div class="field hidden" id="fConfirm">
         <label>تأكيد كلمة المرور</label>
-        <div class="input-wrap">
+        <div class="pw-wrap">
           <input id="confirm" type="password" placeholder="أعد الإدخال" autocomplete="new-password">
-          <button class="eye left-icon" id="eyeConfirm" type="button" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
-          <span class="input-icon right-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+          <button type="button" class="eye" id="eyeConfirm" tabindex="-1">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
         </div>
         <span class="err" id="errConfirm"></span>
       </div>
@@ -118,28 +101,21 @@
         <li data-r="len"><i></i>8 أحرف على الأقل</li>
         <li data-r="num"><i></i>رقم واحد على الأقل</li>
         <li data-r="upper"><i></i>حرف كبير (A-Z)</li>
-        <li data-r="match"><i></i>الكلمتان متطابقتان</li>
+        <li data-r="match"><i></i>متطابقتان</li>
       </ul>
 
-      <div class="forgot-row">
-        <button type="button" class="link" id="forgotBtn">نسيت كلمة المرور؟</button>
-      </div>
+      <button type="button" class="forgot" id="forgotBtn">نسيت كلمة المرور؟</button>
 
-      <button type="submit" id="submitBtn" class="btn-main" disabled>
-        <span class="btn-glow"></span>
+      <button type="submit" id="submitBtn" class="btn-primary" disabled>
         <span class="btn-text">تسجيل الدخول</span>
-        <span class="btn-arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg></span>
       </button>
     </form>
 
     <div id="authMsg" class="msg"></div>
+
     <div class="auth-switch">
       <span id="switchText">ليس لديك حساب؟</span>
-      <button id="switchBtn" class="link-btn" type="button">أنشئ حساباً</button>
-    </div>
-    <div class="auth-foot">
-      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/></svg>
-      اتصال آمن · SSL 256-bit
+      <button id="switchBtn" type="button">أنشئ حساباً</button>
     </div>
   </div>
 </section>
@@ -149,373 +125,299 @@
   <div class="container">
 
     <header class="hdr">
-      <span class="corner c-tl"></span><span class="corner c-tr"></span>
-      <span class="corner c-bl"></span><span class="corner c-br"></span>
       <div class="brand">
         <div class="brand-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt=""></div>
-        <div class="brand-txt"><strong>RemoveBG</strong><span>SANDSTORM</span></div>
+        <div class="brand-txt">
+          <strong>RemoveBG</strong>
+          <span>SANDSTORM</span>
+        </div>
       </div>
       <div class="hdr-tools">
-        <button id="adminMini" class="dev-btn hidden" type="button">✦ المطوّر</button>
+        <button id="adminMini" class="btn-mini hidden" type="button">✦ المطوّر</button>
         <div id="planPill" class="pill"><span class="dot"></span><span id="planTxt">Free</span></div>
       </div>
     </header>
 
     <nav class="nav">
-      <button class="nav-btn active" data-view="studio" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9V6a2 2 0 0 1 2-2h3M15 4h3a2 2 0 0 1 2 2v3M20 15v3a2 2 0 0 1-2 2h-3M9 20H6a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="12" r="3"/></svg>
-        <span>الاستوديو</span>
-      </button>
-      <button class="nav-btn" data-view="editor" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      <button class="nav-btn active" data-view="editor" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
         <span>المحرر</span>
       </button>
       <button class="nav-btn" data-view="history" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l4 2"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l4 2"/></svg>
         <span>السجل</span>
       </button>
       <button class="nav-btn" data-view="profile" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="7" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="7" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
         <span>حسابي</span>
       </button>
       <button id="adminNav" class="nav-btn hidden" data-view="admin" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l7 4v5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V7l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 4v5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V7l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
         <span>المطوّر</span>
       </button>
     </nav>
 
-    <!-- STUDIO -->
-    <section id="studioView" class="view">
-      <div class="hero">
-        <span class="corner c-tl"></span><span class="corner c-tr"></span>
-        <span class="corner c-bl"></span><span class="corner c-br"></span>
-        <div class="hero-glow"></div>
-        <div class="hero-grid"></div>
-        <div class="hero-inner">
-          <div class="hero-badge"><i></i> SANDSTORM ENGINE</div>
-          <h1>استوديو <span>إزالة الخلفية</span></h1>
-          <p class="hero-desc">ارفع صورة، أزل خلفيتها فوراً، ثم انتقل للمحرر الكامل</p>
-        </div>
-      </div>
-      <div class="workspace">
-        <span class="corner c-tl"></span><span class="corner c-tr"></span>
-        <span class="corner c-bl"></span><span class="corner c-br"></span>
-        <div class="ws-head"><div class="ws-title"><i></i> مساحة المعالجة</div><div class="ws-status">● ONLINE</div></div>
-        <div id="uploadPanel" class="upload-area">
-          <div class="upload-inner">
-            <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
-            <h3>اختر صورة للبدء</h3>
-            <p>PNG · JPG · WEBP — حتى 20MB</p>
-            <button id="chooseBtn" class="btn-main small" type="button"><span class="btn-glow"></span><span class="btn-text">اختيار صورة</span></button>
-          </div>
-        </div>
-        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
-        <div id="previewArea" class="preview hidden">
-          <div class="preview-grid">
-            <div class="pv-card"><div class="pv-head"><strong>الأصلية</strong><span>ORIGINAL</span></div><div class="pv-img"><img id="previewOriginal" alt=""></div></div>
-            <div class="pv-card hidden" id="resultCard"><div class="pv-head"><strong>النتيجة</strong><span>TRANSPARENT</span></div><div class="pv-img checker"><img id="previewResult" alt=""></div></div>
-          </div>
-          <div class="pv-actions">
-            <button id="removeBtn" class="btn-main small" type="button"><span class="btn-glow"></span><span class="btn-text">✂️ إزالة الخلفية</span></button>
-            <button id="changeBtn" class="btn-ghost" type="button">تغيير</button>
-            <button id="editBtn" class="btn-accent hidden" type="button">✎ افتح المحرر</button>
-            <button id="downloadBtn" class="btn-success hidden" type="button">⬇ تحميل</button>
-          </div>
-          <div id="processing" class="processing hidden"><div class="proc-ring"><span></span></div><strong>جاري المعالجة...</strong></div>
-        </div>
-      </div>
-    </section>
+    <!-- ============ EDITOR (unified) ============ -->
+    <section id="editorView" class="view">
+      <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
 
-    <!-- EDITOR -->
-    <section id="editorView" class="view hidden">
-      <div class="ed-head">
-        <div>
-          <div class="sec-title">المحرر <span>الاحترافي</span></div>
-          <p class="ed-head-sub">ارفع صورتك كما هي، ثم اختر ما تريد: إزالة الخلفية، تعديل، كتابة، رسم، خلفيات</p>
+      <!-- UPLOAD STAGE -->
+      <div id="uploadStage" class="up-stage">
+        <div class="up-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
         </div>
-        <button id="edBackStudio" class="btn-ghost" type="button">← الاستوديو</button>
-      </div>
-
-      <!-- START STAGE -->
-      <div id="edStartStage" class="ed-start">
-        <span class="corner c-tl"></span><span class="corner c-tr"></span>
-        <span class="corner c-bl"></span><span class="corner c-br"></span>
-        <input id="edQuickFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
-
-        <div class="ed-start-content">
-          <div class="ed-start-badge"><i></i> جاهز للانطلاق</div>
-          <div class="ed-start-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-            </svg>
-          </div>
-          <h3>ابدأ رحلتك الإبداعية</h3>
-          <p>ارفع صورتك كما هي، ثم حرّرها كيفما تشاء</p>
-          <div class="ed-start-formats">PNG · JPG · WEBP — حتى 20MB</div>
-          <button id="edStartBtn" class="btn-main" type="button">
-            <span class="btn-glow"></span>
-            <span class="btn-text">ابدأ التحرير</span>
-            <span class="btn-arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg></span>
-          </button>
-          <div class="ed-start-hint">أو اسحب وأفلت الصورة هنا</div>
-        </div>
-        <div class="ed-start-loading hidden" id="edStartLoading">
-          <div class="bg-loading-spinner">
-            <svg viewBox="0 0 100 100" class="bl-ring br1"><circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="72 217" stroke-linecap="round"/></svg>
-            <svg viewBox="0 0 100 100" class="bl-ring br2"><circle cx="50" cy="50" r="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="53 161" stroke-linecap="round"/></svg>
-            <svg viewBox="0 0 100 100" class="bl-ring br3"><circle cx="50" cy="50" r="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="35 104" stroke-linecap="round"/></svg>
-          </div>
-          <h3>جاري فتح المحرر...</h3>
-        </div>
+        <h2>ابدأ التحرير</h2>
+        <p>ارفع صورة وابدأ بإزالة الخلفية، إضافة خلفية جديدة، كتابة، رسم، فلاتر، تعديلات كاملة</p>
+        <div class="up-formats">PNG · JPG · WEBP · حتى 20MB</div>
+        <button id="chooseBtn" class="btn-primary" type="button">اختر صورة</button>
+        <div class="up-hint">أو اسحب وأفلت الصورة هنا</div>
       </div>
 
       <!-- EDITOR STAGE -->
-      <div id="edEditorStage" class="ed-editor-stage hidden">
-        <div class="ed-toolbar">
-          <button class="ed-tool active" data-tool="move" title="تحريك">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
-            <span>تحريك</span>
+      <div id="workspace" class="ws hidden">
+        <!-- canvas -->
+        <div class="ws-canvas-wrap">
+          <div class="ws-canvas-head">
+            <div class="ws-title"><i></i> مساحة العمل</div>
+            <div class="ws-actions">
+              <button id="btnUndo" class="icon-btn" title="تراجع">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+              </button>
+              <button id="btnReset" class="icon-btn" title="إعادة ضبط">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="ws-canvas-inner" id="canvasWrap">
+            <canvas id="mainCanvas"></canvas>
+            <div id="canvasLoading" class="ws-loading hidden">
+              <div class="proc-ring"><span></span></div>
+              <strong id="canvasLoadingText">جاري المعالجة...</strong>
+            </div>
+          </div>
+          <div class="ws-zoom-bar">
+            <button id="zoomOut" class="zoom-btn">−</button>
+            <span id="zoomVal">100%</span>
+            <button id="zoomIn" class="zoom-btn">+</button>
+            <button id="zoomReset" class="zoom-btn">↻</button>
+          </div>
+        </div>
+
+        <!-- tool panels -->
+        <div class="ws-panels">
+          <!-- BACKGROUND -->
+          <div class="panel hidden" data-panel="background">
+            <div class="panel-head">
+              <span>الخلفية</span>
+              <button class="panel-close" data-close-panel="background">×</button>
+            </div>
+
+            <button id="btnRemoveBg" class="big-action">
+              <div class="big-action-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+              </div>
+              <div class="big-action-text">
+                <strong>إزالة الخلفية</strong>
+                <span>حذف ذكي فوري</span>
+              </div>
+            </button>
+
+            <div class="divider"><span>أو اختر خلفية</span></div>
+
+            <div class="subtabs" id="bgSubtabs">
+              <button class="subtab active" data-bg="preset" type="button">مكتبة</button>
+              <button class="subtab" data-bg="upload" type="button">رفع</button>
+              <button class="subtab" data-bg="color" type="button">لون</button>
+              <button class="subtab" data-bg="transparent" type="button">شفاف</button>
+              <button class="subtab" data-bg="original" type="button">الأصل</button>
+            </div>
+
+            <div class="bg-content" data-bgcontent="preset">
+              <div class="presets" id="presets"></div>
+            </div>
+            <div class="bg-content hidden" data-bgcontent="upload">
+              <div class="upload-zone" id="bgUploadZone">
+                <input id="bgFile" type="file" accept="image/*" hidden>
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                <strong>ارفع صورة خلفية</strong>
+                <span>PNG · JPG · حتى 10MB</span>
+                <button id="bgChoose" class="btn-ghost small" type="button">اختيار ملف</button>
+              </div>
+            </div>
+            <div class="bg-content hidden" data-bgcontent="color">
+              <input type="color" id="bgColor" value="#e0b884" class="color-big">
+              <div class="swatches-big" id="bgSwatches"></div>
+            </div>
+            <div class="bg-content hidden" data-bgcontent="transparent">
+              <div class="note">
+                <div class="note-icon">◌</div>
+                <p>خلفية شفافة (PNG)</p>
+              </div>
+            </div>
+            <div class="bg-content hidden" data-bgcontent="original">
+              <div class="note">
+                <div class="note-icon">📷</div>
+                <p>الصورة الأصلية كما هي</p>
+              </div>
+            </div>
+
+            <div class="panel-group">
+              <label>حجم الصورة: <span id="valScale">100%</span></label>
+              <input type="range" id="rangeScale" min="30" max="300" value="100" class="range">
+            </div>
+            <div class="panel-group">
+              <label>شفافية الصورة: <span id="valAlpha">100%</span></label>
+              <input type="range" id="rangeAlpha" min="0" max="100" value="100" class="range">
+            </div>
+          </div>
+
+          <!-- ADJUST -->
+          <div class="panel hidden" data-panel="adjust">
+            <div class="panel-head">
+              <span>تعديلات</span>
+              <button class="panel-close" data-close-panel="adjust">×</button>
+            </div>
+            <div class="panel-group"><label>السطوع: <span id="valBrightness">100%</span></label><input type="range" id="rangeBrightness" min="20" max="200" value="100" class="range"></div>
+            <div class="panel-group"><label>التباين: <span id="valContrast">100%</span></label><input type="range" id="rangeContrast" min="20" max="200" value="100" class="range"></div>
+            <div class="panel-group"><label>التشبع: <span id="valSaturation">100%</span></label><input type="range" id="rangeSaturation" min="0" max="200" value="100" class="range"></div>
+            <div class="panel-group"><label>درجة اللون: <span id="valHue">0°</span></label><input type="range" id="rangeHue" min="-180" max="180" value="0" class="range"></div>
+            <div class="panel-group"><label>الضباب: <span id="valBlur">0px</span></label><input type="range" id="rangeBlur" min="0" max="20" value="0" class="range"></div>
+            <div class="panel-group"><label>الشفافية: <span id="valOpacity">100%</span></label><input type="range" id="rangeOpacity" min="10" max="100" value="100" class="range"></div>
+            <button id="btnResetAdjust" class="btn-ghost" type="button">إعادة ضبط التعديلات</button>
+          </div>
+
+          <!-- FILTERS -->
+          <div class="panel hidden" data-panel="filters">
+            <div class="panel-head">
+              <span>الفلاتر</span>
+              <button class="panel-close" data-close-panel="filters">×</button>
+            </div>
+            <div class="filters-grid" id="filtersGrid"></div>
+            <div class="panel-group" style="margin-top:14px">
+              <label>شدة الفلتر: <span id="valFilterIntensity">100%</span></label>
+              <input type="range" id="rangeFilterIntensity" min="0" max="100" value="100" class="range">
+            </div>
+          </div>
+
+          <!-- TEXT -->
+          <div class="panel hidden" data-panel="text">
+            <div class="panel-head">
+              <span>النص</span>
+              <button class="panel-close" data-close-panel="text">×</button>
+            </div>
+            <div class="panel-group">
+              <label>نصك</label>
+              <textarea id="textInput" class="textarea" placeholder="اكتب هنا..."></textarea>
+            </div>
+            <div class="panel-group">
+              <label>الخط</label>
+              <select id="textFont" class="select">
+                <option value="'Readex Pro',sans-serif">Readex Pro</option>
+                <option value="'Fraunces',serif">Fraunces</option>
+                <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
+                <option value="'Cairo',sans-serif">Cairo</option>
+                <option value="Arial,sans-serif">Arial</option>
+              </select>
+            </div>
+            <div class="panel-group">
+              <label>الحجم: <span id="valTextSize">48px</span></label>
+              <input type="range" id="textSize" min="12" max="200" value="48" class="range">
+            </div>
+            <div class="panel-group row-2">
+              <div>
+                <label>اللون</label>
+                <input type="color" id="textColor" value="#ffffff" class="color-input">
+              </div>
+              <div>
+                <label>الخلفية</label>
+                <select id="textBg" class="select">
+                  <option value="none">بدون</option>
+                  <option value="rgba(0,0,0,.75)">أسود</option>
+                  <option value="rgba(255,255,255,.9)">أبيض</option>
+                  <option value="rgba(224,184,132,.85)">ذهبي</option>
+                </select>
+              </div>
+            </div>
+            <button id="btnAddText" class="btn-primary" type="button">أضف النص</button>
+          </div>
+
+          <!-- DRAW -->
+          <div class="panel hidden" data-panel="draw">
+            <div class="panel-head">
+              <span>رسم</span>
+              <button class="panel-close" data-close-panel="draw">×</button>
+            </div>
+            <div class="panel-group">
+              <label>حجم الفرشاة: <span id="valBrushSize">8px</span></label>
+              <input type="range" id="brushSize" min="1" max="80" value="8" class="range">
+            </div>
+            <div class="panel-group">
+              <label>اللون</label>
+              <div class="color-row">
+                <input type="color" id="brushColor" value="#e0b884" class="color-input">
+                <div class="swatches" id="brushSwatches"></div>
+              </div>
+            </div>
+            <div class="panel-group">
+              <label>الشفافية: <span id="valBrushOpacity">100%</span></label>
+              <input type="range" id="brushOpacity" min="10" max="100" value="100" class="range">
+            </div>
+            <div class="draw-modes">
+              <button class="mode-btn active" data-drawmode="brush" type="button">فرشاة</button>
+              <button class="mode-btn" data-drawmode="eraser" type="button">ممحاة</button>
+            </div>
+            <button id="btnClearDraw" class="btn-ghost" type="button">مسح كل الرسم</button>
+          </div>
+        </div>
+
+        <!-- tools bar -->
+        <div class="ws-toolsbar">
+          <button class="tool" data-tool="background" type="button">
+            <span class="tool-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            </span>
+            <span>خلفية</span>
           </button>
-          <button class="ed-tool" data-tool="brush" title="فرشاة">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>
-            <span>فرشاة</span>
+          <button class="tool" data-tool="adjust" type="button">
+            <span class="tool-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M4.2 4.2l4.3 4.3m7 7 4.3 4.3M1 12h6m10 0h6M4.2 19.8l4.3-4.3m7-7 4.3-4.3"/></svg>
+            </span>
+            <span>تعديلات</span>
           </button>
-          <button class="ed-tool" data-tool="eraser" title="ممحاة">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
-            <span>ممحاة</span>
+          <button class="tool" data-tool="filters" type="button">
+            <span class="tool-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="12" r="3.5"/><circle cx="16" cy="12" r="3.5"/><path d="M8 8.5h8M8 15.5h8"/></svg>
+            </span>
+            <span>فلاتر</span>
           </button>
-          <button class="ed-tool" data-tool="text" title="نص">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+          <button class="tool" data-tool="text" type="button">
+            <span class="tool-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+            </span>
             <span>نص</span>
           </button>
-          <button class="ed-tool" data-tool="picker" title="قطارة">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m2 22 1-1h3l9-9M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.5 1.5L21 13l-3 3-2.5-2.5L14 14l-2-2Z"/></svg>
-            <span>قطارة</span>
+          <button class="tool" data-tool="draw" type="button">
+            <span class="tool-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>
+            </span>
+            <span>رسم</span>
           </button>
         </div>
 
-        <div class="ed-shell">
-          <div class="ed-canvas-area">
-            <span class="corner c-tl"></span><span class="corner c-tr"></span>
-            <span class="corner c-bl"></span><span class="corner c-br"></span>
-            <div class="ed-canvas-head">
-              <div class="ed-canvas-title"><i></i> مساحة العمل</div>
-              <div class="ed-canvas-status" id="edStatus">● جاهز</div>
-            </div>
-            <div class="ed-canvas-wrap" id="edCanvasWrap">
-              <canvas id="edMainCanvas"></canvas>
-              <div id="edCanvasLoading" class="ed-canvas-loading hidden">
-                <div class="proc-ring"><span></span></div>
-                <strong id="edCanvasLoadingText">جاري المعالجة...</strong>
-              </div>
-            </div>
-            <div class="ed-zoom-bar">
-              <button id="edZoomOut" class="ed-zoom-btn" type="button">−</button>
-              <span id="edZoomVal">100%</span>
-              <button id="edZoomIn" class="ed-zoom-btn" type="button">+</button>
-              <button id="edZoomReset" class="ed-zoom-btn" type="button">↻</button>
-            </div>
-          </div>
-
-          <div class="ed-panel">
-            <span class="corner c-tl"></span><span class="corner c-tr"></span>
-            <span class="corner c-bl"></span><span class="corner c-br"></span>
-
-            <div class="ed-tabs">
-              <button class="ed-tab active" data-tab="background" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-                خلفية
-              </button>
-              <button class="ed-tab" data-tab="adjust" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M4.2 4.2l4.3 4.3m7 7 4.3 4.3M1 12h6m10 0h6M4.2 19.8l4.3-4.3m7-7 4.3-4.3"/></svg>
-                تعديلات
-              </button>
-              <button class="ed-tab" data-tab="draw" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>
-                رسم
-              </button>
-              <button class="ed-tab" data-tab="text" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
-                نص
-              </button>
-            </div>
-
-            <!-- ===== BACKGROUND TAB ===== -->
-            <div class="ed-tab-content" data-content="background">
-              <button id="edRemoveBgBtn" class="ed-primary-action">
-                <div class="ed-primary-icon">
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/>
-                    <path d="M9 9l6 6M15 9l-6 6"/>
-                  </svg>
-                </div>
-                <div class="ed-primary-text">
-                  <strong>إزالة الخلفية</strong>
-                  <span>حذف ذكي فوري بالذكاء الاصطناعي</span>
-                </div>
-                <div class="ed-primary-arrow">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
-                </div>
-              </button>
-
-              <div class="ed-divider"><span>أو اختر خلفية جديدة</span></div>
-
-              <div class="ed-subtabs">
-                <button class="ed-subtab active" data-bgmode="preset" type="button">مكتبة</button>
-                <button class="ed-subtab" data-bgmode="upload" type="button">رفع</button>
-                <button class="ed-subtab" data-bgmode="color" type="button">لون</button>
-                <button class="ed-subtab" data-bgmode="transparent" type="button">شفاف</button>
-                <button class="ed-subtab" data-bgmode="original" type="button">الأصل</button>
-              </div>
-
-              <div class="ed-bg-content" data-bgcontent="preset">
-                <div class="ed-presets" id="edPresets"></div>
-              </div>
-              <div class="ed-bg-content hidden" data-bgcontent="upload">
-                <div class="ed-bg-upload" id="edBgUploadZone">
-                  <input id="edBgFile" type="file" accept="image/*" hidden>
-                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-                  <strong>ارفع صورة خلفية</strong>
-                  <span>PNG · JPG — حتى 10MB</span>
-                  <button id="edBgChoose" class="btn-ghost small" type="button">اختيار ملف</button>
-                </div>
-              </div>
-              <div class="ed-bg-content hidden" data-bgcontent="color">
-                <input type="color" id="edBgColor" value="#e0b884" class="ed-color-big">
-                <div class="ed-swatches ed-swatches-big" id="edBgSwatches"></div>
-              </div>
-              <div class="ed-bg-content hidden" data-bgcontent="transparent">
-                <div class="ed-note">
-                  <div class="ed-note-icon">◌</div>
-                  <p>خلفية شفافة (PNG)</p>
-                </div>
-              </div>
-              <div class="ed-bg-content hidden" data-bgcontent="original">
-                <div class="ed-note">
-                  <div class="ed-note-icon">📷</div>
-                  <p>الصورة الأصلية كما هي</p>
-                </div>
-              </div>
-
-              <div class="ed-bg-move-controls">
-                <div class="ed-group">
-                  <label>حجم الصورة: <span id="edScaleVal">100%</span></label>
-                  <input type="range" id="edScale" min="30" max="300" value="100" class="ed-range">
-                </div>
-                <div class="ed-group">
-                  <label>شفافية الصورة: <span id="edAlphaVal">100%</span></label>
-                  <input type="range" id="edAlpha" min="0" max="100" value="100" class="ed-range">
-                </div>
-              </div>
-            </div>
-
-            <!-- ===== ADJUST TAB ===== -->
-            <div class="ed-tab-content hidden" data-content="adjust">
-              <div class="ed-group">
-                <label>السطوع: <span id="edBrightnessVal">100%</span></label>
-                <input type="range" id="edBrightness" min="20" max="200" value="100" class="ed-range">
-              </div>
-              <div class="ed-group">
-                <label>التباين: <span id="edContrastVal">100%</span></label>
-                <input type="range" id="edContrast" min="20" max="200" value="100" class="ed-range">
-              </div>
-              <div class="ed-group">
-                <label>التشبع: <span id="edSaturationVal">100%</span></label>
-                <input type="range" id="edSaturation" min="0" max="200" value="100" class="ed-range">
-              </div>
-              <div class="ed-group">
-                <label>درجة اللون: <span id="edHueVal">0°</span></label>
-                <input type="range" id="edHue" min="-180" max="180" value="0" class="ed-range">
-              </div>
-              <div class="ed-group">
-                <label>الضباب: <span id="edBlurVal">0px</span></label>
-                <input type="range" id="edBlur" min="0" max="20" value="0" class="ed-range">
-              </div>
-              <div class="ed-group">
-                <label>الرمادي: <span id="edGrayVal">0%</span></label>
-                <input type="range" id="edGray" min="0" max="100" value="0" class="ed-range">
-              </div>
-              <div class="ed-group">
-                <label>البنّي (Sepia): <span id="edSepiaVal">0%</span></label>
-                <input type="range" id="edSepia" min="0" max="100" value="0" class="ed-range">
-              </div>
-              <div class="ed-group">
-                <label>عكس الألوان: <span id="edInvertVal">0%</span></label>
-                <input type="range" id="edInvert" min="0" max="100" value="0" class="ed-range">
-              </div>
-              <div class="ed-actions-row">
-                <button id="edResetAdjust" class="btn-ghost small" type="button">↻ ضبط الكل</button>
-              </div>
-            </div>
-
-            <!-- ===== DRAW TAB ===== -->
-            <div class="ed-tab-content hidden" data-content="draw">
-              <div class="ed-group">
-                <label>حجم الفرشاة: <span id="edBrushSizeVal">8</span> px</label>
-                <input type="range" id="edBrushSize" min="1" max="80" value="8" class="ed-range">
-              </div>
-              <div class="ed-group">
-                <label>لون الفرشاة</label>
-                <div class="ed-color-row">
-                  <input type="color" id="edBrushColor" value="#e0b884">
-                  <div class="ed-swatches" id="edBrushSwatches"></div>
-                </div>
-              </div>
-              <div class="ed-group">
-                <label>شفافية الفرشاة: <span id="edBrushOpacityVal">100%</span></label>
-                <input type="range" id="edBrushOpacity" min="10" max="100" value="100" class="ed-range">
-              </div>
-              <div class="ed-actions-row">
-                <button id="edUndo" class="btn-ghost small" type="button">↶ تراجع</button>
-                <button id="edClearDraw" class="btn-ghost small" type="button">🗑 امسح الكل</button>
-              </div>
-            </div>
-
-            <!-- ===== TEXT TAB ===== -->
-            <div class="ed-tab-content hidden" data-content="text">
-              <div class="ed-group">
-                <label>نصك</label>
-                <textarea id="edTextInput" class="ed-textarea" placeholder="اكتب شيئاً إبداعياً..."></textarea>
-              </div>
-              <div class="ed-group">
-                <label>الخط</label>
-                <select id="edTextFont" class="ed-select">
-                  <option value="'Readex Pro',sans-serif">Readex Pro</option>
-                  <option value="'Cairo',sans-serif">Cairo</option>
-                  <option value="'Fraunces',serif">Fraunces</option>
-                  <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
-                  <option value="Arial,sans-serif">Arial</option>
-                </select>
-              </div>
-              <div class="ed-group">
-                <label>الحجم: <span id="edTextSizeVal">48px</span></label>
-                <input type="range" id="edTextSize" min="12" max="200" value="48" class="ed-range">
-              </div>
-              <div class="ed-group">
-                <label>اللون</label>
-                <input type="color" id="edTextColor" value="#ffffff">
-              </div>
-              <div class="ed-group">
-                <label>الظل</label>
-                <select id="edTextShadow" class="ed-select">
-                  <option value="none">بدون</option>
-                  <option value="rgba(0,0,0,.6)">ظل خفيف</option>
-                  <option value="rgba(224,184,132,.8)">ظل ذهبي</option>
-                  <option value="rgba(224,174,176,.8)">ظل وردي</option>
-                </select>
-              </div>
-              <button id="edAddText" class="btn-main small" type="button"><span class="btn-glow"></span><span class="btn-text">أضف النص</span></button>
-            </div>
-
-            <div class="ed-actions-main">
-              <button id="edSaveBtn" class="btn-success" type="button">✓ حفظ التعديلات</button>
-              <button id="edDownloadBtn" class="btn-download hidden" type="button">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
-                تحميل الصورة
-              </button>
-              <button id="edNewBtn" class="btn-ghost" type="button">↻ صورة جديدة</button>
-            </div>
-          </div>
+        <!-- action bar -->
+        <div class="ws-actionsbar">
+          <button id="btnNewImg" class="action-btn secondary" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            صورة جديدة
+          </button>
+          <button id="btnSave" class="action-btn primary" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+            حفظ التعديلات
+          </button>
+          <button id="btnDownload" class="action-btn success hidden" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+            تحميل
+          </button>
         </div>
       </div>
     </section>
@@ -524,29 +426,35 @@
     <section id="historyView" class="view hidden">
       <div class="sec-head">
         <div class="sec-title">سجل <span>العمليات</span></div>
-        <div class="sec-chips"><div class="chip">الكل <strong id="statTotal">0</strong></div><div class="chip">اليوم <strong id="statToday">0</strong></div></div>
+        <div class="sec-chips">
+          <div class="chip">الكل <strong id="statTotal">0</strong></div>
+          <div class="chip">اليوم <strong id="statToday">0</strong></div>
+        </div>
       </div>
-      <div class="toolbar"><span>نتائجك المحفوظة</span><button id="historyRefresh" type="button">↻ تحديث</button></div>
+      <div class="toolbar">
+        <span>نتائجك المحفوظة</span>
+        <button id="historyRefresh" type="button">↻ تحديث</button>
+      </div>
       <div id="historyContent"></div>
     </section>
 
     <!-- PROFILE -->
     <section id="profileView" class="view hidden">
       <div class="profile-wrap">
-        <div class="profile-card">
-          <span class="corner c-tl"></span><span class="corner c-tr"></span>
-          <span class="corner c-bl"></span><span class="corner c-br"></span>
-          <div class="pc-glow"></div><div class="pc-grid"></div>
-          <div class="avatar-ring"><div id="avatar" class="avatar">?</div></div>
+        <div class="profile-hero">
+          <div class="hero-bg"></div>
+          <div class="hero-grid"></div>
+          <div class="avatar-ring">
+            <div id="avatar" class="avatar">?</div>
+          </div>
           <div id="pUsername" class="p-name">—</div>
           <div id="pEmail" class="p-email">—</div>
           <div id="pRole" class="p-role">● مستخدم</div>
           <span id="pJoined" class="p-joined"></span>
         </div>
+
         <div class="panel">
-          <span class="corner c-tl"></span><span class="corner c-tr"></span>
-          <span class="corner c-bl"></span><span class="corner c-br"></span>
-          <div class="panel-title">إحصائيات</div>
+          <div class="panel-title">إحصائياتك</div>
           <div class="stats-3">
             <div class="st"><strong id="statOps">0</strong><span>إجمالي</span></div>
             <div class="st"><strong id="statOpsToday">0</strong><span>اليوم</span></div>
@@ -567,9 +475,10 @@
     <!-- ADMIN -->
     <section id="adminView" class="view hidden">
       <div class="admin-hdr">
-        <span class="corner c-tl"></span><span class="corner c-tr"></span>
-        <span class="corner c-bl"></span><span class="corner c-br"></span>
-        <div><div class="admin-title">مركز <span>المطوّر</span></div><div class="admin-sub">إدارة الحسابات والعمليات</div></div>
+        <div>
+          <div class="admin-title">مركز <span>المطوّر</span></div>
+          <div class="admin-sub">إدارة الحسابات والعمليات</div>
+        </div>
         <div class="row-actions">
           <button id="adminRefresh" class="btn-ghost" type="button">↻ تحديث</button>
           <button id="adminBack" class="btn-ghost" type="button">الاستوديو</button>
@@ -598,4 +507,4 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 </body>
-          </html>
+                                          </html>
