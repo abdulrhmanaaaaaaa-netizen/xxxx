@@ -1,5 +1,5 @@
 /* ============================================================
-   RemoveBG · Sandstorm Studio — Unified Editor
+   RemoveBG · Sandstorm Studio — Full App v5
    ============================================================ */
 
 const $ = id => document.getElementById(id);
@@ -38,7 +38,7 @@ const FILTERS = [
   { id:'invert', name:'عكسي' },
   { id:'vivid', name:'حيوي' },
   { id:'cool', name:'بارد' },
-  { id:'warm', name:'دافئ' },
+  { id:'warm', name:'غروب' },
   { id:'dramatic', name:'درامي' },
   { id:'fade', name:'باهت' }
 ];
@@ -65,6 +65,10 @@ const checkPwd = p => {
 /* ========== LOADER ========== */
 const Loader = (() => {
   const START = performance.now(); let raf;
+  const steps = [
+    'تهيئة النظام...','الاتصال بالخادم...','تحضير المكتبات...',
+    'تحميل الموارد...','تجهيز المحرر...','اللمسات النهائية...','جاهز للعمل ✓'
+  ];
   function particles(){
     const c = $('fx'); if(!c) return;
     const ctx = c.getContext('2d');
@@ -72,14 +76,21 @@ const Loader = (() => {
     let w, h, parts = [];
     const resize = () => { w=c.width=innerWidth*dpr; h=c.height=innerHeight*dpr; c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px'; };
     resize(); addEventListener('resize', resize);
-    const n = Math.min(40, Math.floor(innerWidth/28));
-    for(let i=0;i<n;i++) parts.push({ x:Math.random()*w, y:Math.random()*h, vx:(Math.random()-.5)*.22*dpr, vy:(Math.random()-.5)*.22*dpr, r:(Math.random()*1.3+.4)*dpr, a:Math.random()*.5+.3, hue: 32+Math.random()*14 });
+    const n = Math.min(80, Math.floor(innerWidth/18));
+    for(let i=0;i<n;i++) parts.push({
+      x:Math.random()*w, y:Math.random()*h,
+      vx:(Math.random()-.5)*.24*dpr, vy:(Math.random()-.5)*.24*dpr,
+      r:(Math.random()*1.5+.4)*dpr, a:Math.random()*.5+.3, hue: 30+Math.random()*20
+    });
     function loop(){
       ctx.clearRect(0,0,w,h);
       for(const p of parts){
         p.x+=p.vx; p.y+=p.vy;
         if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1;
-        ctx.beginPath(); ctx.fillStyle = `hsla(${p.hue},75%,62%,${p.a})`; ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${p.hue},75%,62%,${p.a})`;
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fill();
       }
       raf = requestAnimationFrame(loop);
     }
@@ -87,14 +98,29 @@ const Loader = (() => {
   }
   async function run(){
     particles();
-    let p = 0; const fill = $('ldFill'), pct = $('ldPct');
-    const tick = setInterval(() => { p = Math.min(98, p + Math.random()*7 + 3); if(fill) fill.style.width = p + '%'; if(pct) pct.textContent = Math.round(p) + '%'; }, 130);
+    let p = 0;
+    const fill = $('ldFill'), pct = $('ldPct'), stepEl = $('ldStep'), glowEl = $('ldGlow');
+    const tick = setInterval(() => {
+      p = Math.min(98, p + Math.random()*4 + 2);
+      if(fill) fill.style.width = p + '%';
+      if(pct) pct.textContent = Math.round(p) + '%';
+      if(glowEl) glowEl.style.left = `calc(${p}% - 50px)`;
+      if(stepEl){
+        const idx = Math.min(steps.length - 1, Math.floor(p / (100 / steps.length)));
+        stepEl.textContent = steps[idx];
+      }
+    }, 200);
     const el = performance.now() - START;
     await wait(Math.max(0, CONFIG.LOADER_MIN_MS - el));
-    clearInterval(tick); if(fill) fill.style.width = '100%'; if(pct) pct.textContent = '100%';
-    await wait(320); $('loader')?.classList.add('hide');
+    clearInterval(tick);
+    if(fill) fill.style.width = '100%';
+    if(pct) pct.textContent = '100%';
+    if(stepEl) stepEl.textContent = steps[steps.length - 1];
+    if(glowEl) glowEl.style.left = 'calc(100% - 50px)';
+    await wait(500);
+    $('loader')?.classList.add('hide');
     if(raf) cancelAnimationFrame(raf);
-    setTimeout(() => $('loader')?.remove(), 900);
+    setTimeout(() => $('loader')?.remove(), 1000);
   }
   return { run };
 })();
@@ -182,7 +208,7 @@ const Auth = (() => {
 /* ========== AUTH UI ========== */
 const AuthUI = (() => {
   let mode = 'login';
-  const setErr = (input, el, msg) => { input.classList.toggle('bad', !!msg); el.textContent = msg; el.classList.toggle('show', !!msg); };
+  const setErr = (i, el, m) => { i.classList.toggle('bad', !!m); el.textContent = m; el.classList.toggle('show', !!m); };
   const clearErr = () => { ['username','email','password','confirm'].forEach(k => { const i = $(k), e = $('err'+k[0].toUpperCase()+k.slice(1)); if(i) i.classList.remove('bad','ok'); if(e){ e.textContent=''; e.classList.remove('show'); } }); };
   const msg = (txt, type='') => { const m = $('authMsg'); if(!m) return; m.className = 'msg show ' + type; m.textContent = txt; };
   const clearMsg = () => { const m = $('authMsg'); if(!m) return; m.className = 'msg'; m.textContent = ''; };
@@ -197,9 +223,7 @@ const AuthUI = (() => {
     $('strength').classList.toggle('hidden', !reg);
     $('submitBtn').querySelector('.btn-text').textContent = reg ? 'إنشاء الحساب' : 'تسجيل الدخول';
     $('password').placeholder = reg ? '8 أحرف + رقم + حرف كبير' : '••••••••';
-    $('password').setAttribute('autocomplete', reg ? 'new-password' : 'current-password');
-    const st = $('switchText');
-    const sb = $('switchBtn');
+    const st = $('switchText'); const sb = $('switchBtn');
     if (st) st.textContent = reg ? 'لديك حساب بالفعل؟' : 'ليس لديك حساب؟';
     if (sb) sb.textContent = reg ? 'سجّل الدخول' : 'أنشئ حساباً';
     updateReqs(); checkSubmit();
@@ -221,15 +245,13 @@ const AuthUI = (() => {
     else { ok = ok && pwd.length >= 1; }
     $('submitBtn').disabled = !ok;
   };
-  const eye = (input, btn) => { const v = input.type === 'text'; input.type = v?'password':'text'; btn.style.color = v ? '' : 'var(--sand)'; };
+  const eye = (i, b) => { const v = i.type === 'text'; i.type = v?'password':'text'; b.style.color = v ? '' : 'var(--sand)'; };
   function translateError(e){
     const m = String(e?.message || '').toLowerCase();
-    if(m.includes('invalid login') || m.includes('invalid credentials')) return 'البريد أو كلمة المرور غير صحيحة';
-    if(m.includes('already registered') || m.includes('already been registered') || m.includes('user already')) return 'هذا البريد مسجّل بالفعل';
-    if(m.includes('email not confirmed')) return 'يرجى تأكيد بريدك الإلكتروني أولًا';
-    if(m.includes('password should be at least')) return 'كلمة المرور قصيرة جدًا (6+ أحرف)';
-    if(m.includes('invalid email')) return 'البريد الإلكتروني غير صحيح';
-    if(m.includes('rate limit') || m.includes('too many')) return 'محاولات كثيرة، حاول لاحقًا';
+    if(m.includes('invalid login')) return 'البريد أو كلمة المرور غير صحيحة';
+    if(m.includes('already registered')) return 'هذا البريد مسجّل بالفعل';
+    if(m.includes('email not confirmed')) return 'يرجى تأكيد بريدك أولًا';
+    if(m.includes('rate limit')) return 'محاولات كثيرة، حاول لاحقًا';
     if(e?.status === 0) return 'فشل الاتصال بالإنترنت';
     return e?.message || 'حدث خطأ';
   }
@@ -254,10 +276,10 @@ const AuthUI = (() => {
       if(!isEmailValid(email)){ setErr(emailI, $('errEmail'), 'بريد غير صحيح'); return; }
       if(mode === 'register'){
         const un = $('username').value.trim();
-        if(!/^[a-zA-Z0-9_]{3,20}$/.test(un)){ setErr($('username'), $('errUsername'), 'أحرف وأرقام و _ فقط (3-20)'); return; }
+        if(!/^[a-zA-Z0-9_]{3,20}$/.test(un)){ setErr($('username'), $('errUsername'), 'أحرف وأرقام و _ (3-20)'); return; }
         const { valid } = checkPwd(pwd);
-        if(!valid){ setErr($('password'), $('errPassword'), 'كلمة المرور لا تحقق الشروط'); return; }
-        if($('confirm').value !== pwd){ setErr($('confirm'), $('errConfirm'), 'كلمتا المرور غير متطابقتين'); return; }
+        if(!valid){ setErr($('password'), $('errPassword'), 'كلمة المرور ضعيفة'); return; }
+        if($('confirm').value !== pwd){ setErr($('confirm'), $('errConfirm'), 'كلمتا المرور مختلفتان'); return; }
       } else { if(pwd.length < 1){ setErr($('password'), $('errPassword'), 'أدخل كلمة المرور'); return; } }
       const btn = $('submitBtn'); const txt = btn.querySelector('.btn-text'); const original = txt.textContent;
       btn.disabled = true; txt.textContent = mode === 'login' ? 'جاري الدخول...' : 'جاري الإنشاء...';
@@ -282,141 +304,114 @@ const AuthUI = (() => {
 
 /* ========== EDITOR ========== */
 const Editor = (() => {
-  let originalImage = null;
-  let currentImage = null;
+  let originalImage = null, currentImage = null;
+  let bgRemoved = false;
   let fgCanvas = document.createElement('canvas');
   let mainCanvas = null;
-  let strokes = [];
-  let texts = [];
+  let strokes = [], texts = [];
+  let textIdCounter = 0;
   let adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
-  let filterId = 'none';
-  let filterIntensity = 1;
-  let brushColor = '#e0b884';
-  let brushSize = 8;
-  let brushOpacity = 1;
-  let drawMode = 'brush';
+  let filterId = 'none', filterIntensity = 1;
+  let brushColor = '#e0b884', brushSize = 8, brushOpacity = 1, drawMode = 'brush';
   let currentBg = { type:'original' };
-  let bgImage = null;
-  let bgColorValue = '#e0b884';
-  let drawing = false;
-  let currentStroke = null;
+  let bgImage = null, bgColorValue = '#e0b884';
+  let drawing = false, currentStroke = null;
   let zoom = 1;
   let initDone = false;
   let finalBlob = null;
-  let imgScale = 1;
-  let imgAlpha = 1;
+  let imgScale = 1, imgAlpha = 1, imgOffsetX = 0, imgOffsetY = 0;
   let activePanel = null;
+  let selectedId = null;
+  let dragMode = null, dragStartPt = null, dragItemState = null;
+  let touchPoints = new Map(), pinchState = null;
+  let renderQueued = false, renderImmediate = false;
+
+  /* Interactive crop state */
+  let cropActive = false;
+  let cropRatio = 'free';
+  let cropRect = null;    /* in canvas pixel coordinates */
+  let cropDragMode = null;
+  let cropDragStart = null;
+  let cropStartRect = null;
 
   const $c = id => document.getElementById(id);
 
   function init(){
-    if (initDone) return;
-    initDone = true;
+    if (initDone) return; initDone = true;
     mainCanvas = $c('mainCanvas');
 
-    /* Presets */
     const pw = $c('presets');
-    if (pw){
-      PRESETS.forEach(url => {
-        const el = document.createElement('div');
-        el.className = 'preset';
-        el.innerHTML = `<img src="${url}" alt="" loading="lazy" crossorigin="anonymous">`;
-        el.addEventListener('click', () => {
-          document.querySelectorAll('.preset').forEach(x => x.classList.remove('active'));
-          el.classList.add('active');
-          setBg({ type:'preset', value:url });
-        });
-        pw.appendChild(el);
+    if (pw) PRESETS.forEach(url => {
+      const el = document.createElement('div');
+      el.className = 'preset';
+      el.innerHTML = `<img src="${url}" alt="" loading="lazy" crossorigin="anonymous">`;
+      el.addEventListener('click', async () => {
+        document.querySelectorAll('.preset').forEach(x => x.classList.remove('active'));
+        el.classList.add('active');
+        await setBgSafe({ type:'preset', value:url });
       });
-    }
+      pw.appendChild(el);
+    });
 
-    /* Brush swatches */
     const bs = $c('brushSwatches');
-    if (bs){
-      BRUSH_SWATCHES.forEach(c => {
-        const s = document.createElement('div');
-        s.className = 'swatch';
-        s.style.background = c;
-        s.addEventListener('click', () => {
-          brushColor = c;
-          $c('brushColor').value = c;
-          document.querySelectorAll('#brushSwatches .swatch').forEach(x => x.classList.remove('active'));
-          s.classList.add('active');
-        });
-        bs.appendChild(s);
+    if (bs) BRUSH_SWATCHES.forEach(c => {
+      const s = document.createElement('div');
+      s.className = 'swatch'; s.style.background = c;
+      s.addEventListener('click', () => {
+        brushColor = c; $c('brushColor').value = c;
+        document.querySelectorAll('#brushSwatches .swatch').forEach(x => x.classList.remove('active'));
+        s.classList.add('active');
       });
-    }
+      bs.appendChild(s);
+    });
 
-    /* Bg swatches */
     const bgs = $c('bgSwatches');
-    if (bgs){
-      BG_SWATCHES.forEach(c => {
-        const s = document.createElement('div');
-        s.className = 'swatch';
-        s.style.background = c;
-        s.addEventListener('click', () => {
-          bgColorValue = c;
-          $c('bgColor').value = c;
-          document.querySelectorAll('#bgSwatches .swatch').forEach(x => x.classList.remove('active'));
-          s.classList.add('active');
-          setBg({ type:'color', value:c });
-        });
-        bgs.appendChild(s);
+    if (bgs) BG_SWATCHES.forEach(c => {
+      const s = document.createElement('div');
+      s.className = 'swatch'; s.style.background = c;
+      s.addEventListener('click', async () => {
+        bgColorValue = c; $c('bgColor').value = c;
+        document.querySelectorAll('#bgSwatches .swatch').forEach(x => x.classList.remove('active'));
+        s.classList.add('active');
+        await setBgSafe({ type:'color', value:c });
       });
-    }
+      bgs.appendChild(s);
+    });
 
-    /* Filters grid */
     const fg = $c('filtersGrid');
-    if (fg){
-      FILTERS.forEach(f => {
-        const el = document.createElement('div');
-        el.className = 'filter-item' + (f.id === 'none' ? ' active' : '');
-        el.textContent = f.name;
-        el.dataset.filter = f.id;
-        el.addEventListener('click', () => {
-          document.querySelectorAll('.filter-item').forEach(x => x.classList.remove('active'));
-          el.classList.add('active');
-          filterId = f.id;
-          render();
-        });
-        fg.appendChild(el);
+    if (fg) FILTERS.forEach(f => {
+      const el = document.createElement('div');
+      el.className = 'filter-item' + (f.id === 'none' ? ' active' : '');
+      el.textContent = f.name;
+      el.dataset.filter = f.id;
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.filter-item').forEach(x => x.classList.remove('active'));
+        el.classList.add('active');
+        filterId = f.id; render();
       });
-    }
-
-    /* Tabs */
-    document.querySelectorAll('.tool').forEach(btn => {
-      btn.addEventListener('click', () => openPanel(btn.dataset.tool));
-    });
-    document.querySelectorAll('.panel-close').forEach(btn => {
-      btn.addEventListener('click', () => closePanel(btn.dataset.closePanel));
+      fg.appendChild(el);
     });
 
-    /* Subtabs bg */
-    document.querySelectorAll('.subtab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        const m = tab.dataset.bg;
-        document.querySelectorAll('.subtab').forEach(x => x.classList.toggle('active', x === tab));
-        document.querySelectorAll('.bg-content').forEach(c => c.classList.toggle('hidden', c.dataset.bgcontent !== m));
-        if (m === 'transparent') setBg({ type:'checker' });
-        if (m === 'original') setBg({ type:'original' });
-      });
-    });
+    document.querySelectorAll('.tool').forEach(btn => btn.addEventListener('click', () => openPanel(btn.dataset.tool)));
+    document.querySelectorAll('.panel-close').forEach(btn => btn.addEventListener('click', () => closePanel(btn.dataset.closePanel)));
 
-    /* Draw mode */
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.mode-btn').forEach(x => x.classList.remove('active'));
-        btn.classList.add('active');
-        drawMode = btn.dataset.drawmode;
-      });
-    });
+    document.querySelectorAll('.subtab').forEach(tab => tab.addEventListener('click', async () => {
+      const m = tab.dataset.bg;
+      document.querySelectorAll('.subtab').forEach(x => x.classList.toggle('active', x === tab));
+      document.querySelectorAll('.bg-content').forEach(c => c.classList.toggle('hidden', c.dataset.bgcontent !== m));
+      if (m === 'transparent'){ if (!bgRemoved){ await autoRemoveBackground(); } setBg({ type:'checker' }); }
+      else if (m === 'original'){ setBg({ type:'original' }); }
+    }));
 
-    /* Brush controls */
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-btn').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active'); drawMode = btn.dataset.drawmode;
+    }));
+
     $c('brushSize')?.addEventListener('input', e => { brushSize = +e.target.value; $c('valBrushSize').textContent = brushSize + 'px'; });
     $c('brushColor')?.addEventListener('input', e => { brushColor = e.target.value; });
     $c('brushOpacity')?.addEventListener('input', e => { brushOpacity = e.target.value/100; $c('valBrushOpacity').textContent = e.target.value + '%'; });
 
-    /* Adjust sliders */
     const adj = [
       ['rangeBrightness','brightness','valBrightness','%'],
       ['rangeContrast','contrast','valContrast','%'],
@@ -425,163 +420,368 @@ const Editor = (() => {
       ['rangeBlur','blur','valBlur','px'],
       ['rangeOpacity','opacity','valOpacity','%']
     ];
-    adj.forEach(([id, key, valId, suffix]) => {
-      $c(id)?.addEventListener('input', e => {
-        const v = +e.target.value;
-        adjustments[key] = v;
-        if ($c(valId)) $c(valId).textContent = v + suffix;
-        render();
-      });
-    });
-
-    /* Filter intensity */
-    $c('rangeFilterIntensity')?.addEventListener('input', e => {
-      filterIntensity = e.target.value / 100;
-      $c('valFilterIntensity').textContent = e.target.value + '%';
+    adj.forEach(([id, key, valId, sfx]) => $c(id)?.addEventListener('input', e => {
+      adjustments[key] = +e.target.value;
+      if ($c(valId)) $c(valId).textContent = e.target.value + sfx;
       render();
-    });
+    }));
 
-    /* Scale + alpha */
-    $c('rangeScale')?.addEventListener('input', e => {
-      imgScale = e.target.value / 100;
-      $c('valScale').textContent = e.target.value + '%';
-      render();
-    });
-    $c('rangeAlpha')?.addEventListener('input', e => {
-      imgAlpha = e.target.value / 100;
-      $c('valAlpha').textContent = e.target.value + '%';
-      render();
-    });
-
-    /* Text size */
+    $c('rangeFilterIntensity')?.addEventListener('input', e => { filterIntensity = e.target.value/100; $c('valFilterIntensity').textContent = e.target.value + '%'; render(); });
+    $c('rangeScale')?.addEventListener('input', e => { imgScale = e.target.value/100; $c('valScale').textContent = e.target.value + '%'; render(); });
+    $c('rangeAlpha')?.addEventListener('input', e => { imgAlpha = e.target.value/100; $c('valAlpha').textContent = e.target.value + '%'; render(); });
     $c('textSize')?.addEventListener('input', e => { $c('valTextSize').textContent = e.target.value + 'px'; });
 
-    /* Add text */
     $c('btnAddText')?.addEventListener('click', () => {
       const text = $c('textInput').value.trim();
       if (!text) return toast('اكتب نصاً أولاً', 'err');
       const base = currentImage || originalImage;
       if (!base) return;
-      const size = +$c('textSize').value;
-      const color = $c('textColor').value;
-      const font = $c('textFont').value;
-      const bg = $c('textBg').value;
-      texts.push({ text, x: base.naturalWidth/2, y: base.naturalHeight/2, size, color, font, bg });
+      const id = ++textIdCounter;
+      texts.push({
+        id, text,
+        x: base.naturalWidth/2, y: base.naturalHeight/2,
+        size: +$c('textSize').value,
+        color: $c('textColor').value,
+        font: $c('textFont').value,
+        bg: $c('textBg').value
+      });
       $c('textInput').value = '';
+      selectedId = id;
       render();
-      toast('تمت إضافة النص ✓', 'ok');
+      toast('أضف النص ✓ اسحبه على الصورة', 'ok');
     });
 
-    /* Bg upload */
-    const uz = $c('bgUploadZone');
-    const fi = $c('bgFile');
+    const uz = $c('bgUploadZone'); const fi = $c('bgFile');
     $c('bgChoose')?.addEventListener('click', e => { e.stopPropagation(); fi.click(); });
     uz?.addEventListener('click', () => fi.click());
-    uz?.addEventListener('dragover', e => { e.preventDefault(); });
-    uz?.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer?.files?.[0]; if (f) handleBgUpload(f); });
     fi?.addEventListener('change', () => { const f = fi.files?.[0]; fi.value = ''; if (f) handleBgUpload(f); });
+    $c('bgColor')?.addEventListener('input', async e => { bgColorValue = e.target.value; await setBgSafe({ type:'color', value:bgColorValue }); });
 
-    /* Bg color picker */
-    $c('bgColor')?.addEventListener('input', e => { bgColorValue = e.target.value; setBg({ type:'color', value:bgColorValue }); });
-
-    /* Canvas events */
     if (mainCanvas){
-      mainCanvas.addEventListener('pointerdown', onPointerDown);
-      mainCanvas.addEventListener('pointermove', onPointerMove);
+      mainCanvas.style.touchAction = 'none';
+      mainCanvas.addEventListener('pointerdown', onPointerDown, { passive:false });
+      mainCanvas.addEventListener('pointermove', onPointerMove, { passive:false });
       mainCanvas.addEventListener('pointerup', onPointerUp);
       mainCanvas.addEventListener('pointercancel', onPointerUp);
+      mainCanvas.addEventListener('wheel', onWheel, { passive:false });
+      mainCanvas.addEventListener('contextmenu', e => e.preventDefault());
     }
 
-    /* Zoom */
     $c('zoomIn')?.addEventListener('click', () => { zoom = Math.min(3, zoom + .1); applyZoom(); });
     $c('zoomOut')?.addEventListener('click', () => { zoom = Math.max(.3, zoom - .1); applyZoom(); });
     $c('zoomReset')?.addEventListener('click', () => { zoom = 1; applyZoom(); });
 
-    /* Actions */
-    $c('btnUndo')?.addEventListener('click', () => {
-      if (strokes.length){ strokes.pop(); render(); return toast('تراجع'); }
-      if (texts.length){ texts.pop(); render(); return toast('تراجع'); }
-      toast('لا يوجد شي للتراجع', 'err');
-    });
-    $c('btnReset')?.addEventListener('click', () => {
-      if (!originalImage) return;
-      adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
-      filterId = 'none'; filterIntensity = 1;
-      strokes = []; texts = [];
-      imgScale = 1; imgAlpha = 1;
-      ['Brightness','Contrast','Saturation','Hue','Blur','Opacity'].forEach(k => {
-        const id = 'range'+k;
-        const vId = 'val'+k;
-        const defaults = { Brightness:100, Contrast:100, Saturation:100, Hue:0, Blur:0, Opacity:100 };
-        const sfx = { Brightness:'%', Contrast:'%', Saturation:'%', Hue:'°', Blur:'px', Opacity:'%' };
-        if($c(id)) $c(id).value = defaults[k];
-        if($c(vId)) $c(vId).textContent = defaults[k] + sfx[k];
-      });
-      if($c('rangeScale')) $c('rangeScale').value = 100;
-      if($c('rangeAlpha')) $c('rangeAlpha').value = 100;
-      if($c('rangeFilterIntensity')) $c('rangeFilterIntensity').value = 100;
-      if($c('valScale')) $c('valScale').textContent = '100%';
-      if($c('valAlpha')) $c('valAlpha').textContent = '100%';
-      if($c('valFilterIntensity')) $c('valFilterIntensity').textContent = '100%';
-      document.querySelectorAll('.filter-item').forEach(x => x.classList.toggle('active', x.dataset.filter === 'none'));
-      render();
-      toast('تم إعادة الضبط ✓', 'ok');
-    });
+    $c('btnUndo')?.addEventListener('click', undo);
+    $c('btnReset')?.addEventListener('click', resetAll);
     $c('btnClearDraw')?.addEventListener('click', () => {
-      if (!strokes.length && !texts.length) return toast('لا يوجد رسم أو نص', 'err');
-      strokes = []; texts = []; render(); toast('تم المسح ✓', 'ok');
+      if (!strokes.length && !texts.length) return toast('لا يوجد شي', 'err');
+      strokes = []; texts = []; selectedId = null; render(); toast('تم المسح ✓', 'ok');
     });
-    $c('btnResetAdjust')?.addEventListener('click', () => {
-      adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
-      ['Brightness','Contrast','Saturation','Hue','Blur','Opacity'].forEach(k => {
-        const id = 'range'+k;
-        const vId = 'val'+k;
-        const defaults = { Brightness:100, Contrast:100, Saturation:100, Hue:0, Blur:0, Opacity:100 };
-        const sfx = { Brightness:'%', Contrast:'%', Saturation:'%', Hue:'°', Blur:'px', Opacity:'%' };
-        if($c(id)) $c(id).value = defaults[k];
-        if($c(vId)) $c(vId).textContent = defaults[k] + sfx[k];
-      });
-      render();
-      toast('تم إعادة التعديلات ✓', 'ok');
-    });
-
-    /* Remove BG */
-    $c('btnRemoveBg')?.addEventListener('click', removeBackground);
-
-    /* Save / Download / New */
+    $c('btnResetAdjust')?.addEventListener('click', resetAdjustments);
+    $c('btnRemoveBg')?.addEventListener('click', () => removeBackground(false));
     $c('btnSave')?.addEventListener('click', saveImage);
     $c('btnDownload')?.addEventListener('click', () => {
       if (!finalBlob) return toast('احفظ أولاً', 'err');
       downloadBlob(finalBlob, `removebg-${Date.now()}.png`);
       toast('تم التحميل ✓', 'ok');
     });
-    $c('btnNewImg')?.addEventListener('click', () => {
-      reset();
-      toast('ارفع صورة جديدة');
+    $c('btnNewImg')?.addEventListener('click', () => { reset(); toast('ارفع صورة جديدة'); });
+
+    initCrop();
+    initCropDrag();
+
+    const stage = $c('uploadStage'); const fileInput = $c('fileInput');
+    $c('chooseBtn')?.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
+    stage?.addEventListener('click', e => { if (e.target.closest('button')) return; fileInput.click(); });
+    ['dragenter','dragover'].forEach(n => stage?.addEventListener(n, e => { e.preventDefault(); stage.classList.add('drag'); }));
+    ['dragleave','drop'].forEach(n => stage?.addEventListener(n, e => { e.preventDefault(); stage.classList.remove('drag'); }));
+    stage?.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) handleFile(f); });
+    fileInput.addEventListener('change', () => { const f = fileInput.files?.[0]; fileInput.value = ''; if (f) handleFile(f); });
+  }
+
+  /* ===== INTERACTIVE CROP ===== */
+  function initCrop(){
+    document.querySelectorAll('.crop-ratio').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.crop-ratio').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        cropRatio = btn.dataset.ratio;
+        if (cropActive) applyRatioToCrop();
+      });
     });
 
-    /* File input + drag */
-    const stage = $c('uploadStage');
-    const fileInput = $c('fileInput');
-    $c('chooseBtn')?.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
-    stage?.addEventListener('click', e => {
-      if (e.target.closest('button')) return;
-      fileInput.click();
+    document.querySelectorAll('.crop-action').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const act = btn.dataset.act;
+        if (act === 'rot-left') rotateImage(-90);
+        if (act === 'rot-right') rotateImage(90);
+        if (act === 'flip-h') flipImage('h');
+        if (act === 'flip-v') flipImage('v');
+      });
     });
-    ['dragenter','dragover'].forEach(n => stage?.addEventListener(n, e => {
-      e.preventDefault(); stage.classList.add('drag');
-    }));
-    ['dragleave','drop'].forEach(n => stage?.addEventListener(n, e => {
-      e.preventDefault(); stage.classList.remove('drag');
-    }));
-    stage?.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) handleFile(f); });
-    fileInput.addEventListener('change', () => {
-      const f = fileInput.files?.[0]; fileInput.value = '';
-      if (f) handleFile(f);
+
+    $c('btnCropReset')?.addEventListener('click', () => {
+      if (!cropActive) return;
+      cropRatio = 'free';
+      document.querySelectorAll('.crop-ratio').forEach(x => x.classList.toggle('active', x.dataset.ratio === 'free'));
+      showDefaultCrop();
+      toast('تم إعادة الضبط');
+    });
+
+    $c('btnCropApply')?.addEventListener('click', applyCrop);
+  }
+
+  function initCropDrag(){
+    const box = $c('cropBox');
+    if (!box) return;
+
+    box.addEventListener('pointerdown', e => {
+      if (e.target.classList.contains('crop-handle')){
+        cropDragMode = 'resize';
+        const h = e.target.dataset.h;
+        cropDragStart = { x: e.clientX, y: e.clientY };
+        cropStartRect = { ...cropRect, handle: h };
+      } else {
+        cropDragMode = 'move';
+        cropDragStart = { x: e.clientX, y: e.clientY };
+        cropStartRect = { ...cropRect };
+      }
+      try{ box.setPointerCapture(e.pointerId); }catch{}
+      e.stopPropagation();
+      e.preventDefault();
+    });
+
+    box.addEventListener('pointermove', e => {
+      if (!cropDragMode) return;
+      const canvasRect = mainCanvas.getBoundingClientRect();
+      const sx = mainCanvas.width / canvasRect.width;
+      const sy = mainCanvas.height / canvasRect.height;
+      const dx = (e.clientX - cropDragStart.x) * sx;
+      const dy = (e.clientY - cropDragStart.y) * sy;
+
+      if (cropDragMode === 'move'){
+        cropRect.x = clamp(cropStartRect.x + dx, 0, mainCanvas.width - cropRect.w);
+        cropRect.y = clamp(cropStartRect.y + dy, 0, mainCanvas.height - cropRect.h);
+      } else {
+        const h = cropStartRect.handle;
+        let x = cropStartRect.x, y = cropStartRect.y, w = cropStartRect.w, hh = cropStartRect.h;
+        const minSize = 30;
+
+        if (h === 'tl'){ x = cropStartRect.x + dx; y = cropStartRect.y + dy; w = cropStartRect.w - dx; hh = cropStartRect.h - dy; }
+        if (h === 'tr'){ y = cropStartRect.y + dy; w = cropStartRect.w + dx; hh = cropStartRect.h - dy; }
+        if (h === 'bl'){ x = cropStartRect.x + dx; w = cropStartRect.w - dx; hh = cropStartRect.h + dy; }
+        if (h === 'br'){ w = cropStartRect.w + dx; hh = cropStartRect.h + dy; }
+        if (h === 't'){ y = cropStartRect.y + dy; hh = cropStartRect.h - dy; }
+        if (h === 'b'){ hh = cropStartRect.h + dy; }
+        if (h === 'l'){ x = cropStartRect.x + dx; w = cropStartRect.w - dx; }
+        if (h === 'r'){ w = cropStartRect.w + dx; }
+
+        if (w < minSize){ w = minSize; if (h.includes('l')) x = cropStartRect.x + cropStartRect.w - minSize; }
+        if (hh < minSize){ hh = minSize; if (h.includes('t')) y = cropStartRect.y + cropStartRect.h - minSize; }
+
+        if (cropRatio !== 'free'){
+          const [rw, rh] = cropRatio.split(':').map(Number);
+          const targetR = rw / rh;
+          if (h === 'br' || h === 'tl' || h === 'tr' || h === 'bl'){
+            hh = w / targetR;
+          }
+        }
+
+        cropRect = { x, y, w, h: hh };
+      }
+
+      /* Constrain to canvas */
+      cropRect.x = clamp(cropRect.x, 0, mainCanvas.width);
+      cropRect.y = clamp(cropRect.y, 0, mainCanvas.height);
+      cropRect.w = Math.min(cropRect.w, mainCanvas.width - cropRect.x);
+      cropRect.h = Math.min(cropRect.h, mainCanvas.height - cropRect.y);
+
+      updateCropOverlay();
+    });
+
+    box.addEventListener('pointerup', e => {
+      cropDragMode = null;
+      try{ box.releasePointerCapture(e.pointerId); }catch{}
+    });
+    box.addEventListener('pointercancel', e => {
+      cropDragMode = null;
+      try{ box.releasePointerCapture(e.pointerId); }catch{}
     });
   }
 
-  /* ===== PANEL MANAGEMENT ===== */
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  function showDefaultCrop(){
+    if (!mainCanvas) return;
+    const w = mainCanvas.width * .8;
+    const h = mainCanvas.height * .8;
+    cropRect = {
+      x: (mainCanvas.width - w) / 2,
+      y: (mainCanvas.height - h) / 2,
+      w, h
+    };
+    cropActive = true;
+    $c('cropOverlay')?.classList.remove('hidden');
+    updateCropOverlay();
+  }
+
+  function applyRatioToCrop(){
+    if (!cropRect || cropRatio === 'free') return;
+    const [rw, rh] = cropRatio.split(':').map(Number);
+    const targetR = rw / rh;
+    const cx = cropRect.x + cropRect.w / 2;
+    const cy = cropRect.y + cropRect.h / 2;
+    let nw = cropRect.w;
+    let nh = nw / targetR;
+    if (nh > cropRect.h){ nh = cropRect.h; nw = nh * targetR; }
+    cropRect.x = cx - nw / 2;
+    cropRect.y = cy - nh / 2;
+    cropRect.w = nw;
+    cropRect.h = nh;
+    if (cropRect.x < 0) cropRect.x = 0;
+    if (cropRect.y < 0) cropRect.y = 0;
+    if (cropRect.x + cropRect.w > mainCanvas.width) cropRect.x = mainCanvas.width - cropRect.w;
+    if (cropRect.y + cropRect.h > mainCanvas.height) cropRect.y = mainCanvas.height - cropRect.h;
+    updateCropOverlay();
+  }
+
+  function updateCropOverlay(){
+    if (!cropRect || !mainCanvas) return;
+    const canvasRect = mainCanvas.getBoundingClientRect();
+    const wrapRect = $c('canvasWrap').getBoundingClientRect();
+    const sx = canvasRect.width / mainCanvas.width;
+    const sy = canvasRect.height / mainCanvas.height;
+
+    const x = (canvasRect.left - wrapRect.left) + cropRect.x * sx;
+    const y = (canvasRect.top - wrapRect.top) + cropRect.y * sy;
+    const w = cropRect.w * sx;
+    const h = cropRect.h * sy;
+
+    const box = $c('cropBox');
+    box.style.left = x + 'px';
+    box.style.top = y + 'px';
+    box.style.width = w + 'px';
+    box.style.height = h + 'px';
+
+    const overlay = $c('cropOverlay');
+    overlay.querySelector('.crop-mask.t').style.height = y + 'px';
+    overlay.querySelector('.crop-mask.b').style.height = (wrapRect.height - y - h) + 'px';
+    overlay.querySelector('.crop-mask.l').style.width = x + 'px';
+    overlay.querySelector('.crop-mask.l').style.top = y + 'px';
+    overlay.querySelector('.crop-mask.l').style.height = h + 'px';
+    overlay.querySelector('.crop-mask.r').style.width = (wrapRect.width - x - w) + 'px';
+    overlay.querySelector('.crop-mask.r').style.top = y + 'px';
+    overlay.querySelector('.crop-mask.r').style.height = h + 'px';
+
+    const dimEl = $c('cropDim');
+    if (dimEl) dimEl.textContent = `${Math.round(cropRect.w)} × ${Math.round(cropRect.h)}`;
+  }
+
+  function applyCrop(){
+    if (!cropActive || !cropRect) return toast('فعّل أداة القص أولاً', 'err');
+    const base = currentImage || originalImage;
+    if (!base) return toast('لا توجد صورة', 'err');
+
+    const c = document.createElement('canvas');
+    c.width = Math.round(cropRect.w);
+    c.height = Math.round(cropRect.h);
+    c.getContext('2d').drawImage(base, Math.round(cropRect.x), Math.round(cropRect.y), Math.round(cropRect.w), Math.round(cropRect.h), 0, 0, c.width, c.height);
+
+    const img = new Image();
+    img.onload = () => {
+      currentImage = img; originalImage = img;
+      imgScale = 1; imgOffsetX = 0; imgOffsetY = 0;
+      if ($c('rangeScale')) $c('rangeScale').value = 100;
+      if ($c('valScale')) $c('valScale').textContent = '100%';
+      cropActive = false;
+      $c('cropOverlay')?.classList.add('hidden');
+      render();
+      toast('تم القص ✓', 'ok');
+    };
+    img.src = c.toDataURL('image/png');
+  }
+
+  function rotateImage(deg){
+    const base = currentImage || originalImage;
+    if (!base) return toast('لا توجد صورة', 'err');
+    const W = base.naturalWidth, H = base.naturalHeight;
+    const rad = deg * Math.PI / 180;
+    const cos = Math.abs(Math.cos(rad)), sin = Math.abs(Math.sin(rad));
+    const newW = Math.round(W * cos + H * sin);
+    const newH = Math.round(W * sin + H * cos);
+    const c = document.createElement('canvas');
+    c.width = newW; c.height = newH;
+    const ctx = c.getContext('2d');
+    ctx.translate(newW/2, newH/2);
+    ctx.rotate(rad);
+    ctx.drawImage(base, -W/2, -H/2);
+    const img = new Image();
+    img.onload = () => {
+      currentImage = img; originalImage = img;
+      imgScale = 1; imgOffsetX = 0; imgOffsetY = 0;
+      if ($c('rangeScale')) $c('rangeScale').value = 100;
+      if ($c('valScale')) $c('valScale').textContent = '100%';
+      render();
+      if (cropActive) showDefaultCrop();
+      toast('تم التدوير ✓', 'ok');
+    };
+    img.src = c.toDataURL('image/png');
+  }
+
+  function flipImage(dir){
+    const base = currentImage || originalImage;
+    if (!base) return toast('لا توجد صورة', 'err');
+    const W = base.naturalWidth, H = base.naturalHeight;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+    if (dir === 'h'){ ctx.translate(W, 0); ctx.scale(-1, 1); }
+    else { ctx.translate(0, H); ctx.scale(1, -1); }
+    ctx.drawImage(base, 0, 0);
+    const img = new Image();
+    img.onload = () => {
+      currentImage = img; originalImage = img;
+      render();
+      if (cropActive) showDefaultCrop();
+      toast('تم الانعكاس ✓', 'ok');
+    };
+    img.src = c.toDataURL('image/png');
+  }
+
+  async function setBgSafe(bg){
+    if (!bgRemoved && (bg.type === 'preset' || bg.type === 'upload' || bg.type === 'color')){
+      const ok = await autoRemoveBackground();
+      if (!ok) return;
+    }
+    setBg(bg);
+  }
+  async function autoRemoveBackground(){
+    if (bgRemoved) return true;
+    toast('جاري إزالة الخلفية تلقائياً...', 'ok');
+    return await removeBackground(true);
+  }
+  function setBg(bg){
+    currentBg = bg;
+    if (bg.type === 'preset'){
+      bgImage = new Image();
+      bgImage.crossOrigin = 'anonymous';
+      bgImage.onload = render; bgImage.onerror = () => toast('تعذر تحميل الخلفية', 'err');
+      bgImage.src = bg.value;
+    } else if (bg.type === 'upload'){
+      bgImage = new Image();
+      bgImage.onload = render;
+      bgImage.src = bg.value;
+    } else bgImage = null;
+    render();
+  }
+  function handleBgUpload(file){
+    if (!file.type.startsWith('image/')) return toast('صيغة غير مدعومة', 'err');
+    if (file.size > 10*1024*1024) return toast('الحجم > 10MB', 'err');
+    const url = URL.createObjectURL(file);
+    setBgSafe({ type:'upload', value:url });
+    toast('تم تحميل الخلفية ✓', 'ok');
+  }
+
   function openPanel(name){
     if (activePanel === name){
       closePanel(name);
@@ -590,28 +790,45 @@ const Editor = (() => {
     activePanel = name;
     document.querySelectorAll('.panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
     document.querySelectorAll('.tool').forEach(t => t.classList.toggle('active', t.dataset.tool === name));
-    if (name === 'draw') mainCanvas.classList.add('tool-brush');
-    else mainCanvas.classList.remove('tool-brush','tool-eraser');
+
+    if (name === 'crop'){
+      if (!currentImage && !originalImage) { toast('ارفع صورة أولاً', 'err'); activePanel = null; document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden')); document.querySelectorAll('.tool').forEach(t => t.classList.remove('active')); return; }
+      showDefaultCrop();
+      toast('اسحب الحواف لتحديد منطقة القص ✓', 'ok');
+    } else if (name === 'draw'){
+      cropActive = false;
+      $c('cropOverlay')?.classList.add('hidden');
+      if (mainCanvas) mainCanvas.classList.add('tool-brush');
+    } else {
+      cropActive = false;
+      $c('cropOverlay')?.classList.add('hidden');
+      selectedId = null;
+      render();
+    }
+
+    if (name !== 'draw' && mainCanvas) mainCanvas.classList.remove('tool-brush');
     document.querySelector('.ws-panels')?.scrollIntoView({behavior:'smooth', block:'nearest'});
   }
-  function closePanel(name){
+  function closePanel(){
     activePanel = null;
+    cropActive = false;
+    $c('cropOverlay')?.classList.add('hidden');
     document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
     document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
-    if (mainCanvas) mainCanvas.classList.remove('tool-brush','tool-eraser');
+    if (mainCanvas) mainCanvas.classList.remove('tool-brush');
+    selectedId = null;
+    render();
   }
-
   function applyZoom(){
     if (mainCanvas) mainCanvas.style.transform = `scale(${zoom})`;
     if ($c('zoomVal')) $c('zoomVal').textContent = Math.round(zoom*100) + '%';
+    if (cropActive) updateCropOverlay();
   }
 
-  /* ===== FILE HANDLING ===== */
   async function handleFile(file){
     const allowed = ['image/png','image/jpeg','image/webp'];
     if (!allowed.includes(file.type)) return toast('صيغة غير مدعومة', 'err');
     if (file.size > (CONFIG.MAX_FILE_MB * 1024 * 1024)) return toast(`الحجم > ${CONFIG.MAX_FILE_MB}MB`, 'err');
-
     await loadOriginal(file);
     $c('uploadStage')?.classList.add('hidden');
     $c('workspace')?.classList.remove('hidden');
@@ -619,23 +836,25 @@ const Editor = (() => {
     finalBlob = null;
     toast('الصورة جاهزة ✓', 'ok');
   }
-
   function loadOriginal(file){
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => {
-        originalImage = img;
-        currentImage = img;
-        strokes = []; texts = [];
+        originalImage = img; currentImage = img;
+        bgRemoved = false;
+        strokes = []; texts = []; textIdCounter = 0;
         currentBg = { type:'original' };
         adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
         filterId = 'none'; filterIntensity = 1;
-        imgScale = 1; imgAlpha = 1;
+        imgScale = 1; imgAlpha = 1; imgOffsetX = 0; imgOffsetY = 0;
+        selectedId = null;
         if ($c('rangeScale')) $c('rangeScale').value = 100;
         if ($c('rangeAlpha')) $c('rangeAlpha').value = 100;
         if ($c('valScale')) $c('valScale').textContent = '100%';
         if ($c('valAlpha')) $c('valAlpha').textContent = '100%';
+        document.querySelectorAll('.subtab').forEach(x => x.classList.toggle('active', x.dataset.bg === 'original'));
+        document.querySelectorAll('.bg-content').forEach(c => c.classList.toggle('hidden', c.dataset.bgcontent !== 'original'));
         closePanel();
         render();
         applyZoom();
@@ -646,23 +865,22 @@ const Editor = (() => {
     });
   }
 
-  /* ===== REMOVE BACKGROUND ===== */
-  async function removeBackground(){
+  async function removeBackground(silent = false){
     const btn = $c('btnRemoveBg');
     const loading = $c('canvasLoading');
     const loadingText = $c('canvasLoadingText');
     const base = currentImage || originalImage;
-    if (!base) return toast('ارفع صورة أولاً', 'err');
+    if (!base){ if(!silent) toast('ارفع صورة أولاً', 'err'); return false; }
 
     const s = await Auth.valid();
-    if (!s?.access_token || !s?.user?.id){ toast('انتهت الجلسة', 'err'); App.showAuth(); return; }
+    if (!s?.access_token || !s?.user?.id){ toast('انتهت الجلسة', 'err'); App.showAuth(); return false; }
     Auth.session = s;
     if (!Auth.profile) Auth.profile = await API.getProfile(s.user.id, s.access_token);
-    if (Auth.profile?.is_banned) return toast('الحساب موقوف', 'err');
+    if (Auth.profile?.is_banned){ if(!silent) toast('الحساب موقوف', 'err'); return false; }
     if (!Auth.isPro()){
       const today = await API.countToday(s.access_token, s.user.id).catch(()=>0);
       const lim = Number(Auth.profile?.daily_limit ?? CONFIG.DEFAULT_DAILY_LIMIT);
-      if (lim > 0 && today >= lim) return toast(`وصلت للحد اليومي (${lim})`, 'err');
+      if (lim > 0 && today >= lim){ toast(`وصلت للحد اليومي (${lim})`, 'err'); return false; }
     }
 
     if (btn) btn.disabled = true;
@@ -671,11 +889,10 @@ const Editor = (() => {
 
     try {
       const c = document.createElement('canvas');
-      c.width = base.naturalWidth;
-      c.height = base.naturalHeight;
+      c.width = base.naturalWidth; c.height = base.naturalHeight;
       c.getContext('2d').drawImage(base, 0, 0);
       const blob = await new Promise(r => c.toBlob(r, 'image/png'));
-      const file = new File([blob], 'source.png', { type: 'image/png' });
+      const file = new File([blob], 'source.png', { type:'image/png' });
 
       const origPath = await API.upload(s.access_token, s.user.id, file, 'orig').catch(()=>null);
       const resultBlob = await API.removeBg(file);
@@ -685,161 +902,297 @@ const Editor = (() => {
       await new Promise((resolve, reject) => {
         const url = URL.createObjectURL(resultBlob);
         const img = new Image();
-        img.onload = () => { currentImage = img; render(); resolve(); };
+        img.onload = () => { currentImage = img; bgRemoved = true; render(); resolve(); };
         img.onerror = reject;
         img.src = url;
       });
 
-      /* Switch to transparent */
-      currentBg = { type:'checker' };
-      document.querySelectorAll('.subtab').forEach(x => x.classList.toggle('active', x.dataset.bg === 'transparent'));
-      document.querySelectorAll('.bg-content').forEach(c => c.classList.toggle('hidden', c.dataset.bgcontent !== 'transparent'));
-      render();
-
       if (App.refreshUsage) App.refreshUsage();
-      toast('تمت إزالة الخلفية ✓', 'ok');
+      if (!silent) toast('تمت إزالة الخلفية ✓', 'ok');
+      return true;
     } catch(e){
       console.error(e);
       toast(e.message || 'فشلت العملية', 'err');
+      return false;
     } finally {
       if (btn) btn.disabled = false;
       loading?.classList.add('hidden');
     }
   }
 
-  /* ===== CANVAS INTERACTION ===== */
-  function getPointer(e){
+  function getCanvasPoint(e){
     const rect = mainCanvas.getBoundingClientRect();
     const sx = mainCanvas.width / rect.width;
     const sy = mainCanvas.height / rect.height;
     return { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy };
   }
+  function getImageBox(){
+    const base = currentImage || originalImage;
+    if (!base) return null;
+    const W = base.naturalWidth, H = base.naturalHeight;
+    const w = W * imgScale, h = H * imgScale;
+    const cx = W/2 + imgOffsetX, cy = H/2 + imgOffsetY;
+    return { x: cx - w/2, y: cy - h/2, w, h, cx, cy };
+  }
+  function getTextBox(t, ctx){
+    ctx.save(); ctx.font = `bold ${t.size}px ${t.font}`;
+    const tw = ctx.measureText(t.text).width; ctx.restore();
+    const pad = t.size * .3;
+    const w = tw + pad*2, h = t.size + pad*1.4;
+    return { x: t.x - w/2, y: t.y - h/2, w, h, cx: t.x, cy: t.y };
+  }
+  function hitHandle(pt, box, r){
+    const cs = [
+      { x: box.x, y: box.y, c:'tl' },
+      { x: box.x + box.w, y: box.y, c:'tr' },
+      { x: box.x, y: box.y + box.h, c:'bl' },
+      { x: box.x + box.w, y: box.y + box.h, c:'br' }
+    ];
+    for (const c of cs) if (Math.hypot(pt.x - c.x, pt.y - c.y) <= r) return c.c;
+    return null;
+  }
+  function inBox(pt, box){ return pt.x >= box.x && pt.x <= box.x + box.w && pt.y >= box.y && pt.y <= box.y + box.h; }
+
   function onPointerDown(e){
+    if (cropActive) return;
     const base = currentImage || originalImage;
     if (!base) return;
-    if (activePanel !== 'draw' && activePanel !== 'text') return;
-    const p = getPointer(e);
+    renderImmediate = true;
+    touchPoints.set(e.pointerId, { x:e.clientX, y:e.clientY });
 
-    if (activePanel === 'text'){
-      const text = $c('textInput').value.trim() || 'نص';
-      const size = +$c('textSize').value;
-      const color = $c('textColor').value;
-      const font = $c('textFont').value;
-      const bg = $c('textBg').value;
-      texts.push({ text, x:p.x, y:p.y, size, color, font, bg });
-      render();
-      toast('تمت إضافة النص');
+    if (touchPoints.size === 2){
+      const pts = [...touchPoints.values()];
+      pinchState = { dist: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y), item: selectedId };
+      if (selectedId === 'image') pinchState.startScale = imgScale;
+      else if (typeof selectedId === 'number'){ const t = texts.find(x => x.id === selectedId); if (t) pinchState.startSize = t.size; }
       return;
     }
-    if (activePanel === 'draw'){
+
+    const pt = getCanvasPoint(e);
+    const ctx = mainCanvas.getContext('2d');
+    const handleR = Math.max(24, mainCanvas.width * 0.05);
+
+    if (activePanel === 'draw' && selectedId === null){
       drawing = true;
-      currentStroke = { tool: drawMode, color: brushColor, size: brushSize, opacity: brushOpacity, points: [p] };
+      currentStroke = { tool: drawMode, color: brushColor, size: brushSize, opacity: brushOpacity, points:[pt] };
       mainCanvas.classList.add('dragging');
       try{ mainCanvas.setPointerCapture(e.pointerId); }catch{}
+      return;
     }
-  }
-  function onPointerMove(e){
-    if (!drawing || !currentStroke) return;
-    const p = getPointer(e);
-    currentStroke.points.push(p);
+
+    if (selectedId !== null){
+      let selBox = null;
+      if (selectedId === 'image') selBox = getImageBox();
+      else { const t = texts.find(x => x.id === selectedId); if (t) selBox = getTextBox(t, ctx); }
+      if (selBox){
+        const h = hitHandle(pt, selBox, handleR);
+        if (h){
+          dragMode = 'resize';
+          dragStartPt = pt;
+          dragItemState = { id: selectedId, startScale: imgScale, startSize: selectedId === 'image' ? null : (texts.find(x => x.id === selectedId)?.size), startBox: {...selBox} };
+          try{ mainCanvas.setPointerCapture(e.pointerId); }catch{}
+          return;
+        }
+      }
+    }
+
+    for (let i = texts.length - 1; i >= 0; i--){
+      const t = texts[i]; const box = getTextBox(t, ctx);
+      if (inBox(pt, box)){
+        selectedId = t.id;
+        dragMode = 'move';
+        dragStartPt = pt;
+        dragItemState = { id: t.id, startX: t.x, startY: t.y };
+        render();
+        try{ mainCanvas.setPointerCapture(e.pointerId); }catch{}
+        return;
+      }
+    }
+
+    if (activePanel !== 'text'){
+      const box = getImageBox();
+      if (box && inBox(pt, box)){
+        selectedId = 'image';
+        dragMode = 'move';
+        dragStartPt = pt;
+        dragItemState = { id: 'image', startOffsetX: imgOffsetX, startOffsetY: imgOffsetY };
+        render();
+        try{ mainCanvas.setPointerCapture(e.pointerId); }catch{}
+        return;
+      }
+    }
+
+    if (activePanel === 'text'){
+      const text = $c('textInput').value.trim();
+      if (text){
+        const id = ++textIdCounter;
+        texts.push({ id, text, x: pt.x, y: pt.y, size: +$c('textSize').value, color: $c('textColor').value, font: $c('textFont').value, bg: $c('textBg').value });
+        $c('textInput').value = '';
+        selectedId = id;
+        render();
+        toast('أضف النص ✓');
+        return;
+      }
+    }
+
+    selectedId = null;
     render();
   }
-  function onPointerUp(e){
-    if (drawing && currentStroke){
-      strokes.push(currentStroke);
-      currentStroke = null;
-      drawing = false;
-      mainCanvas.classList.remove('dragging');
+
+  function onPointerMove(e){
+    if (cropActive) return;
+    if (touchPoints.has(e.pointerId)) touchPoints.set(e.pointerId, { x:e.clientX, y:e.clientY });
+
+    if (pinchState && touchPoints.size === 2){
+      const pts = [...touchPoints.values()];
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const ratio = dist / pinchState.dist;
+      if (pinchState.item === 'image' && pinchState.startScale){
+        imgScale = Math.max(.2, Math.min(4, pinchState.startScale * ratio));
+        if ($c('rangeScale')) $c('rangeScale').value = Math.round(imgScale * 100);
+        if ($c('valScale')) $c('valScale').textContent = Math.round(imgScale*100) + '%';
+      } else if (typeof pinchState.item === 'number' && pinchState.startSize){
+        const t = texts.find(x => x.id === pinchState.item);
+        if (t) t.size = Math.max(10, Math.min(400, pinchState.startSize * ratio));
+      }
+      render();
+      return;
+    }
+
+    if (drawing && currentStroke){ currentStroke.points.push(getCanvasPoint(e)); render(); return; }
+
+    if (dragMode === 'move' && dragItemState){
+      const pt = getCanvasPoint(e);
+      const dx = pt.x - dragStartPt.x, dy = pt.y - dragStartPt.y;
+      if (dragItemState.id === 'image'){ imgOffsetX = dragItemState.startOffsetX + dx; imgOffsetY = dragItemState.startOffsetY + dy; }
+      else { const t = texts.find(x => x.id === dragItemState.id); if (t){ t.x = dragItemState.startX + dx; t.y = dragItemState.startY + dy; } }
+      render(); return;
+    }
+
+    if (dragMode === 'resize' && dragItemState){
+      const pt = getCanvasPoint(e);
+      const b = dragItemState.startBox;
+      const startDist = Math.hypot(dragStartPt.x - b.cx, dragStartPt.y - b.cy);
+      const nowDist = Math.hypot(pt.x - b.cx, pt.y - b.cy);
+      if (startDist > 1){
+        const ratio = nowDist / startDist;
+        if (dragItemState.id === 'image'){
+          imgScale = Math.max(.2, Math.min(4, dragItemState.startScale * ratio));
+          if ($c('rangeScale')) $c('rangeScale').value = Math.round(imgScale * 100);
+          if ($c('valScale')) $c('valScale').textContent = Math.round(imgScale*100) + '%';
+        } else {
+          const t = texts.find(x => x.id === dragItemState.id);
+          if (t) t.size = Math.max(10, Math.min(400, dragItemState.startSize * ratio));
+        }
+      }
+      render(); return;
     }
   }
 
-  /* ===== RENDER ===== */
+  function onPointerUp(e){
+    if (cropActive) return;
+    touchPoints.delete(e.pointerId);
+    if (touchPoints.size < 2) pinchState = null;
+    if (drawing && currentStroke){ strokes.push(currentStroke); currentStroke = null; drawing = false; mainCanvas.classList.remove('dragging'); }
+    dragMode = null; dragItemState = null;
+    renderImmediate = false;
+    render();
+  }
+
+  function onWheel(e){
+    if (cropActive) return;
+    if (selectedId === 'image' || !selectedId){
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.05 : 0.05;
+      imgScale = Math.max(.2, Math.min(4, imgScale + delta));
+      if ($c('rangeScale')) $c('rangeScale').value = Math.round(imgScale * 100);
+      if ($c('valScale')) $c('valScale').textContent = Math.round(imgScale*100) + '%';
+      render();
+    } else if (typeof selectedId === 'number'){
+      e.preventDefault();
+      const t = texts.find(x => x.id === selectedId);
+      if (t){ t.size = Math.max(10, Math.min(400, t.size + (e.deltaY > 0 ? -3 : 3))); render(); }
+    }
+  }
+
   function applyFilter(id, intensity, ctx){
-    /* intensity between 0 and 1 */
     const t = intensity;
     if (id === 'none') return;
     ctx.save();
-    ctx.globalCompositeOperation = 'source-atop';
-    if (id === 'grayscale'){
-      ctx.fillStyle = `rgba(128,128,128,${t})`;
-      ctx.globalCompositeOperation = 'saturation';
-      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-    } else if (id === 'sepia'){
-      ctx.globalCompositeOperation = 'overlay';
-      ctx.fillStyle = `rgba(200,150,80,${t*.6})`;
-      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-    } else if (id === 'invert'){
-      ctx.globalCompositeOperation = 'difference';
-      ctx.fillStyle = `rgba(255,255,255,${t})`;
-      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-    } else if (id === 'vivid'){
-      ctx.globalCompositeOperation = 'overlay';
-      ctx.fillStyle = `rgba(255,100,150,${t*.3})`;
-      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-    } else if (id === 'cool'){
-      ctx.globalCompositeOperation = 'multiply';
-      ctx.fillStyle = `rgba(150,200,255,${t*.4})`;
-      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-    } else if (id === 'warm'){
-      ctx.globalCompositeOperation = 'overlay';
-      ctx.fillStyle = `rgba(255,180,100,${t*.5})`;
-      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-    } else if (id === 'dramatic'){
-      ctx.globalCompositeOperation = 'overlay';
-      ctx.fillStyle = `rgba(0,0,0,${t*.3})`;
-      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-    } else if (id === 'fade'){
-      ctx.globalCompositeOperation = 'source-atop';
-      ctx.fillStyle = `rgba(255,245,220,${t*.25})`;
-      ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-    }
+    if (id === 'grayscale'){ ctx.globalCompositeOperation = 'saturation'; ctx.fillStyle = `rgba(128,128,128,${t})`; ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height); }
+    else if (id === 'sepia'){ ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = `rgba(200,150,80,${t*.6})`; ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height); }
+    else if (id === 'invert'){ ctx.globalCompositeOperation = 'difference'; ctx.fillStyle = `rgba(255,255,255,${t})`; ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height); }
+    else if (id === 'vivid'){ ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = `rgba(255,100,150,${t*.3})`; ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height); }
+    else if (id === 'cool'){ ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(150,200,255,${t*.4})`; ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height); }
+    else if (id === 'warm'){ ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = `rgba(255,180,100,${t*.5})`; ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height); }
+    else if (id === 'dramatic'){ ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = `rgba(0,0,0,${t*.3})`; ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height); }
+    else if (id === 'fade'){ ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = `rgba(255,245,220,${t*.25})`; ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height); }
     ctx.restore();
+  }
+  function roundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r); ctx.closePath();
+  }
+  function drawStroke(ctx, st){
+    ctx.save();
+    if (st.tool === 'eraser') ctx.globalCompositeOperation = 'destination-out';
+    ctx.strokeStyle = st.color; ctx.lineWidth = st.size;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.globalAlpha = st.opacity ?? 1;
+    ctx.beginPath();
+    const pts = st.points;
+    if (pts.length === 1){ ctx.arc(pts[0].x, pts[0].y, st.size/2, 0, Math.PI*2); ctx.fillStyle = st.color; ctx.fill(); }
+    else { ctx.moveTo(pts[0].x, pts[0].y); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke(); }
+    ctx.restore();
+  }
+  function drawCover(ctx, img, w, h){
+    const ir = img.width / img.height, cr = w / h;
+    let sw, sh, sx, sy;
+    if (ir > cr){ sh = img.height; sw = sh * cr; sx = (img.width - sw)/2; sy = 0; }
+    else { sw = img.width; sh = sw / cr; sx = 0; sy = (img.height - sh)/2; }
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+  }
+  function drawChecker(ctx, w, h){
+    const s = Math.max(12, Math.round(w/60));
+    for (let y = 0; y < h; y += s) for (let x = 0; x < w; x += s){
+      ctx.fillStyle = ((x/s + y/s) % 2 === 0) ? '#160d18' : '#1e1422';
+      ctx.fillRect(x, y, s, s);
+    }
   }
 
   function render(){
+    if (renderImmediate) return renderNow();
+    if (renderQueued) return;
+    renderQueued = true;
+    requestAnimationFrame(() => { renderQueued = false; renderNow(); });
+  }
+  function renderNow(){
     const base = currentImage || originalImage;
     if (!base || !mainCanvas) return;
+    const W = base.naturalWidth, H = base.naturalHeight;
+    mainCanvas.width = W; mainCanvas.height = H;
 
-    const W = base.naturalWidth;
-    const H = base.naturalHeight;
-    mainCanvas.width = W;
-    mainCanvas.height = H;
-
-    /* Foreground */
-    fgCanvas.width = W;
-    fgCanvas.height = H;
+    fgCanvas.width = W; fgCanvas.height = H;
     const fg = fgCanvas.getContext('2d');
     fg.clearRect(0,0,W,H);
 
-    const b = adjustments.brightness;
-    const c = adjustments.contrast;
-    const s = adjustments.saturation;
-    const h = adjustments.hue;
-    const blur = adjustments.blur;
-    const op = adjustments.opacity;
-    fg.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) hue-rotate(${h}deg) blur(${blur}px)`;
-    fg.globalAlpha = imgAlpha * (op/100);
-    const scaledW = W * imgScale;
-    const scaledH = H * imgScale;
-    const dx = (W - scaledW) / 2;
-    const dy = (H - scaledH) / 2;
-    fg.drawImage(base, dx, dy, scaledW, scaledH);
-    fg.filter = 'none';
-    fg.globalAlpha = 1;
+    fg.filter = `brightness(${adjustments.brightness}%) contrast(${adjustments.contrast}%) saturate(${adjustments.saturation}%) hue-rotate(${adjustments.hue}deg) blur(${adjustments.blur}px)`;
+    fg.globalAlpha = imgAlpha * (adjustments.opacity/100);
+    const sw = W * imgScale, sh = H * imgScale;
+    const dx = (W - sw)/2 + imgOffsetX, dy = (H - sh)/2 + imgOffsetY;
+    fg.drawImage(base, dx, dy, sw, sh);
+    fg.filter = 'none'; fg.globalAlpha = 1;
 
-    /* Apply filter on fg */
     if (filterId !== 'none') applyFilter(filterId, filterIntensity, fg);
-
-    /* Strokes */
     for (const st of strokes) drawStroke(fg, st);
     if (currentStroke) drawStroke(fg, currentStroke);
 
-    /* Texts */
     for (const t of texts){
       fg.save();
       fg.font = `bold ${t.size}px ${t.font}`;
-      fg.textAlign = 'center';
-      fg.textBaseline = 'middle';
+      fg.textAlign = 'center'; fg.textBaseline = 'middle';
       const tw = fg.measureText(t.text).width;
       if (t.bg && t.bg !== 'none'){
         fg.fillStyle = t.bg;
@@ -852,99 +1205,85 @@ const Editor = (() => {
       fg.restore();
     }
 
-    /* Main */
     const ctx = mainCanvas.getContext('2d');
     ctx.clearRect(0,0,W,H);
-
-    if (currentBg.type === 'color'){
-      ctx.fillStyle = currentBg.value;
-      ctx.fillRect(0,0,W,H);
-    } else if (currentBg.type === 'original'){
-      drawChecker(ctx, W, H);
-    } else if ((currentBg.type === 'preset' || currentBg.type === 'upload') && bgImage?.complete && bgImage.naturalWidth){
-      drawCover(ctx, bgImage, W, H);
-    } else if (currentBg.type === 'checker'){
-      drawChecker(ctx, W, H);
-    }
+    if (currentBg.type === 'color'){ ctx.fillStyle = currentBg.value; ctx.fillRect(0,0,W,H); }
+    else if (currentBg.type === 'original'){ drawChecker(ctx, W, H); }
+    else if ((currentBg.type === 'preset' || currentBg.type === 'upload') && bgImage?.complete && bgImage.naturalWidth){ drawCover(ctx, bgImage, W, H); }
+    else if (currentBg.type === 'checker'){ drawChecker(ctx, W, H); }
 
     ctx.drawImage(fgCanvas, 0, 0);
-  }
 
-  function roundRect(ctx, x, y, w, h, r){
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.arcTo(x+w, y, x+w, y+h, r);
-    ctx.arcTo(x+w, y+h, x, y+h, r);
-    ctx.arcTo(x, y+h, x, y, r);
-    ctx.arcTo(x, y, x+w, y, r);
-    ctx.closePath();
-  }
+    if (selectedId !== null){
+      let box = null;
+      if (selectedId === 'image') box = getImageBox();
+      else { const t = texts.find(x => x.id === selectedId); if (t) box = getTextBox(t, ctx); }
+      if (box) drawSelection(ctx, box);
+    }
 
-  function drawStroke(ctx, st){
+    if (cropActive) setTimeout(updateCropOverlay, 0);
+  }
+  function drawSelection(ctx, box){
+    const sf = mainCanvas.width / 800;
+    const pad = 6 * sf;
     ctx.save();
-    if (st.tool === 'eraser') ctx.globalCompositeOperation = 'destination-out';
-    ctx.strokeStyle = st.color;
-    ctx.lineWidth = st.size;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.globalAlpha = st.opacity ?? 1;
+    ctx.strokeStyle = 'rgba(224,184,132,.95)';
+    ctx.lineWidth = 2 * sf;
+    ctx.setLineDash([8*sf, 6*sf]);
     ctx.beginPath();
-    const pts = st.points;
-    if (pts.length === 1){
-      ctx.arc(pts[0].x, pts[0].y, st.size/2, 0, Math.PI*2);
-      ctx.fillStyle = st.color;
-      ctx.fill();
-    } else {
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-      ctx.stroke();
+    ctx.rect(box.x - pad, box.y - pad, box.w + pad*2, box.h + pad*2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const handleR = Math.max(6, 10 * sf);
+    const cs = [
+      { x: box.x - pad, y: box.y - pad },
+      { x: box.x + box.w + pad, y: box.y - pad },
+      { x: box.x - pad, y: box.y + box.h + pad },
+      { x: box.x + box.w + pad, y: box.y + box.h + pad }
+    ];
+    for (const c of cs){
+      ctx.beginPath(); ctx.arc(c.x, c.y, handleR, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(224,184,132,1)'; ctx.fill();
+      ctx.lineWidth = 2 * sf; ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.stroke();
     }
     ctx.restore();
   }
-  function drawCover(ctx, img, w, h){
-    const ir = img.width / img.height;
-    const cr = w / h;
-    let sw, sh, sx, sy;
-    if (ir > cr){ sh = img.height; sw = sh * cr; sx = (img.width - sw) / 2; sy = 0; }
-    else { sw = img.width; sh = sw / cr; sx = 0; sy = (img.height - sh) / 2; }
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
-  }
-  function drawChecker(ctx, w, h){
-    const s = Math.max(12, Math.round(w/60));
-    for (let y = 0; y < h; y += s){
-      for (let x = 0; x < w; x += s){
-        ctx.fillStyle = ((x/s + y/s) % 2 === 0) ? '#160d18' : '#1e1422';
-        ctx.fillRect(x, y, s, s);
-      }
-    }
-  }
 
-  function setBg(bg){
-    currentBg = bg;
-    if (bg.type === 'preset'){
-      bgImage = new Image();
-      bgImage.crossOrigin = 'anonymous';
-      bgImage.onload = render;
-      bgImage.onerror = () => toast('تعذر تحميل الخلفية', 'err');
-      bgImage.src = bg.value;
-    } else if (bg.type === 'upload'){
-      bgImage = new Image();
-      bgImage.onload = render;
-      bgImage.src = bg.value;
-    } else {
-      bgImage = null;
-    }
+  function undo(){
+    if (strokes.length){ strokes.pop(); render(); return toast('تراجع'); }
+    if (texts.length){ texts.pop(); render(); return toast('تراجع'); }
+    toast('لا يوجد شي للتراجع', 'err');
+  }
+  function resetAdjustments(){
+    adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
+    ['Brightness','Contrast','Saturation','Hue','Blur','Opacity'].forEach(k => {
+      const id = 'range'+k, vId = 'val'+k;
+      const def = { Brightness:100, Contrast:100, Saturation:100, Hue:0, Blur:0, Opacity:100 };
+      const sfx = { Brightness:'%', Contrast:'%', Saturation:'%', Hue:'°', Blur:'px', Opacity:'%' };
+      if ($c(id)) $c(id).value = def[k];
+      if ($c(vId)) $c(vId).textContent = def[k] + sfx[k];
+    });
     render();
+    toast('تم إعادة التعديلات ✓', 'ok');
   }
-  function handleBgUpload(file){
-    if (!file.type.startsWith('image/')) return toast('صيغة غير مدعومة', 'err');
-    if (file.size > 10*1024*1024) return toast('الحجم > 10MB', 'err');
-    const url = URL.createObjectURL(file);
-    setBg({ type:'upload', value:url });
-    toast('تم تحميل الخلفية ✓', 'ok');
+  function resetAll(){
+    if (!originalImage) return;
+    resetAdjustments();
+    filterId = 'none'; filterIntensity = 1;
+    strokes = []; texts = []; textIdCounter = 0;
+    imgScale = 1; imgAlpha = 1; imgOffsetX = 0; imgOffsetY = 0;
+    if ($c('rangeScale')) $c('rangeScale').value = 100;
+    if ($c('rangeAlpha')) $c('rangeAlpha').value = 100;
+    if ($c('rangeFilterIntensity')) $c('rangeFilterIntensity').value = 100;
+    if ($c('valScale')) $c('valScale').textContent = '100%';
+    if ($c('valAlpha')) $c('valAlpha').textContent = '100%';
+    if ($c('valFilterIntensity')) $c('valFilterIntensity').textContent = '100%';
+    document.querySelectorAll('.filter-item').forEach(x => x.classList.toggle('active', x.dataset.filter === 'none'));
+    selectedId = null;
+    if (cropActive) showDefaultCrop();
+    render();
+    toast('تم إعادة الضبط ✓', 'ok');
   }
-
-  /* ===== SAVE / DOWNLOAD ===== */
   async function saveImage(){
     const base = currentImage || originalImage;
     if (!base) return toast('لا توجد صورة', 'err');
@@ -953,18 +1292,16 @@ const Editor = (() => {
     const orig = btn.innerHTML;
     btn.innerHTML = 'جاري الحفظ...';
     try{
-      render();
+      const wasCrop = cropActive;
+      if (wasCrop){ cropActive = false; $c('cropOverlay')?.classList.add('hidden'); }
+      renderNow();
       const outBlob = await new Promise(r => mainCanvas.toBlob(r, 'image/png'));
       finalBlob = outBlob;
       $c('btnDownload')?.classList.remove('hidden');
+      if (wasCrop){ cropActive = true; $c('cropOverlay')?.classList.remove('hidden'); }
       toast('تم الحفظ ✓ اضغط تحميل', 'ok');
-    }catch(e){
-      console.error(e);
-      toast('فشل الحفظ', 'err');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = orig;
-    }
+    }catch(e){ console.error(e); toast('فشل الحفظ', 'err'); }
+    finally{ btn.disabled = false; btn.innerHTML = orig; }
   }
   function downloadBlob(blob, name){
     if (!blob){ toast('لا يوجد ملف', 'err'); return; }
@@ -975,45 +1312,25 @@ const Editor = (() => {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
-
   function reset(){
     originalImage = null; currentImage = null; finalBlob = null;
-    strokes = []; texts = [];
+    bgRemoved = false;
+    strokes = []; texts = []; textIdCounter = 0;
     adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
     filterId = 'none'; filterIntensity = 1;
     currentBg = { type:'original' };
     bgImage = null;
-    imgScale = 1; imgAlpha = 1;
+    imgScale = 1; imgAlpha = 1; imgOffsetX = 0; imgOffsetY = 0;
+    selectedId = null;
+    cropActive = false;
+    cropRect = null;
     $c('uploadStage')?.classList.remove('hidden');
     $c('workspace')?.classList.add('hidden');
     $c('btnDownload')?.classList.add('hidden');
     closePanel();
   }
 
-  async function openWithBlob(blob){
-    await new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(blob);
-      const img = new Image();
-      img.onload = () => {
-        originalImage = img; currentImage = img;
-        strokes = []; texts = [];
-        currentBg = { type:'original' };
-        adjustments = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, opacity:100 };
-        filterId = 'none'; filterIntensity = 1;
-        imgScale = 1; imgAlpha = 1;
-        render(); applyZoom();
-        resolve();
-      };
-      img.onerror = reject;
-      img.src = url;
-    });
-    $c('uploadStage')?.classList.add('hidden');
-    $c('workspace')?.classList.remove('hidden');
-    $c('btnDownload')?.classList.add('hidden');
-    finalBlob = null;
-  }
-
-  return { init, openWithBlob, reset };
+  return { init, reset };
 })();
 
 /* ========== APP ========== */
@@ -1062,7 +1379,7 @@ const App = (() => {
       const today = await API.countToday(s.access_token, s.user.id);
       const st = $('statTotal'); if(st) st.textContent = ops.length;
       const std = $('statToday'); if(std) std.textContent = today;
-      if(!ops.length){ wrap.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><h3>لا توجد عمليات</h3><p>ابدأ من الاستوديو</p></div>`; return; }
+      if(!ops.length){ wrap.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><h3>لا توجد عمليات</h3></div>`; return; }
       const grid = document.createElement('div'); grid.className = 'history-grid';
       for(const op of ops){
         const c = document.createElement('div'); c.className = 'hist-card';
@@ -1075,7 +1392,7 @@ const App = (() => {
       grid.addEventListener('click', async e => {
         const b = e.target.closest('[data-act]'); if(!b) return;
         const op = opsCache.find(o => String(o.id) === String(b.dataset.id)); if(!op) return;
-        if(b.dataset.act === 'dl'){ b.disabled=true; b.textContent='...'; try{ const u = await API.resolveImg(op.result_url, s.access_token); if(!u) throw new Error('تعذر التجهيز'); await downloadFromUrl(u, `removebg-${String(op.id).slice(0,8)}.png`); }catch(err){ toast(err.message||'فشل التحميل','err'); } finally{ b.disabled=false; b.textContent='⬇ تحميل'; } }
+        if(b.dataset.act === 'dl'){ b.disabled=true; b.textContent='...'; try{ const u = await API.resolveImg(op.result_url, s.access_token); if(!u) throw new Error('تعذر التجهيز'); downloadFromUrl(u, `removebg-${String(op.id).slice(0,8)}.png`); }catch(err){ toast(err.message||'فشل التحميل','err'); } finally{ b.disabled=false; b.textContent='⬇ تحميل'; } }
         if(b.dataset.act === 'del'){ if(!confirm('حذف هذه العملية؟')) return; b.disabled=true; b.textContent='...'; try{ await API.delOp(s.access_token, op.id); await API.removeFiles(s.access_token, [op.original_url, op.result_url]); toast('تم الحذف ✓','ok'); await refreshHistory(); }catch(err){ toast(err.message||'فشل الحذف','err'); b.disabled=false; b.textContent='🗑 حذف'; } }
       });
     }catch(e){ wrap.innerHTML = `<div class="empty"><div class="empty-icon">!</div><h3>تعذر التحميل</h3><p>${esc(e.message)}</p></div>`; }
@@ -1123,6 +1440,12 @@ const App = (() => {
       finally{ e.currentTarget.disabled = false; }
     });
     $('logoutBtn')?.addEventListener('click', () => Auth.doLogout(true));
+    window.addEventListener('resize', () => {
+      if (document.getElementById('cropOverlay')?.classList.contains('hidden') === false){
+        const box = document.getElementById('cropBox');
+        if (box) box.dispatchEvent(new Event('resize'));
+      }
+    });
   }
   return { showAuth, showApp, enterApp, switchView, bindUI, refreshUsage };
 })();
