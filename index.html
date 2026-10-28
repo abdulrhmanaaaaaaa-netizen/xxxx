@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="sandstorm">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1b1009">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="RemoveBG — استوديو صور بطابع سينمائي من الرمل والنحاس والذهب.">
+<title>RemoveBG — استوديو العاصفة الرملية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Noto+Serif+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="loader">
+  <div class="ld-orb o1"></div>
+  <div class="ld-orb o2"></div>
+  <div class="ld-orb o3"></div>
+  <div class="ld-grid"></div>
+  <canvas id="fx"></canvas>
+
+  <div class="ld-visual">
+    <svg class="ld-arc a1" viewBox="0 0 300 300">
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f5d8b0"/>
+          <stop offset="50%" stop-color="#e0b884"/>
+          <stop offset="100%" stop-color="#c4783a"/>
+        </linearGradient>
+      </defs>
+      <circle cx="150" cy="150" r="140" fill="none" stroke="url(#g1)" stroke-width="3" stroke-linecap="round" stroke-dasharray="220 660"/>
+    </svg>
+    <svg class="ld-arc a2" viewBox="0 0 300 300">
+      <defs>
+        <linearGradient id="g2" x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ecc8ca"/>
+          <stop offset="100%" stop-color="#e0aeb0"/>
+        </linearGradient>
+      </defs>
+      <circle cx="150" cy="150" r="120" fill="none" stroke="url(#g2)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="170 583"/>
+    </svg>
+    <svg class="ld-arc a3" viewBox="0 0 300 300">
+      <defs>
+        <linearGradient id="g3" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%" stop-color="#e8c896"/>
+          <stop offset="100%" stop-color="#c4783a"/>
+        </linearGradient>
+      </defs>
+      <circle cx="150" cy="150" r="100" fill="none" stroke="url(#g3)" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="130 498"/>
+    </svg>
+    <svg class="ld-arc a4" viewBox="0 0 300 300">
+      <defs>
+        <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f5d8b0"/>
+          <stop offset="100%" stop-color="#e0aeb0"/>
+        </linearGradient>
+      </defs>
+      <circle cx="150" cy="150" r="80" fill="none" stroke="url(#g4)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="95 408"/>
+    </svg>
+    <svg class="ld-arc a5" viewBox="0 0 300 300">
+      <defs>
+        <linearGradient id="g5" x1="1" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#e0b884"/>
+          <stop offset="100%" stop-color="#ecc8ca"/>
+        </linearGradient>
+      </defs>
+      <circle cx="150" cy="150" r="60" fill="none" stroke="url(#g5)" stroke-width="2" stroke-linecap="round" stroke-dasharray="70 307"/>
+    </svg>
+
+    <div class="ld-satellite s1"><span></span></div>
+    <div class="ld-satellite s2"><span></span></div>
+    <div class="ld-satellite s3"><span></span></div>
+    <div class="ld-satellite s4"><span></span></div>
+
+    <div class="ld-pulse p1"></div>
+    <div class="ld-pulse p2"></div>
+    <div class="ld-pulse p3"></div>
+
+    <div class="ld-core">
+      <div class="ld-core-glow"></div>
+      <img src="brand.svg" alt="">
+    </div>
+  </div>
+
+  <div class="ld-text">
+    <div class="ld-eyebrow">مساحة للصورة والفكرة</div>
+    <div class="ld-title">Remove<span>BG</span></div>
+    <div class="ld-sub">صورك، بطريقتك</div>
+    <div class="ld-progress">
+      <div class="ld-progress-fill" id="ldFill"></div>
+      <div class="ld-progress-glow" id="ldGlow"></div>
+    </div>
+    <div class="ld-meta">
+      <span class="ld-step" id="ldStep">تهيئة النظام...</span>
+      <span class="ld-pct" id="ldPct">0%</span>
+    </div>
+  </div>
+</div>
+
+<section id="authScreen" class="auth hidden">
+  <button id="themeToggleAuth" class="theme-toggle auth-theme-toggle" type="button" aria-label="تغيير الثيم" title="تغيير الثيم">
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.2 15.1A8.5 8.5 0 0 1 8.9 3.8a8.6 8.6 0 1 0 11.3 11.3Z"/><path d="m15.5 3 .7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7.7-2.1Z"/></svg>
+    <span class="theme-label">العاصفة الرملية</span>
+  </button>
+  <div class="auth-bg">
+    <div class="auth-orb o1"></div>
+    <div class="auth-orb o2"></div>
+    <div class="auth-orb o3"></div>
+    <div class="auth-mesh"></div>
+  </div>
+
+  <div class="auth-card">
+    <span class="glass-line"></span>
+    <div class="auth-logo"><img src="brand.svg" alt=""></div>
+
+    <div class="auth-head">
+      <h1 id="formTitle">أهلًا بعودتك</h1>
+      <p id="formSub">ادخل إلى مساحتك وأكمل فكرتك.</p>
+    </div>
+
+    <form id="authForm" autocomplete="on" novalidate>
+      <div class="field hidden" id="fUsername">
+        <label>اسم المستخدم</label>
+        <input id="username" type="text" maxlength="20" placeholder="username" autocomplete="username" spellcheck="false">
+        <span class="err" id="errUsername"></span>
+      </div>
+
+      <div class="field">
+        <label>البريد الإلكتروني</label>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email" spellcheck="false" required>
+        <span class="err" id="errEmail"></span>
+      </div>
+
+      <div class="field">
+        <label>كلمة المرور</label>
+        <div class="pw-wrap">
+          <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+          <button type="button" class="eye" id="eyePass" tabindex="-1">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="strength hidden" id="strength">
+          <div class="bars" data-lvl="0"><i></i><i></i><i></i><i></i></div>
+          <span id="strengthTxt">—</span>
+        </div>
+        <span class="err" id="errPassword"></span>
+      </div>
+
+      <div class="field hidden" id="fConfirm">
+        <label>تأكيد كلمة المرور</label>
+        <div class="pw-wrap">
+          <input id="confirm" type="password" placeholder="أعد الإدخال" autocomplete="new-password">
+          <button type="button" class="eye" id="eyeConfirm" tabindex="-1">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <span class="err" id="errConfirm"></span>
+      </div>
+
+      <ul class="reqs hidden" id="reqs">
+        <li data-r="len"><i></i>8 أحرف على الأقل</li>
+        <li data-r="num"><i></i>رقم واحد على الأقل</li>
+        <li data-r="upper"><i></i>حرف كبير (A-Z)</li>
+        <li data-r="match"><i></i>متطابقتان</li>
+      </ul>
+
+      <button type="button" class="forgot" id="forgotBtn">نسيت كلمة المرور؟</button>
+
+      <button type="submit" id="submitBtn" class="btn-primary" disabled>
+        <span class="btn-text">تسجيل الدخول</span>
+      </button>
+    </form>
+
+    <div id="authMsg" class="msg"></div>
+
+    <div class="auth-switch">
+      <span id="switchText">ليس لديك حساب؟</span>
+      <button id="switchBtn" type="button">أنشئ حساباً</button>
+    </div>
+  </div>
+</section>
+
+<main id="appScreen" class="app hidden">
+  <div class="container">
+
+    <header class="hdr">
+      <div class="brand">
+        <div class="brand-logo"><img src="brand.svg" alt=""></div>
+        <div class="brand-txt"><strong>RemoveBG</strong><span>استوديو الصور</span></div>
+      </div>
+      <div class="hdr-tools">
+        <button id="adminMini" class="btn-mini hidden" type="button">✦ المطوّر</button>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="تغيير الثيم" title="تغيير الثيم">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.2 15.1A8.5 8.5 0 0 1 8.9 3.8a8.6 8.6 0 1 0 11.3 11.3Z"/><path d="m15.5 3 .7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7.7-2.1Z"/></svg>
+          <span class="theme-label">العاصفة الرملية</span>
+        </button>
+        <div id="planPill" class="pill"><span class="dot"></span><span id="planTxt">Free</span></div>
+      </div>
+    </header>
+
+    <nav class="nav">
+      <button class="nav-btn active" data-view="editor" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span>المحرر</span>
+      </button>
+      <button class="nav-btn" data-view="history" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l4 2"/></svg>
+        <span>السجل</span>
+      </button>
+      <button class="nav-btn" data-view="profile" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="7" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <span>حسابي</span>
+      </button>
+      <button id="adminNav" class="nav-btn hidden" data-view="admin" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 4v5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V7l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span>المطوّر</span>
+      </button>
+    </nav>
+
+    <section id="editorView" class="view">
+      <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+
+      <div id="uploadStage" class="up-stage">
+        <div class="up-copy">
+          <div class="up-eyebrow"><span></span> استوديو صغير لأفكارك</div>
+          <div class="up-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          </div>
+          <h2>خلّ صورتك تحكي فكرتك</h2>
+          <p>أزل الخلفية، جرّب لونًا جديدًا، أو أضف لمستك الخاصة. البداية بصورة واحدة.</p>
+          <div class="up-formats"><span>PNG</span><i>·</i><span>JPG</span><i>·</i><span>WEBP</span><b>حتى 20MB</b></div>
+          <div class="up-actions-row">
+            <button id="chooseBtn" class="btn-primary" type="button">ابدأ بصورة</button>
+            <div class="up-hint">أو اسحب الصورة إلى هنا</div>
+          </div>
+        </div>
+        <div class="up-art" aria-hidden="true">
+          <div class="art-spark spark-one">✳</div>
+          <div class="art-spark spark-two">✦</div>
+          <div class="art-card art-card-back"></div>
+          <div class="art-card art-card-front"><img class="art-scene" src="assets/desert-warrior.webp" alt="مشهد فني لمحارب في وادٍ صحراوي" fetchpriority="high"></div>
+          <div class="art-note"><span class="art-note-mark">✦</span><span>فكرتك، بطريقتك</span></div>
+          <div class="art-caption">قصّ · لون · خلفية</div>
+        </div>
+      </div>
+
+      <div id="workspace" class="ws hidden">
+        <div class="ws-canvas-wrap">
+          <div class="ws-canvas-head">
+            <div class="ws-title"><i></i> مساحة العمل</div>
+            <div class="ws-actions">
+              <button id="btnAuto" class="icon-btn" title="تحسين تلقائي">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M19 15l.8 2.4L22 18l-2.2.6L19 21l-.8-2.4L16 18l2.2-.6L19 15z"/></svg>
+              </button>
+              <button id="btnUndo" class="icon-btn" title="تراجع">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+              </button>
+              <button id="btnReset" class="icon-btn" title="إعادة ضبط">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="ws-canvas-inner" id="canvasWrap">
+            <canvas id="mainCanvas"></canvas>
+
+            <div id="cropOverlay" class="crop-overlay hidden">
+              <div class="crop-mask t"></div>
+              <div class="crop-mask b"></div>
+              <div class="crop-mask l"></div>
+              <div class="crop-mask r"></div>
+
+              <div class="crop-box" id="cropBox">
+                <div class="crop-grid-lines">
+                  <span></span><span></span>
+                  <span></span><span></span>
+                </div>
+                <div class="crop-handle h-tl" data-h="tl"></div>
+                <div class="crop-handle h-tr" data-h="tr"></div>
+                <div class="crop-handle h-bl" data-h="bl"></div>
+                <div class="crop-handle h-br" data-h="br"></div>
+                <div class="crop-handle h-t" data-h="t"></div>
+                <div class="crop-handle h-b" data-h="b"></div>
+                <div class="crop-handle h-l" data-h="l"></div>
+                <div class="crop-handle h-r" data-h="r"></div>
+              </div>
+            </div>
+
+            <div id="canvasLoading" class="ws-loading hidden">
+              <div class="proc-ring"><span></span></div>
+              <strong id="canvasLoadingText">جاري المعالجة...</strong>
+            </div>
+          </div>
+
+          <div class="ws-zoom-bar">
+            <button id="zoomOut" class="zoom-btn">−</button>
+            <span id="zoomVal">100%</span>
+            <button id="zoomIn" class="zoom-btn">+</button>
+            <button id="zoomReset" class="zoom-btn">↻</button>
+          </div>
+        </div>
+
+        <div class="ws-panels">
+          <div class="panel hidden" data-panel="background">
+            <div class="panel-head"><span>الخلفية</span><button class="panel-close" data-close-panel="background">×</button></div>
+            <button id="btnRemoveBg" class="big-action">
+              <div class="big-action-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+              </div>
+              <div class="big-action-text">
+                <strong>إزالة الخلفية</strong>
+                <span>حذف ذكي فوري</span>
+              </div>
+            </button>
+            <div class="divider"><span>أو اختر خلفية</span></div>
+            <div class="subtabs">
+              <button class="subtab active" data-bg="preset" type="button">مكتبة</button>
+              <button class="subtab" data-bg="upload" type="button">رفع</button>
+              <button class="subtab" data-bg="color" type="button">لون</button>
+              <button class="subtab" data-bg="gradient" type="button">تدرج</button>
+              <button class="subtab" data-bg="transparent" type="button">شفاف</button>
+            </div>
+            <div class="bg-content" data-bgcontent="preset"><div class="presets" id="presets"></div></div>
+            <div class="bg-content hidden" data-bgcontent="upload">
+              <div class="upload-zone" id="bgUploadZone">
+                <input id="bgFile" type="file" accept="image/*" hidden>
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                <strong>ارفع صورة خلفية</strong>
+                <span>PNG · JPG · حتى 10MB</span>
+                <button id="bgChoose" class="btn-ghost small" type="button">اختيار ملف</button>
+              </div>
+            </div>
+            <div class="bg-content hidden" data-bgcontent="color">
+              <input type="color" id="bgColor" value="#e0b884" class="color-big">
+              <div class="swatches-big" id="bgSwatches"></div>
+            </div>
+            <div class="bg-content hidden" data-bgcontent="gradient">
+              <div class="gradients-grid" id="gradientsGrid"></div>
+            </div>
+            <div class="bg-content hidden" data-bgcontent="transparent"><div class="note"><div class="note-icon">◌</div><p>خلفية شفافة (PNG)</p></div></div>
+            <div class="panel-group">
+              <label>حجم الصورة: <span id="valScale">100%</span></label>
+              <input type="range" id="rangeScale" min="30" max="300" value="100" class="range">
+            </div>
+            <div class="panel-group">
+              <label>شفافية الصورة: <span id="valAlpha">100%</span></label>
+              <input type="range" id="rangeAlpha" min="0" max="100" value="100" class="range">
+            </div>
+          </div>
+
+          <div class="panel hidden" data-panel="crop">
+            <div class="panel-head"><span>القص والاقتصاص</span><button class="panel-close" data-close-panel="crop">×</button></div>
+            <div class="crop-status-bar">
+              <span>اسحب الحواف من الشاشة</span>
+              <span class="crop-dim" id="cropDim">—</span>
+            </div>
+            <div class="panel-group">
+              <label>نسبة الأبعاد</label>
+              <div class="crop-ratios">
+                <button class="crop-ratio active" data-ratio="free" type="button">حر</button>
+                <button class="crop-ratio" data-ratio="1:1" type="button">□ 1:1</button>
+                <button class="crop-ratio" data-ratio="16:9" type="button">▭ 16:9</button>
+                <button class="crop-ratio" data-ratio="9:16" type="button">▯ 9:16</button>
+                <button class="crop-ratio" data-ratio="4:3" type="button">4:3</button>
+                <button class="crop-ratio" data-ratio="3:4" type="button">3:4</button>
+                <button class="crop-ratio" data-ratio="2:3" type="button">2:3</button>
+                <button class="crop-ratio" data-ratio="3:2" type="button">3:2</button>
+              </div>
+            </div>
+            <div class="panel-group">
+              <label>تدوير وانعكاس</label>
+              <div class="crop-actions">
+                <button class="crop-action" data-act="rot-left" type="button">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+                  <span>يسار 90°</span>
+                </button>
+                <button class="crop-action" data-act="rot-right" type="button">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg>
+                  <span>يمين 90°</span>
+                </button>
+                <button class="crop-action" data-act="flip-h" type="button">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M8 7l-4 5 4 5M16 7l4 5-4 5"/></svg>
+                  <span>قلب أفقي</span>
+                </button>
+                <button class="crop-action" data-act="flip-v" type="button">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M7 8l5-4 5 4M7 16l5 4 5-4"/></svg>
+                  <span>قلب عمودي</span>
+                </button>
+              </div>
+            </div>
+            <div class="crop-actions-row">
+              <button id="btnCropReset" class="btn-ghost" type="button">↻ إعادة الضبط</button>
+              <button id="btnCropApply" class="btn-primary" type="button">✓ تطبيق القص</button>
+            </div>
+          </div>
+
+          <div class="panel hidden" data-panel="adjust">
+            <div class="panel-head"><span>تعديلات احترافية</span><button class="panel-close" data-close-panel="adjust">×</button></div>
+            <div class="panel-group"><label>السطوع: <span id="valBrightness">100%</span></label><input type="range" id="rangeBrightness" min="20" max="200" value="100" class="range"></div>
+            <div class="panel-group"><label>التباين: <span id="valContrast">100%</span></label><input type="range" id="rangeContrast" min="20" max="200" value="100" class="range"></div>
+            <div class="panel-group"><label>التشبع: <span id="valSaturation">100%</span></label><input type="range" id="rangeSaturation" min="0" max="200" value="100" class="range"></div>
+            <div class="panel-group"><label>الحدة: <span id="valSharpen">0%</span></label><input type="range" id="rangeSharpen" min="0" max="100" value="0" class="range"></div>
+            <div class="panel-group"><label>درجة اللون: <span id="valHue">0°</span></label><input type="range" id="rangeHue" min="-180" max="180" value="0" class="range"></div>
+            <div class="panel-group"><label>الحرارة: <span id="valTemp">0</span></label><input type="range" id="rangeTemp" min="-50" max="50" value="0" class="range"></div>
+            <div class="panel-group"><label>الضباب: <span id="valBlur">0px</span></label><input type="range" id="rangeBlur" min="0" max="20" value="0" class="range"></div>
+            <div class="panel-group"><label>Vignette: <span id="valVignette">0%</span></label><input type="range" id="rangeVignette" min="0" max="100" value="0" class="range"></div>
+            <div class="panel-group"><label>الشفافية: <span id="valOpacity">100%</span></label><input type="range" id="rangeOpacity" min="10" max="100" value="100" class="range"></div>
+            <button id="btnResetAdjust" class="btn-ghost" type="button">إعادة ضبط التعديلات</button>
+          </div>
+
+          <div class="panel hidden" data-panel="filters">
+            <div class="panel-head"><span>الفلاتر</span><button class="panel-close" data-close-panel="filters">×</button></div>
+            <div class="filters-categories">
+              <button class="fc-btn active" data-fc="all" type="button">الكل</button>
+              <button class="fc-btn" data-fc="basic" type="button">أساسي</button>
+              <button class="fc-btn" data-fc="warm" type="button">دافئ</button>
+              <button class="fc-btn" data-fc="cool" type="button">بارد</button>
+              <button class="fc-btn" data-fc="art" type="button">فني</button>
+            </div>
+            <div class="filters-grid-v2" id="filtersGrid"></div>
+            <div class="panel-group" style="margin-top:14px">
+              <label>شدة الفلتر: <span id="valFilterIntensity">100%</span></label>
+              <input type="range" id="rangeFilterIntensity" min="0" max="100" value="100" class="range">
+            </div>
+          </div>
+
+          <div class="panel hidden" data-panel="borders">
+            <div class="panel-head"><span>الإطارات</span><button class="panel-close" data-close-panel="borders">×</button></div>
+            <div class="borders-grid" id="bordersGrid"></div>
+            <div class="panel-group" style="margin-top:14px">
+              <label>سماكة الإطار: <span id="valBorderWidth">20px</span></label>
+              <input type="range" id="rangeBorderWidth" min="5" max="80" value="20" class="range">
+            </div>
+          </div>
+
+          <div class="panel hidden" data-panel="text">
+            <div class="panel-head"><span>النص</span><button class="panel-close" data-close-panel="text">×</button></div>
+            <div class="panel-group"><label>نصك</label><textarea id="textInput" class="textarea" placeholder="اكتب هنا..."></textarea></div>
+            <div class="panel-group">
+              <label>الخط</label>
+              <select id="textFont" class="select">
+                <option value="'Readex Pro',sans-serif">Readex Pro</option>
+                <option value="'Fraunces',serif">Fraunces</option>
+                <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
+                <option value="Arial,sans-serif">Arial</option>
+              </select>
+            </div>
+            <div class="panel-group"><label>الحجم: <span id="valTextSize">48px</span></label><input type="range" id="textSize" min="12" max="200" value="48" class="range"></div>
+            <div class="panel-group row-2">
+              <div><label>اللون</label><input type="color" id="textColor" value="#ffffff" class="color-input"></div>
+              <div>
+                <label>الخلفية</label>
+                <select id="textBg" class="select">
+                  <option value="none">بدون</option>
+                  <option value="rgba(0,0,0,.75)">أسود</option>
+                  <option value="rgba(255,255,255,.9)">أبيض</option>
+                  <option value="rgba(224,184,132,.85)">ذهبي</option>
+                </select>
+              </div>
+            </div>
+            <div class="panel-group">
+              <label>ظل النص</label>
+              <select id="textShadow" class="select">
+                <option value="none">بدون</option>
+                <option value="rgba(0,0,0,.7)">ظل خفيف</option>
+                <option value="rgba(224,184,132,.9)">ظل ذهبي</option>
+                <option value="rgba(224,174,176,.9)">ظل وردي</option>
+              </select>
+            </div>
+            <button id="btnAddText" class="btn-primary" type="button">أضف النص</button>
+          </div>
+
+          <div class="panel hidden" data-panel="stickers">
+            <div class="panel-head"><span>الملصقات</span><button class="panel-close" data-close-panel="stickers">×</button></div>
+            <div class="stickers-grid" id="stickersGrid"></div>
+          </div>
+
+          <div class="panel hidden" data-panel="draw">
+            <div class="panel-head"><span>رسم</span><button class="panel-close" data-close-panel="draw">×</button></div>
+            <div class="panel-group"><label>حجم الفرشاة: <span id="valBrushSize">8px</span></label><input type="range" id="brushSize" min="1" max="80" value="8" class="range"></div>
+            <div class="panel-group">
+              <label>اللون</label>
+              <div class="color-row">
+                <input type="color" id="brushColor" value="#e0b884" class="color-input">
+                <div class="swatches" id="brushSwatches"></div>
+              </div>
+            </div>
+            <div class="panel-group"><label>الشفافية: <span id="valBrushOpacity">100%</span></label><input type="range" id="brushOpacity" min="10" max="100" value="100" class="range"></div>
+            <div class="draw-modes">
+              <button class="mode-btn active" data-drawmode="brush" type="button">فرشاة</button>
+              <button class="mode-btn" data-drawmode="eraser" type="button">ممحاة</button>
+            </div>
+            <button id="btnClearDraw" class="btn-ghost" type="button">مسح كل الرسم</button>
+          </div>
+        </div>
+
+        <div class="ws-toolsbar">
+          <button class="tool" data-tool="crop" type="button">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2v16a2 2 0 0 0 2 2h16"/><path d="M2 6h16a2 2 0 0 1 2 2v16"/></svg></span>
+            <span>قص</span>
+          </button>
+          <button class="tool" data-tool="background" type="button">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></span>
+            <span>خلفية</span>
+          </button>
+          <button class="tool" data-tool="adjust" type="button">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M4.2 4.2l4.3 4.3m7 7 4.3 4.3M1 12h6m10 0h6M4.2 19.8l4.3-4.3m7-7 4.3-4.3"/></svg></span>
+            <span>تعديلات</span>
+          </button>
+          <button class="tool" data-tool="filters" type="button">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="12" r="3.5"/><circle cx="16" cy="12" r="3.5"/><path d="M8 8.5h8M8 15.5h8"/></svg></span>
+            <span>فلاتر</span>
+          </button>
+          <button class="tool" data-tool="borders" type="button">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg></span>
+            <span>إطارات</span>
+          </button>
+          <button class="tool" data-tool="text" type="button">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></span>
+            <span>نص</span>
+          </button>
+          <button class="tool" data-tool="stickers" type="button">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg></span>
+            <span>ملصقات</span>
+          </button>
+          <button class="tool" data-tool="draw" type="button">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg></span>
+            <span>رسم</span>
+          </button>
+        </div>
+
+        <div class="ws-actionsbar">
+          <button id="btnNewImg" class="action-btn secondary" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            صورة جديدة
+          </button>
+          <button id="btnSave" class="action-btn primary" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+            حفظ التعديلات
+          </button>
+          <button id="btnDownload" class="action-btn success hidden" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+            تحميل
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="historyView" class="view hidden">
+      <div class="sec-head">
+        <div class="sec-title">سجل <span>العمليات</span></div>
+        <div class="sec-chips">
+          <div class="chip">الكل <strong id="statTotal">0</strong></div>
+          <div class="chip">اليوم <strong id="statToday">0</strong></div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <span>نتائجك المحفوظة</span>
+        <button id="historyRefresh" type="button">↻ تحديث</button>
+      </div>
+      <div id="historyContent"></div>
+    </section>
+
+    <section id="profileView" class="view hidden">
+      <div class="profile-wrap">
+        <div class="profile-hero">
+          <div class="hero-bg"></div>
+          <div class="hero-grid"></div>
+          <div class="avatar-ring"><div id="avatar" class="avatar">?</div></div>
+          <div id="pUsername" class="p-name">—</div>
+          <div id="pEmail" class="p-email">—</div>
+          <div id="pRole" class="p-role">● مستخدم</div>
+          <span id="pJoined" class="p-joined"></span>
+        </div>
+        <div class="panel">
+          <div class="panel-title">إحصائياتك</div>
+          <div class="stats-3">
+            <div class="st"><strong id="statOps">0</strong><span>إجمالي</span></div>
+            <div class="st"><strong id="statOpsToday">0</strong><span>اليوم</span></div>
+            <div class="st"><strong id="statRemain">5</strong><span>المتبقي</span></div>
+          </div>
+          <div class="info-2">
+            <div class="ib"><span>الخطة</span><strong id="pPlan">Free</strong></div>
+            <div class="ib"><span>الحالة</span><strong id="pStatus">نشط</strong></div>
+          </div>
+          <div class="row-actions">
+            <button id="refreshProfile" class="btn-ghost" type="button">↻ تحديث</button>
+            <button id="logoutBtn" class="btn-danger" type="button">خروج</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="adminView" class="view hidden">
+      <div class="admin-hdr">
+        <div>
+          <div class="admin-title">مركز <span>المطوّر</span></div>
+          <div class="admin-sub">إدارة الحسابات والعمليات</div>
+        </div>
+        <div class="row-actions">
+          <button id="adminRefresh" class="btn-ghost" type="button">↻ تحديث</button>
+          <button id="adminBack" class="btn-ghost" type="button">الاستوديو</button>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><strong id="mUsers">0</strong><span>حسابات</span></div>
+        <div class="metric"><strong id="mOps">0</strong><span>عمليات</span></div>
+        <div class="metric"><strong id="mToday">0</strong><span>اليوم</span></div>
+        <div class="metric"><strong id="mActive">0</strong><span>نشاط</span></div>
+      </div>
+      <input id="adminSearch" class="search" type="search" placeholder="ابحث بالاسم أو البريد...">
+      <div class="admin-cols">
+        <div class="sec"><div class="sec-head2"><strong>الحسابات</strong><span id="usersLabel">0</span></div><div id="usersList" class="users-list"></div></div>
+        <div class="sec"><div class="sec-head2"><strong>آخر العمليات</strong><span>الكل</span></div><div id="opsList" class="ops-grid"></div></div>
+      </div>
+    </section>
+
+    <footer class="ft"><span class="ft-mark">✳</span> RemoveBG — اصنعها بطريقتك.</footer>
+  </div>
+</main>
+
+<div id="modal" class="modal"><div class="modal-card"><div class="modal-head"><strong id="modalTitle">إدارة الحساب</strong><button id="modalClose" class="modal-x" type="button">×</button></div><div id="modalBody" class="modal-body"></div></div></div>
+<div id="toast" class="toast"></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+  </html>
