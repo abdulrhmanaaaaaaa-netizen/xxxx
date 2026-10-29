@@ -1,0 +1,385 @@
+/* ==========================================================
+   RemoveBG · حكاية الصحراء
+   A warmer, painterly theme inspired by historic sepia artwork.
+   Kept separate so the editor's existing behavior remains intact.
+   ========================================================== */
+:root {
+  --bg:#1d140e;
+  --bg-2:#261a12;
+  --bg-3:#332319;
+  --panel:#2b1e15;
+  --panel-2:#38271b;
+  --panel-3:#493222;
+  --line:#4b3524;
+  --line-2:#65472e;
+  --line-3:#89653f;
+  --sand:#c9a46a;
+  --sand-hi:#f1d9a6;
+  --sand-lo:#91643e;
+  --gold:#dec17f;
+  --rose:#bd8b62;
+  --rose-hi:#dfb98b;
+  --ember:#95552f;
+  --violet:#7d7558;
+  --cyan:#9ba58b;
+  --txt:#f5eddf;
+  --txt-2:#d6c3a5;
+  --muted:#ad8d69;
+  --muted-2:#73563e;
+  --ok:#b4c39b;
+  --err:#df987d;
+  --r:18px;
+  --r-md:14px;
+  --r-sm:10px;
+  --r-lg:22px;
+  --r-xl:28px;
+  --font:'Cairo',system-ui,sans-serif;
+  --font-display:'Amiri',serif;
+  --font-mono:'Cairo',system-ui,sans-serif;
+}
+
+html { color-scheme:dark; }
+body {
+  color:var(--txt);
+  background-color:var(--bg);
+  background-image:
+    linear-gradient(180deg,rgba(26,17,11,.95),rgba(26,17,11,.985)),
+    url('assets/medieval-landscape.webp');
+  background-position:center,center;
+  background-size:cover,cover;
+  background-attachment:fixed,fixed;
+  line-height:1.7;
+}
+::selection { background:#d5b77c;color:#25170f; }
+:focus-visible { outline:2px solid var(--sand-hi);outline-offset:3px; }
+::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#9a7448,#553923); }
+.container { width:min(1320px,calc(100% - 30px)); }
+
+/* Long illustrated introduction */
+#loader {
+  gap:27px;
+  padding:clamp(22px,5vw,56px);
+  background:#1a1009;
+  isolation:isolate;
+}
+#loader::before {
+  content:"";
+  position:absolute;
+  inset:-2%;
+  z-index:0;
+  background:url('assets/medieval-landscape.webp') center 47%/cover no-repeat;
+  opacity:.9;
+  filter:saturate(.75) sepia(.14);
+  animation:loaderLandscape 18s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+#loader::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(18,10,5,.25),rgba(18,10,5,.78) 44%,rgba(18,10,5,.96) 100%),
+    linear-gradient(0deg,rgba(16,9,5,.9),transparent 42%,rgba(16,9,5,.2));
+}
+@keyframes loaderLandscape { from{transform:scale(1)}to{transform:scale(1.055)} }
+#loader .ld-orb,
+#loader .ld-grid,
+#loader #fx,
+#loader .ld-arc,
+#loader .ld-satellite,
+#loader .ld-pulse,
+#loader .ld-core-glow { display:none!important; }
+.ld-visual {
+  width:clamp(118px,17vw,174px);
+  height:clamp(118px,17vw,174px);
+  margin-inline:auto;
+  border-radius:28px;
+  padding:7px;
+  border:1px solid rgba(238,209,153,.72);
+  background:linear-gradient(145deg,rgba(248,226,183,.2),rgba(66,39,20,.62));
+  box-shadow:0 18px 70px rgba(0,0,0,.45),0 0 0 7px rgba(211,176,115,.06);
+  transform:rotate(-2deg);
+}
+.ld-core {
+  width:100%;height:100%;
+  border-radius:20px;
+  border:2px solid rgba(240,216,169,.78);
+  box-shadow:inset 0 0 0 3px rgba(28,17,10,.5),0 10px 30px rgba(0,0,0,.32);
+  animation:coreBreath 5s ease-in-out infinite;
+}
+.ld-core img { object-fit:cover;object-position:center 43%; }
+.ld-text { width:min(520px,100%);text-align:center; }
+.ld-eyebrow {
+  margin-bottom:12px;
+  font-family:var(--font);
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:1.5px;
+  color:#e2c28b;
+  text-shadow:0 2px 20px #100905;
+}
+.ld-title {
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:clamp(44px,7vw,66px);
+  font-weight:700;
+  letter-spacing:.3px;
+  color:#fff0d2;
+  text-shadow:0 3px 22px rgba(0,0,0,.6);
+}
+.ld-title span {
+  background:linear-gradient(135deg,#f0d99f,#bd864b 70%,#f2d5a0);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.ld-sub {
+  margin-top:11px;
+  font-family:var(--font);
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:.5px;
+  color:#dbc39b;
+}
+.ld-progress {
+  width:min(420px,100%);
+  height:5px;
+  margin:30px auto 0;
+  background:rgba(15,9,5,.72);
+  border:1px solid rgba(222,193,127,.16);
+  box-shadow:none;
+}
+.ld-progress-fill {
+  background:linear-gradient(90deg,#85542e,#d4b170,#f2d9a2);
+  box-shadow:0 0 18px rgba(220,186,119,.35);
+}
+.ld-progress-glow { opacity:.38; }
+.ld-meta { margin-top:13px; }
+.ld-step { font-family:var(--font);font-size:12px;letter-spacing:0;color:#d5c09d; }
+.ld-pct { font-family:'Cormorant Garamond',serif;font-size:17px;letter-spacing:1px;color:#f0d5a0; }
+.ld-footnote { margin-top:22px;color:rgba(241,220,183,.7);font-size:12px;letter-spacing:.1px; }
+
+/* Auth: aged parchment and candlelit wood */
+.auth { isolation:isolate; }
+.auth-bg {
+  background:
+    linear-gradient(90deg,rgba(26,16,9,.68),rgba(26,16,9,.91)),
+    url('assets/medieval-landscape.webp') center/cover no-repeat;
+}
+.auth-orb,.auth-mesh { display:none!important; }
+.auth-card {
+  background:linear-gradient(155deg,rgba(57,39,25,.96),rgba(35,23,15,.985));
+  border:1px solid rgba(207,167,103,.42);
+  box-shadow:0 32px 90px rgba(0,0,0,.48),inset 0 1px rgba(255,236,194,.08);
+  backdrop-filter:blur(14px);
+}
+.glass-line { background:linear-gradient(90deg,transparent,#d3b174,transparent)!important; }
+.auth-logo,.brand-logo {
+  border-color:rgba(220,190,135,.72);
+  box-shadow:0 8px 22px rgba(0,0,0,.24);
+}
+.auth-logo { border-radius:21px; }
+.auth-head h1 { font-family:var(--font-display);font-size:31px;font-weight:700; }
+.auth-head p { color:#d0b995;font-weight:400; }
+.field label,.panel-group label,.mg-box label { color:#ddc9a8; }
+.field input,.pw-wrap input,.search,.plan-select,.limit-input,
+input:not([type="checkbox"]):not([type="file"]),select,textarea {
+  background:rgba(25,17,11,.78);
+  color:var(--txt);
+  border-color:#62452e;
+}
+.field input:focus,.pw-wrap input:focus,.search:focus,
+input:not([type="checkbox"]):not([type="file"]):focus,select:focus,textarea:focus {
+  border-color:#d1ad71;
+  box-shadow:0 0 0 3px rgba(207,169,104,.13);
+}
+.field input::placeholder,input::placeholder,textarea::placeholder { color:#927558; }
+.btn-primary,.nav-btn.active,.tool.active,.mode-btn.active,.action-btn.primary,
+.user-avatar,.summary-av {
+  color:#25180f;
+  background:linear-gradient(135deg,#f0dba9 0%,#cfaa68 58%,#a87947 100%);
+  box-shadow:0 8px 24px rgba(151,103,53,.18),inset 0 1px rgba(255,248,221,.5);
+}
+.btn-primary { border:1px solid rgba(246,221,168,.42); }
+.btn-primary::before { background:linear-gradient(135deg,transparent,rgba(255,249,225,.24),transparent); }
+.btn-primary:hover:not(:disabled) { box-shadow:0 12px 26px rgba(161,112,58,.24); }
+.btn-primary:disabled { opacity:.56;filter:saturate(.5); }
+.forgot,.auth-switch button { color:#e1be82; }
+.reqS li.ok,.reqs li.ok { color:#c5d1a9; }
+.msg.err { color:#f0b7a0;border-color:rgba(190,100,65,.4);background:rgba(128,58,31,.15); }
+.msg.ok { color:#d4e0b7;border-color:rgba(159,183,127,.4);background:rgba(75,94,54,.15); }
+
+/* App shell */
+.app { position:relative;isolation:isolate; }
+.hdr,.nav,.ws-canvas-wrap,.panel,.ws-toolsbar,.sec-head,.toolbar,
+.profile-hero,.metric,.admin-hdr,.sec,.modal-card,.summary,.mg-box,
+.ban-row,.toast {
+  background:linear-gradient(155deg,rgba(57,39,25,.97),rgba(35,23,15,.98));
+  border-color:var(--line-2);
+  box-shadow:0 16px 42px rgba(0,0,0,.22),inset 0 1px rgba(255,230,185,.035);
+}
+.hdr::before { background:linear-gradient(90deg,transparent,rgba(224,193,127,.72),transparent); }
+.brand-txt strong,.panel-title,.sec-title,.admin-title,.modal-head strong { color:#f1e5cd; }
+.brand-txt span { color:#c1a47b;font-family:var(--font);font-size:10px;letter-spacing:.4px; }
+.brand-logo { border-radius:14px; }
+.btn-mini,.manage-btn {
+  border-color:rgba(205,165,99,.35);
+  background:rgba(205,165,99,.09);
+  color:#f0d5a0;
+}
+.pill,.chip,.summary-pill,.user-state,.p-role {
+  border-color:#5c412c;background:rgba(27,18,11,.6);color:#d8c29f;
+}
+.pill.pro { background:rgba(202,162,98,.12);border-color:#977344;color:#f1d6a1; }
+.nav-btn { color:#b69a76; }
+.nav-btn:hover,.tool:hover { color:#f1d6a1;background:rgba(204,165,100,.08); }
+.nav-btn.active,.tool.active { box-shadow:0 5px 16px rgba(155,109,55,.2); }
+
+/* Artwork-led upload area: a scene, not another generic panel */
+.up-stage {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  min-height:370px;
+  padding:clamp(30px,4vw,52px);
+  border:1px solid rgba(191,150,91,.58);
+  border-radius:26px;
+  text-align:right;
+  background-color:#2d1d12;
+  background-image:
+    linear-gradient(to left,rgba(42,27,17,.985) 0%,rgba(42,27,17,.95) 38%,rgba(42,27,17,.68) 61%,rgba(42,27,17,.22) 100%),
+    url('assets/medieval-landscape.webp');
+  background-position:center,left center;
+  background-size:cover,cover;
+  box-shadow:0 22px 56px rgba(0,0,0,.28),inset 0 1px rgba(255,230,186,.08);
+}
+.up-stage::after {
+  content:"";position:absolute;inset:13px;border:1px solid rgba(224,193,127,.18);
+  border-radius:18px;pointer-events:none;
+}
+.up-stage > * { position:relative;z-index:1;max-width:57%; }
+.up-stage:hover,.up-stage.drag {
+  border-color:#e1c183;
+  box-shadow:0 0 0 3px rgba(206,165,99,.1),0 22px 56px rgba(0,0,0,.28);
+}
+.up-icon {
+  width:76px;height:76px;margin:0 0 18px;
+  border-radius:22px;border:1px solid rgba(225,194,131,.5);
+  background:linear-gradient(145deg,rgba(211,174,110,.2),rgba(62,41,24,.7));
+  color:#e8ca8e;box-shadow:0 8px 26px rgba(0,0,0,.22);animation:floatIcon 5.6s ease-in-out infinite;
+}
+.up-icon svg { width:35px;height:35px; }
+.up-stage h2 { font-family:var(--font-display);font-size:clamp(27px,3vw,39px);font-weight:700;letter-spacing:0;line-height:1.35;margin-bottom:8px;color:#f7e9cb; }
+.up-stage p { margin:0 0 17px;max-width:520px;color:#d4bd9b;font-size:14px;font-weight:400;line-height:2; }
+.up-formats {
+  padding:5px 13px;border:1px solid rgba(207,170,108,.26);
+  background:rgba(24,15,9,.58);color:#e4cfab;font-family:var(--font);font-size:11px;letter-spacing:.4px;margin-bottom:19px;
+}
+.up-stage .btn-primary { min-width:220px;margin:0; }
+.up-hint { margin-top:13px;color:#c2a47c;font-size:11.5px;line-height:1.8; }
+
+/* Editor surfaces, choices and previews */
+.ws-canvas-inner { background-color:#24180f;border-color:#59402b;background-image:linear-gradient(45deg,rgba(216,187,137,.055) 25%,transparent 25%),linear-gradient(-45deg,rgba(216,187,137,.055) 25%,transparent 25%),linear-gradient(45deg,transparent 75%,rgba(216,187,137,.055) 75%),linear-gradient(-45deg,transparent 75%,rgba(216,187,137,.055) 75%); }
+.ws-title i { background:linear-gradient(135deg,#e9ce94,#98653a);box-shadow:0 0 8px rgba(210,172,109,.25); }
+.icon-btn,.toolbar button,.subtab,.tool,.mode-btn,.action-btn.secondary,.btn-ghost,
+.swatch,.preset,.gradient-item,.filter-item,.border-item,.sticker-item,.upload-zone {
+  border-color:#5a402a;
+}
+.icon-btn,.mode-btn,.tool,.sticker-item,.swatch,.panel-group input,
+.panel-group select,.subtabs,.toolbar button,.action-btn.secondary,
+.btn-ghost,.hist-card,.mg-box,.ib,.st,.summary-pill {
+  background-color:rgba(32,21,13,.58);
+}
+.icon-btn { color:#e2c58b;background:rgba(32,21,13,.76); }
+.icon-btn:hover,.panel-close:hover { border-color:#c6a16a;background:rgba(195,151,85,.1); }
+.tool { color:#b69a76; }
+.tool.active { color:#25180f; }
+.action-btn.primary { color:#25180f; }
+.action-btn.secondary { color:#e7d6b8;border-color:#66482e; }
+.action-btn.success { color:#d7e1bd;border-color:rgba(161,185,129,.38);background:rgba(99,121,72,.17); }
+.panel-head { border-color:#57402c; }
+.panel-head span,.sec-title span,.admin-title span { background:linear-gradient(135deg,#f0d8a3,#b98249);-webkit-background-clip:text;background-clip:text;color:transparent; }
+.panel-close { color:#c1a17b; }
+.panel-group label,.panel-group label span { color:#ddc7a5; }
+.divider::before,.divider::after { background:linear-gradient(90deg,transparent,#735235,transparent); }
+.subtab { color:#c0a47e;background:rgba(27,18,11,.6); }
+.subtab.active { color:#291b10;background:linear-gradient(135deg,#e7d09b,#c7a166);border-color:#d5b474; }
+.preset,.gradient-item,.filter-item,.border-item { background-color:#2b1e14; }
+.preset:hover,.gradient-item:hover,.filter-item:hover,.border-item:hover { border-color:#c5a06a; }
+.preset.active,.gradient-item.active,.filter-item.active,.border-item.active { border-color:#e4c788;box-shadow:0 0 0 2px rgba(211,176,111,.18); }
+.bg-content,.note,.upload-zone,.crop-ratio,.swatch,.gradient-item,.filter-item,.border-item {
+  border-color:#5d422b;
+}
+.big-action { background:linear-gradient(135deg,rgba(189,145,81,.2),rgba(75,49,28,.5));border-color:#765433; }
+.big-action:hover { background:linear-gradient(135deg,rgba(189,145,81,.28),rgba(75,49,28,.62));border-color:#c39a61; }
+.big-action-text strong { color:#f0dfbd; }
+.big-action-text span,.note p,.upload-zone span { color:#c2a37b; }
+.ws-loading { background:rgba(28,18,11,.9); }
+.ws-loading strong { color:#f5e7ce; }
+.proc-ring::before { border-top-color:#e4c68a;border-right-color:#9a673c; }
+.proc-ring::after { border-color:rgba(224,193,127,.42); }
+
+/* Lists, account, admin and dialogs */
+.sec-head,.sec-head2,.hist-date,.hist-actions,.modal-head { border-color:#4f3825;background-color:rgba(46,31,19,.85); }
+.toolbar { background:rgba(39,26,16,.62); }
+.toolbar span,.metric span,.st span,.ib span,.p-email,.p-joined,.admin-sub,.summary-email,.op-body span,.empty p,.hist-date { color:#bd9e77; }
+.hist-card,.op-card { background:linear-gradient(145deg,#342319,#26190f);border-color:#5c412c; }
+.hist-thumb,.op-thumb { background:#21160e; }
+.hist-actions .btn-success { background:rgba(105,128,77,.18);border-color:rgba(161,185,129,.32);color:#d5e1bb; }
+.hist-actions .btn-danger,.btn-danger { background:rgba(149,74,46,.15);border-color:rgba(202,120,89,.38);color:#f0b9a0; }
+.profile-hero { background:linear-gradient(155deg,rgba(58,39,25,.98),rgba(35,23,15,.99)); }
+.hero-bg { background:radial-gradient(circle,rgba(205,165,97,.25),transparent 68%); }
+.avatar-ring { background:conic-gradient(from 0deg,#f0d8a3,#b17a45,#d9b779,#6b4930,#f0d8a3);box-shadow:0 12px 32px rgba(0,0,0,.25); }
+.avatar { background:linear-gradient(135deg,#362319,#1e140d);border-color:#2b1b11;color:#f1d49b; }
+.p-role.dev,.user-state.pro { border-color:#927044;color:#f0d6a2; }
+.st,.ib { background:rgba(32,21,13,.54);border-color:#4c3523; }
+.st strong,.metric strong { background:linear-gradient(135deg,#f1daa7,#bd864a);-webkit-background-clip:text;background-clip:text;color:transparent; }
+.user-row:hover { background:rgba(201,164,106,.07); }
+.user-avatar,.summary-av { box-shadow:none; }
+.user-state.banned { border-color:rgba(205,125,95,.36);color:#efb59c; }
+.empty { background:rgba(31,20,12,.55);border-color:#765637; }
+.empty-icon { color:#e4c68b;background:rgba(200,164,103,.1);border-color:#755634; }
+.modal { background:rgba(12,8,5,.82); }
+.modal-card { background:linear-gradient(155deg,#39271a,#24180f);border-color:#715033; }
+.modal-head { background:rgba(48,32,20,.97); }
+.toast { background:linear-gradient(145deg,rgba(55,38,24,.99),rgba(33,22,14,.99));border-color:#725334;color:#f2e5cc; }
+.toast.ok { border-color:rgba(161,185,129,.5);color:#d5e2bd; }
+.toast.err { border-color:rgba(205,125,95,.5);color:#f0b8a0; }
+.ft {
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  border-color:#4c3523;color:#bd9d75;font-family:var(--font);font-size:11px;letter-spacing:.1px;
+}
+.ft-ornament { color:#a9814c;letter-spacing:3px;font-size:14px; }
+.ft-note { color:#927352;font-size:11px; }
+
+/* The artwork is the statement; animations stay soft and purposeful. */
+@media(max-width:760px) {
+  .container { width:calc(100% - 18px); }
+  #loader { gap:23px; }
+  #loader::before { background-position:32% center; }
+  #loader::after { background:linear-gradient(180deg,rgba(19,11,6,.22),rgba(19,11,6,.91) 39%,rgba(19,11,6,.98)); }
+  .ld-visual { width:116px;height:116px; }
+  .ld-core { border-radius:16px; }
+  .ld-eyebrow { font-size:11px; }
+  .ld-sub { font-size:11px; }
+  .ld-progress { margin-top:24px; }
+  .ld-footnote { margin-top:15px;font-size:11px; }
+  .up-stage {
+    min-height:365px;
+    padding:30px 23px;
+    background-image:linear-gradient(to left,rgba(42,27,17,.95),rgba(42,27,17,.85) 56%,rgba(42,27,17,.62)),url('assets/medieval-landscape.webp');
+    background-position:center,left center;
+  }
+  .up-stage > * { max-width:100%; }
+  .up-stage h2 { font-size:28px; }
+  .up-stage p { font-size:13px; }
+  .up-icon { width:65px;height:65px;border-radius:18px; }
+  .up-icon svg { width:31px;height:31px; }
+  .up-stage .btn-primary { min-width:0;width:100%; }
+  .auth { padding:18px 14px; }
+  .auth-card { padding:30px 22px 25px;border-radius:24px; }
+  .brand-txt span { font-size:10px; }
+  .hdr { padding:10px 12px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #loader::before { animation:none; }
+}
