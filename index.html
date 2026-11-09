@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa+Ink:wght@400;700&display=swap" rel="stylesheet"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#0d0906" name="theme-color"/>
+<meta content="dark" name="color-scheme"/>
+<script>
+(function(){
+  try {
+    const saved = JSON.parse(localStorage.getItem('removebg_sandstorm_v2') || 'null');
+    const hasSession = !!(saved && (saved.access_token || saved.refresh_token));
+    const introSeen = localStorage.getItem('removebg_first_intro_seen_v4') === '1';
+    document.documentElement.dataset.firstEntry = hasSession ? 'session' : (introSeen ? 'auth' : 'intro');
+  } catch (_) { document.documentElement.dataset.firstEntry = 'intro'; }
+})();
+</script>
+
+<title>RemoveBG | استوديو تحرير الصور</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="loader">
+<div class="ld-orb o1"></div>
+<div class="ld-orb o2"></div>
+<div class="ld-orb o3"></div>
+<div class="ld-grid"></div>
+<canvas id="fx"></canvas>
+<div class="ld-visual">
+<svg class="ld-arc a1" viewbox="0 0 300 300">
+<defs>
+<lineargradient id="g1" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0%" stop-color="#f5d8b0"></stop>
+<stop offset="50%" stop-color="#e0b884"></stop>
+<stop offset="100%" stop-color="#c4783a"></stop>
+</lineargradient>
+</defs>
+<circle cx="150" cy="150" fill="none" r="140" stroke="url(#g1)" stroke-dasharray="220 660" stroke-linecap="round" stroke-width="3"></circle>
+</svg>
+<svg class="ld-arc a2" viewbox="0 0 300 300">
+<defs>
+<lineargradient id="g2" x1="1" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#ead1b5"></stop>
+<stop offset="100%" stop-color="#c99570"></stop>
+</lineargradient>
+</defs>
+<circle cx="150" cy="150" fill="none" r="120" stroke="url(#g2)" stroke-dasharray="170 583" stroke-linecap="round" stroke-width="2.6"></circle>
+</svg>
+<svg class="ld-arc a3" viewbox="0 0 300 300">
+<defs>
+<lineargradient id="g3" x1="0" x2="1" y1="1" y2="0">
+<stop offset="0%" stop-color="#e8c896"></stop>
+<stop offset="100%" stop-color="#c4783a"></stop>
+</lineargradient>
+</defs>
+<circle cx="150" cy="150" fill="none" r="100" stroke="url(#g3)" stroke-dasharray="130 498" stroke-linecap="round" stroke-width="2.4"></circle>
+</svg>
+<svg class="ld-arc a4" viewbox="0 0 300 300">
+<defs>
+<lineargradient id="g4" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0%" stop-color="#f5d8b0"></stop>
+<stop offset="100%" stop-color="#c99570"></stop>
+</lineargradient>
+</defs>
+<circle cx="150" cy="150" fill="none" r="80" stroke="url(#g4)" stroke-dasharray="95 408" stroke-linecap="round" stroke-width="2.2"></circle>
+</svg>
+<svg class="ld-arc a5" viewbox="0 0 300 300">
+<defs>
+<lineargradient id="g5" x1="1" x2="0" y1="1" y2="0">
+<stop offset="0%" stop-color="#e0b884"></stop>
+<stop offset="100%" stop-color="#ead1b5"></stop>
+</lineargradient>
+</defs>
+<circle cx="150" cy="150" fill="none" r="60" stroke="url(#g5)" stroke-dasharray="70 307" stroke-linecap="round" stroke-width="2"></circle>
+</svg>
+<div class="ld-satellite s1"><span></span></div>
+<div class="ld-satellite s2"><span></span></div>
+<div class="ld-satellite s3"><span></span></div>
+<div class="ld-satellite s4"><span></span></div>
+<div class="ld-pulse p1"></div>
+<div class="ld-pulse p2"></div>
+<div class="ld-pulse p3"></div>
+<div class="ld-core">
+<div class="ld-core-glow"></div>
+<img src="https://up6.cc/2026/09/178886608408951.jpg" alt="شعار RemoveBG"/>
+</div>
+</div>
+<div class="ld-text">
+<div class="ld-eyebrow">REMOVE BG <span>•</span> استوديو تحرير الصور</div>
+<div class="ld-title">Remove<span>BG</span></div>
+<div class="ld-sub">استوديو تحرير الصور</div>
+<div class="ld-capabilities">
+<span><i>✦</i> تحرير احترافي</span>
+<span><i>◈</i> ملصقات وتأثيرات</span>
+<span><i>▣</i> تصدير بجودة عالية</span>
+</div>
+<div class="ld-progress">
+<div class="ld-progress-fill" id="ldFill"></div>
+<div class="ld-progress-glow" id="ldGlow"></div>
+</div>
+<div class="ld-meta">
+<span class="ld-step" id="ldStep">تهيئة النظام...</span>
+<span class="ld-pct" id="ldPct">0%</span>
+</div>
+</div>
+</div>
+
+<section class="first-visit-intro" id="firstVisitIntro" aria-label="مقدمة RemoveBG ثلاثية الأبعاد">
+  <div class="intro-atmosphere intro-atmosphere-a"></div>
+  <div class="intro-atmosphere intro-atmosphere-b"></div>
+  <div class="intro-grain"></div>
+  <div class="intro-boot-text" id="introBootText" aria-live="off">
+    REMOVEBG / SYSTEM BOOT<br>
+    <span>&gt; material.field.initializing</span><br>
+    <span>&gt; metal.structure.assembling</span><br>
+    <span>&gt; image.studio.ready</span>
+  </div>
+  <div class="intro-topline">
+    <span class="intro-brand"><span class="intro-brand-mark" aria-hidden="true">H</span><span class="intro-brand-name">REMOVE<span>BG</span></span></span>
+    <span class="intro-top-note">IMAGE EDITING STUDIO</span>
+    <button class="intro-skip" id="firstVisitSkip" type="button">تخطي المقدمة <b>↗</b></button>
+  </div>
+  <div class="intro-main">
+    <div class="intro-letter-stage" id="intro3dStage" aria-label="تكوين حرف H ثلاثي الأبعاد">
+      <canvas id="intro3dCanvas" class="intro3d-canvas" aria-hidden="true"></canvas>
+      <div class="intro-fallback-h" aria-hidden="true">H</div>
+      <div class="intro-stage-caption"><span>H — FORMATION</span><i></i><span>01 / 01</span></div>
+    </div>
+    <div class="intro-copy" id="introCopy">
+      <span class="intro-kicker"><i></i> REMOVEBG STUDIO</span>
+      <h1>مساحة تحرير<br/><em>الصور.</em></h1>
+      <p>أدوات دقيقة. مساحة عمل واحدة.</p>
+      <button class="intro-continue" id="firstVisitContinue" type="button"><span>الدخول إلى الاستوديو</span><b>←</b></button>
+    </div>
+  </div>
+  <div class="intro-bottomline"><span>REMOVEBG STUDIO</span><span class="intro-signature">Haider</span><span>IMAGE EDITING</span></div>
+</section><section class="auth hidden" id="authScreen">
+<div class="auth-bg">
+<div class="auth-orb o1"></div>
+<div class="auth-orb o2"></div>
+<div class="auth-orb o3"></div>
+<div class="auth-mesh"></div>
+</div>
+<div class="auth-card">
+<span class="glass-line"></span>
+<div class="auth-logo"><img src="https://up6.cc/2026/09/178886608408951.jpg" alt="شعار RemoveBG"/></div>
+<div class="auth-head">
+<h1 id="formTitle">مرحباً بك</h1>
+<p id="formSub">سجّل دخولك لمتابعة إبداعك</p>
+</div>
+<form autocomplete="on" id="authForm" novalidate="">
+<div class="field hidden" id="fUsername">
+<label>اسم المستخدم</label>
+<input autocomplete="username" id="username" maxlength="20" placeholder="username" spellcheck="false" type="text"/>
+<span class="err" id="errUsername"></span>
+</div>
+<div class="field">
+<label>البريد الإلكتروني</label>
+<input autocomplete="email" id="email" placeholder="you@example.com" required="" spellcheck="false" type="email"/>
+<span class="err" id="errEmail"></span>
+</div>
+<div class="field">
+<label>كلمة المرور</label>
+<div class="pw-wrap">
+<input autocomplete="current-password" id="password" placeholder="••••••••" required="" type="password"/>
+<button class="eye" id="eyePass" tabindex="-1" type="button">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="18"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</button>
+</div>
+<div class="strength hidden" id="strength">
+<div class="bars" data-lvl="0"><i></i><i></i><i></i><i></i></div>
+<span id="strengthTxt">—</span>
+</div>
+<span class="err" id="errPassword"></span>
+</div>
+<div class="field hidden" id="fConfirm">
+<label>تأكيد كلمة المرور</label>
+<div class="pw-wrap">
+<input autocomplete="new-password" id="confirm" placeholder="أعد الإدخال" type="password"/>
+<button class="eye" id="eyeConfirm" tabindex="-1" type="button">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="18"><path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</button>
+</div>
+<span class="err" id="errConfirm"></span>
+</div>
+<ul class="reqs hidden" id="reqs">
+<li data-r="len"><i></i>8 أحرف على الأقل</li>
+<li data-r="num"><i></i>رقم واحد على الأقل</li>
+<li data-r="upper"><i></i>حرف كبير (A-Z)</li>
+<li data-r="match"><i></i>متطابقتان</li>
+</ul>
+<button class="forgot" id="forgotBtn" type="button">نسيت كلمة المرور؟</button>
+<button class="btn-primary" disabled="" id="submitBtn" type="submit">
+<span class="btn-text">تسجيل الدخول</span>
+</button>
+</form>
+<div class="msg" id="authMsg"></div>
+<div class="auth-switch">
+<span id="switchText">ليس لديك حساب؟</span>
+<button id="switchBtn" type="button">أنشئ حساباً</button>
+</div>
+</div>
+</section>
+<main class="app hidden" id="appScreen">
+<div class="container">
+<header class="hdr">
+<div class="brand">
+<div class="brand-logo"><span class="h-monogram" aria-label="H">H</span></div>
+<div class="brand-txt"><strong>RemoveBG</strong><span>استوديو تحرير الصور</span></div>
+</div>
+<div class="hdr-tools">
+<button class="btn-mini hidden" id="adminMini" type="button">✦ المطوّر</button>
+<div class="pill" id="planPill"><span class="dot"></span><span id="planTxt">مجاني</span></div>
+</div>
+</header>
+<nav class="nav">
+<button class="nav-btn active" data-view="editor" type="button">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+<span>المحرر</span>
+</button><button class="nav-btn" data-view="assets" type="button"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><rect height="8" rx="1.5" width="8" x="3" y="3"></rect><rect height="8" rx="1.5" width="8" x="13" y="3"></rect><rect height="8" rx="1.5" width="8" x="3" y="13"></rect><rect height="8" rx="1.5" width="8" x="13" y="13"></rect></svg><span>مكتبة الأصول</span></button>
+<button class="nav-btn" data-view="history" type="button">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l4 2"></path></svg>
+<span>السجل</span>
+</button>
+<button class="nav-btn" data-view="profile" type="button">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><circle cx="12" cy="7" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+<span>حسابي</span>
+</button>
+<button class="nav-btn hidden" data-view="admin" id="adminNav" type="button">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M12 3l7 4v5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V7l7-4z"></path><path d="M9 12l2 2 4-4"></path></svg>
+<span>المطوّر</span>
+</button>
+</nav>
+<section class="view" id="editorView">
+<input accept="image/png,image/jpeg,image/webp" hidden="" id="fileInput" type="file"/>
+<div class="up-stage upload-stage-clean" id="uploadStage">
+  <div class="upload-clean-head">
+    <span class="upload-clean-mark" aria-hidden="true"></span>
+    <div><strong>مشروع جديد</strong><small>REMOVEBG STUDIO</small></div>
+  </div>
+  <div class="upload-clean-center">
+    <div class="upload-clean-emblem"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 31V8m0 0-8 8m8-8 8 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 29v8a3 3 0 0 0 3 3h22a3 3 0 0 0 3-3v-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+    <h2>اسحب صورة إلى مساحة العمل</h2>
+    <button class="btn-primary upload-clean-button" id="chooseBtn" type="button"><span>تحديد صورة</span><b>↗</b></button>
+    <div class="upload-clean-formats"><span>PNG</span><span>JPG</span><span>WEBP</span><i></i><small>حتى 20MB</small></div>
+  </div>
+</div>
+<div class="ws hidden" id="workspace">
+<div class="ws-canvas-wrap">
+<div class="ws-canvas-head">
+<div class="ws-title"><i></i><span>لوحة التحرير</span><small id="canvasDimensions">جاهز للعمل</small><em class="workspace-file-name" id="workspaceFileName">مشروع جديد</em></div>
+<div class="ws-actions">
+<button class="icon-btn" id="btnAuto" title="تحسين تلقائي">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"></path><path d="M19 15l.8 2.4L22 18l-2.2.6L19 21l-.8-2.4L16 18l2.2-.6L19 15z"></path></svg>
+</button>
+<button class="icon-btn" id="btnUndo" title="تراجع">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+</button>
+<button class="icon-btn" id="btnReset" title="إعادة ضبط">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"></path></svg>
+</button>
+<button aria-label="توسيع مساحة التحرير" aria-pressed="false" class="icon-btn workspace-focus-btn" id="toggleCanvasFocus" title="توسيع مساحة التحرير" type="button"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewbox="0 0 24 24" width="18"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"></path></svg></button>
+<button class="editor-export-top" id="btnSaveTop" type="button"><svg fill="none" height="17" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="17"><path d="M12 3v12m-5-5 5 5 5-5M4 21h16"></path></svg><span>تصدير</span></button>
+</div>
+</div>
+<div class="ws-canvas-inner" id="canvasWrap">
+<canvas id="mainCanvas"></canvas>
+<div class="crop-overlay hidden" id="cropOverlay">
+<div class="crop-mask t"></div>
+<div class="crop-mask b"></div>
+<div class="crop-mask l"></div>
+<div class="crop-mask r"></div>
+<div class="crop-box" id="cropBox">
+<div class="crop-grid-lines">
+<span></span><span></span>
+<span></span><span></span>
+</div>
+<div class="crop-handle h-tl" data-h="tl"></div>
+<div class="crop-handle h-tr" data-h="tr"></div>
+<div class="crop-handle h-bl" data-h="bl"></div>
+<div class="crop-handle h-br" data-h="br"></div>
+<div class="crop-handle h-t" data-h="t"></div>
+<div class="crop-handle h-b" data-h="b"></div>
+<div class="crop-handle h-l" data-h="l"></div>
+<div class="crop-handle h-r" data-h="r"></div>
+</div>
+</div>
+<div class="ws-loading hidden" id="canvasLoading">
+<div class="proc-ring"><span></span></div>
+<strong id="canvasLoadingText">جاري المعالجة...</strong>
+</div>
+</div>
+<div class="ws-zoom-bar">
+<button class="zoom-btn" id="zoomOut">−</button>
+<span id="zoomVal">100%</span>
+<button class="zoom-btn" id="zoomIn">+</button>
+<button aria-label="ملاءمة الصورة" class="zoom-btn" id="zoomReset" title="ملاءمة الصورة كاملة داخل مساحة العمل" type="button">⌗</button>
+</div>
+</div>
+<div class="ws-panels">
+<div class="panel welcome-panel" data-panel="welcome">
+  <div class="panel-head"><span>المحرر</span><span class="welcome-ready-pill">جاهز</span></div>
+  <div class="workspace-empty-state">
+    <div class="workspace-empty-symbol" aria-hidden="true"></div>
+    <strong>مساحة العمل جاهزة</strong>
+    <p>اختر أداة من الشريط لبدء التحرير.</p>
+  </div>
+</div>
+<div class="panel hidden" data-panel="background">
+<div class="panel-head"><span>الخلفية</span><button class="panel-close" data-close-panel="background">×</button></div>
+<button class="big-action" id="btnRemoveBg">
+<div class="big-action-icon">
+<svg fill="none" height="22" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="22"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"></circle><path d="M9 9l6 6M15 9l-6 6"></path></svg>
+</div>
+<div class="big-action-text">
+<strong>إزالة الخلفية</strong>
+<span>تُنفذ عند اختيار خلفية بديلة أو بالضغط هنا · تتطلب اتصالًا بالخدمة</span>
+</div>
+</button>
+<div class="note bg-apply-hint hidden" id="bgApplyHint" role="status" aria-live="polite"></div>
+<div class="divider"><span>أو اختر خلفية</span></div>
+<div class="subtabs">
+<button class="subtab active" data-bg="preset" type="button">مكتبة</button>
+<button class="subtab" data-bg="upload" type="button">رفع</button>
+<button class="subtab" data-bg="color" type="button">لون</button>
+<button class="subtab" data-bg="gradient" type="button">تدرج</button>
+<button aria-label="فتح مكتبة الخلفيات الخارجية" class="subtab" data-bg="online" type="button">المكتبة الخارجية</button>
+<button class="subtab" data-bg="transparent" type="button">شفاف</button>
+</div>
+<div class="bg-content" data-bgcontent="preset"><div class="presets" id="presets"></div></div>
+<div class="bg-content hidden" data-bgcontent="upload">
+<div class="upload-zone" id="bgUploadZone">
+<input accept="image/*" hidden="" id="bgFile" type="file"/>
+<svg fill="none" height="30" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" width="30"><path d="M12 16V4M7 9l5-5 5 5"></path><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path></svg>
+<strong>ارفع صورة خلفية</strong>
+<span>PNG · JPG · حتى 10MB</span>
+<button class="btn-ghost small" id="bgChoose" type="button">اختيار ملف</button>
+</div>
+</div>
+<div class="bg-content hidden" data-bgcontent="color">
+<input class="color-big" id="bgColor" type="color" value="#e0b884"/>
+<div class="swatches-big" id="bgSwatches"></div>
+</div>
+<div class="bg-content hidden" data-bgcontent="gradient">
+<div class="gradients-grid" id="gradientsGrid"></div>
+</div>
+
+<div class="bg-content hidden" data-bgcontent="transparent"><div class="note"><div class="note-icon">◌</div><p>خلفية شفافة (PNG)</p></div></div>
+<div class="panel-group">
+<label>حجم الصورة: <span id="valScale">100%</span></label>
+<input class="range" id="rangeScale" max="300" min="30" type="range" value="100"/>
+</div>
+<div class="panel-group">
+<label>شفافية الصورة: <span id="valAlpha">100%</span></label>
+<input class="range" id="rangeAlpha" max="100" min="0" type="range" value="100"/>
+</div>
+</div>
+<div class="panel hidden" data-panel="crop">
+<div class="panel-head"><span>القص والاقتصاص</span><button class="panel-close" data-close-panel="crop">×</button></div>
+<div class="crop-status-bar">
+<span>اسحب الحواف من الشاشة</span>
+<span class="crop-dim" id="cropDim">—</span>
+</div>
+<div class="panel-group">
+<label>نسبة الأبعاد</label>
+<div class="crop-ratios">
+<button class="crop-ratio active" data-ratio="free" type="button">حر</button>
+<button class="crop-ratio" data-ratio="1:1" type="button">□ 1:1</button>
+<button class="crop-ratio" data-ratio="16:9" type="button">▭ 16:9</button>
+<button class="crop-ratio" data-ratio="9:16" type="button">▯ 9:16</button>
+<button class="crop-ratio" data-ratio="4:3" type="button">4:3</button>
+<button class="crop-ratio" data-ratio="3:4" type="button">3:4</button>
+<button class="crop-ratio" data-ratio="2:3" type="button">2:3</button>
+<button class="crop-ratio" data-ratio="3:2" type="button">3:2</button>
+</div>
+</div>
+<div class="panel-group">
+<label>تدوير وانعكاس</label>
+<div class="crop-actions">
+<button class="crop-action" data-act="rot-left" type="button">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"></path></svg>
+<span>يسار 90°</span>
+</button>
+<button class="crop-action" data-act="rot-right" type="button">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"></path></svg>
+<span>يمين 90°</span>
+</button>
+<button class="crop-action" data-act="flip-h" type="button">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 3v18M8 7l-4 5 4 5M16 7l4 5-4 5"></path></svg>
+<span>قلب أفقي</span>
+</button>
+<button class="crop-action" data-act="flip-v" type="button">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M3 12h18M7 8l5-4 5 4M7 16l5 4 5-4"></path></svg>
+<span>قلب عمودي</span>
+</button>
+</div>
+</div>
+<div class="crop-actions-row">
+<button class="btn-ghost" id="btnCropReset" type="button">↻ إعادة الضبط</button>
+<button class="btn-primary" id="btnCropApply" type="button">✓ تطبيق القص</button>
+</div>
+</div>
+<div class="panel hidden" data-panel="adjust">
+<div class="panel-head"><span>تعديلات احترافية</span><button class="panel-close" data-close-panel="adjust">×</button></div>
+<div class="panel-group"><label>السطوع: <span id="valBrightness">100%</span></label><input class="range" id="rangeBrightness" max="200" min="20" type="range" value="100"/></div>
+<div class="panel-group"><label>التباين: <span id="valContrast">100%</span></label><input class="range" id="rangeContrast" max="200" min="20" type="range" value="100"/></div>
+<div class="panel-group"><label>التشبع: <span id="valSaturation">100%</span></label><input class="range" id="rangeSaturation" max="200" min="0" type="range" value="100"/></div>
+<div class="panel-group"><label>الحدة: <span id="valSharpen">0%</span></label><input class="range" id="rangeSharpen" max="100" min="0" type="range" value="0"/></div>
+<div class="panel-group"><label>درجة اللون: <span id="valHue">0°</span></label><input class="range" id="rangeHue" max="180" min="-180" type="range" value="0"/></div>
+<div class="panel-group"><label>الحرارة: <span id="valTemp">0</span></label><input class="range" id="rangeTemp" max="50" min="-50" type="range" value="0"/></div>
+<div class="panel-group"><label>الضباب: <span id="valBlur">0px</span></label><input class="range" id="rangeBlur" max="20" min="0" type="range" value="0"/></div>
+<div class="panel-group"><label>Vignette: <span id="valVignette">0%</span></label><input class="range" id="rangeVignette" max="100" min="0" type="range" value="0"/></div>
+<div class="panel-group"><label>الشفافية: <span id="valOpacity">100%</span></label><input class="range" id="rangeOpacity" max="100" min="10" type="range" value="100"/></div>
+<button class="btn-ghost" id="btnResetAdjust" type="button">إعادة ضبط التعديلات</button>
+</div>
+<div class="panel hidden" data-panel="effects">
+<div class="panel-head"><span>الاستايلات والمؤثرات</span><button class="panel-close" data-close-panel="effects">×</button></div>
+<section class="effect-section">
+<div class="effect-section-head"><div><strong>تحويلات فنية</strong><span>تُطبّق على الصورة ويمكن تصديرها</span></div><span class="effect-count">18</span></div>
+<div class="effect-choice-grid" id="artStylesGrid">
+<button class="effect-choice active" data-art-style="none" type="button"><span class="effect-preview preview-original">◈</span><strong>الأصلية</strong><small>بدون تحويل</small></button>
+<button class="effect-choice" data-art-style="cartoon" type="button"><span class="effect-preview preview-cartoon"><img class="effect-preview-image" src="assets/service-previews/cartoon-3d.webp" alt="" loading="lazy"/></span><strong>كرتون</strong><small>ألوان وحدود</small></button>
+<button class="effect-choice" data-art-style="comic" type="button"><span class="effect-preview preview-comic"><img class="effect-preview-image" src="assets/service-previews/comic.webp" alt="" loading="lazy"/></span><strong>كوميك</strong><small>طابع القصص</small></button>
+<button class="effect-choice" data-art-style="sketch" type="button"><span class="effect-preview preview-sketch"><img class="effect-preview-image" src="assets/service-previews/sketch.webp" alt="" loading="lazy"/></span><strong>رسم بالقلم</strong><small>أبيض وأسود</small></button>
+<button class="effect-choice" data-art-style="duotone" type="button"><span class="effect-preview preview-duotone"><img class="effect-preview-image" src="assets/service-previews/duotone.webp" alt="" loading="lazy"/></span><strong>ثنائي اللون</strong><small>بني ونحاسي</small></button>
+<button class="effect-choice" data-art-style="blackwhite" type="button"><span class="effect-preview preview-sketch"><img class="effect-preview-image" src="assets/service-previews/monochrome.webp" alt="" loading="lazy"/></span><strong>أبيض وأسود</strong><small>تدرج رمادي</small></button>
+<button class="effect-choice" data-art-style="pixel" type="button"><span class="effect-preview preview-pixel"><img class="effect-preview-image" src="assets/service-previews/pixel-art.webp" alt="" loading="lazy"/></span><strong>بكسلات</strong><small>Pixel Art</small></button>
+<button class="effect-choice" data-art-style="oil" type="button"><span class="effect-preview preview-oil"><img class="effect-preview-image" src="assets/service-previews/oil-painting.webp" alt="" loading="lazy"/></span><strong>ألوان زيتية</strong><small>ملمس ضربات فرشاة</small></button>
+<button class="effect-choice" data-art-style="watercolor" type="button"><span class="effect-preview preview-watercolor"><img class="effect-preview-image" src="assets/service-previews/watercolor.webp" alt="" loading="lazy"/></span><strong>ألوان مائية</strong><small>تدرجات وملمس ورقي</small></button>
+<button class="effect-choice" data-art-style="halftone" type="button"><span class="effect-preview preview-halftone"><img class="effect-preview-image" src="assets/service-previews/halftone.webp" alt="" loading="lazy"/></span><strong>تنقيط مطبوع</strong><small>نمط Halftone</small></button>
+<button class="effect-choice" data-art-style="popart" type="button"><span class="effect-preview"><img class="effect-preview-image" src="assets/service-previews/pop-art.webp" alt="" loading="lazy"/></span><strong>بوب آرت</strong><small>ألوان جريئة ودرجات محددة</small></button>
+<button class="effect-choice" data-art-style="anime" type="button"><span class="effect-preview preview-anime"><img class="effect-preview-image" src="assets/service-previews/anime.webp" alt="" loading="lazy"/></span><strong>ملصق أنمي</strong><small>ألوان وحدود حادة</small></button>
+<button class="effect-choice" data-art-style="vintage" type="button"><span class="effect-preview"><img class="effect-preview-image" src="assets/service-previews/vintage.webp" alt="" loading="lazy"/></span><strong>فيلم كلاسيكي</strong><small>دفء باهت وحبيبات</small></button>
+<button class="effect-choice" data-art-style="cyberpunk" type="button"><span class="effect-preview"><img class="effect-preview-image" src="assets/service-previews/cyberpunk.webp" alt="" loading="lazy"/></span><strong>سايبربانك</strong><small>نيون أزرق ووردي</small></button>
+<button class="effect-choice" data-art-style="cinematic" type="button"><span class="effect-preview"><img class="effect-preview-image" src="assets/service-previews/cinematic.webp" alt="" loading="lazy"/></span><strong>سينمائي</strong><small>ظلال باردة وإضاءة دافئة</small></button>
+<button class="effect-choice" data-art-style="infrared" type="button"><span class="effect-preview"></span><strong>ألوان حرارية</strong><small>طيف حراري متدرج</small></button>
+<button class="effect-choice" data-art-style="pastel" type="button"><span class="effect-preview"></span><strong>باستيل ناعم</strong><small>ألوان هادئة منخفضة التباين</small></button>
+<button class="effect-choice" data-art-style="noir" type="button"><span class="effect-preview"></span><strong>نوار</strong><small>أبيض وأسود بتباين درامي</small></button>
+<button class="effect-choice" data-art-style="blueprint" type="button"><span class="effect-preview"></span><strong>مخطط هندسي</strong><small>خطوط زرقاء على خلفية عميقة</small></button>
+</div>
+<div class="panel-group"><label>قوة التحويل: <span id="valArtIntensity">100%</span></label><input class="range" id="artIntensity" max="100" min="0" type="range" value="100"/></div>
+</section>
+<section class="effect-section">
+<div class="effect-section-head"><div><strong>مؤثرات بصرية</strong><span>طبقات إضاءة وملمس فوق الصورة</span></div><span class="effect-count">27</span></div>
+<div class="effect-choice-grid visual-effect-grid" id="visualEffectsGrid">
+<button class="effect-choice active" data-visual-fx="none" type="button"><span class="effect-preview preview-original">○</span><strong>بدون</strong><small>الصورة صافية</small></button>
+<button class="effect-choice" data-visual-fx="lightleak" type="button"><span class="effect-preview preview-light"><img class="effect-preview-image" src="assets/service-previews/light-leak.webp" alt="" loading="lazy"/></span><strong>تسرب ضوئي</strong><small>وهج دافئ</small></button>
+<button class="effect-choice" data-visual-fx="bokeh" type="button"><span class="effect-preview preview-bokeh"><img class="effect-preview-image" src="assets/service-previews/bokeh.webp" alt="" loading="lazy"/></span><strong>بوكيه</strong><small>دوائر ضوئية</small></button>
+<button class="effect-choice" data-visual-fx="grain" type="button"><span class="effect-preview preview-grain"><img class="effect-preview-image" src="assets/service-previews/film-grain.webp" alt="" loading="lazy"/></span><strong>حبيبات فيلم</strong><small>ملمس سينمائي</small></button>
+<button class="effect-choice" data-visual-fx="dust" type="button"><span class="effect-preview preview-dust"><img class="effect-preview-image" src="assets/service-previews/dust-particles.webp" alt="" loading="lazy"/></span><strong>غبار ناعم</strong><small>نقاط مضيئة</small></button>
+<button class="effect-choice" data-visual-fx="glow" type="button"><span class="effect-preview preview-glow"><img class="effect-preview-image" src="assets/service-previews/glow.webp" alt="" loading="lazy"/></span><strong>توهج</strong><small>إضاءة محيطية</small></button>
+<button class="effect-choice" data-visual-fx="shadow" type="button"><span class="effect-preview preview-shadow"></span><strong>ظل سينمائي</strong><small>عمق وتعتيم محيطي</small></button>
+<button class="effect-choice" data-visual-fx="reflection" type="button"><span class="effect-preview preview-reflection"></span><strong>انعكاس</strong><small>سطح عاكس متدرج</small></button>
+<button class="effect-choice" data-visual-fx="softfocus" type="button"><span class="effect-preview preview-softfocus"></span><strong>تركيز ناعم</strong><small>هالة ضبابية ناعمة</small></button>
+<button class="effect-choice" data-visual-fx="chromatic" type="button"><span class="effect-preview preview-chromatic"></span><strong>انحراف لوني</strong><small>فصل ألوان العدسة</small></button>
+<button class="effect-choice" data-visual-fx="motion" type="button"><span class="effect-preview preview-motion"></span><strong>ضباب الحركة</strong><small>أثر حركة اتجاهي</small></button>
+<button class="effect-choice" data-visual-fx="neon" type="button"><span class="effect-preview preview-neon"></span><strong>نيون</strong><small>حواف وإضاءة باردة</small></button>
+<button class="effect-choice" data-visual-fx="vignette" type="button"><span class="effect-preview preview-vignette"></span><strong>تظليل الأطراف</strong><small>تركيز بصري مركزي</small></button>
+<button class="effect-choice" data-visual-fx="snow" type="button"><span class="effect-preview"><img class="effect-preview-image" src="assets/service-previews/snow.webp" alt="" loading="lazy"/></span><strong>ثلوج</strong><small>جزيئات ثلج مضيئة</small></button>
+<button class="effect-choice" data-visual-fx="rain" type="button"><span class="effect-preview"><img class="effect-preview-image" src="assets/service-previews/rain.webp" alt="" loading="lazy"/></span><strong>مطر</strong><small>خطوط مطر سينمائية</small></button>
+<button class="effect-choice" data-visual-fx="lensflare" type="button"><span class="effect-preview"><img class="effect-preview-image" src="assets/service-previews/lens-flare.webp" alt="" loading="lazy"/></span><strong>وهج عدسة</strong><small>انعكاس ضوئي وعدسة</small></button>
+<button class="effect-choice" data-visual-fx="sparkles" type="button"><span class="effect-preview"><img class="effect-preview-image" src="assets/service-previews/sparkles.webp" alt="" loading="lazy"/></span><strong>بريق</strong><small>نجوم ولمعات ذهبية</small></button>
+<button class="effect-choice" data-visual-fx="smoke" type="button"><span class="effect-preview"><img class="effect-preview-image" src="assets/service-previews/smoke.webp" alt="" loading="lazy"/></span><strong>دخان</strong><small>ضباب ناعم متعدد الطبقات</small></button>
+<button class="effect-choice" data-visual-fx="aurora" type="button"><span class="effect-preview preview-aurora"></span><strong>الشفق القطبي</strong><small>ستائر ضوئية ملونة</small></button>
+<button class="effect-choice" data-visual-fx="rays" type="button"><span class="effect-preview preview-rays"></span><strong>أشعة الشمس</strong><small>حزم ضوء ناعمة</small></button>
+<button class="effect-choice" data-visual-fx="bubbles" type="button"><span class="effect-preview preview-bubbles"></span><strong>فقاعات زجاجية</strong><small>دوائر شفافة ولمعان</small></button>
+<button class="effect-choice" data-visual-fx="autumn" type="button"><span class="effect-preview preview-autumn"></span><strong>أوراق الخريف</strong><small>أوراق ذهبية متطايرة</small></button>
+<button class="effect-choice" data-visual-fx="fireflies" type="button"><span class="effect-preview preview-fireflies"></span><strong>يراعات</strong><small>نقاط ضوء متوهجة</small></button>
+<button class="effect-choice" data-visual-fx="prism" type="button"><span class="effect-preview preview-prism"></span><strong>طيف منشوري</strong><small>ألوان منشور ضوئي</small></button>
+<button class="effect-choice" data-visual-fx="frost" type="button"><span class="effect-preview preview-frost"></span><strong>صقيع</strong><small>حواف جليدية دقيقة</small></button>
+<button class="effect-choice" data-visual-fx="confetti" type="button"><span class="effect-preview preview-confetti"></span><strong>قصاصات ملونة</strong><small>أشكال احتفالية</small></button>
+<button class="effect-choice" data-visual-fx="halftone" type="button"><span class="effect-preview preview-halftone"></span><strong>نقاط مطبوعة</strong><small>ملمس طباعة فني</small></button>
+<button class="effect-choice" data-visual-fx="vhs" type="button"><span class="effect-preview preview-vhs"></span><strong>VHS</strong><small>خطوط ومسح تناظري</small></button>
+</div>
+<div class="panel-group"><label>شدة المؤثر: <span id="valVisualIntensity">78%</span></label><input class="range" id="visualIntensity" max="100" min="0" type="range" value="78"/></div>
+</section>
+
+
+<button class="asset-open-link" id="openExternalOverlays" type="button"><span>مكتبة المؤثرات الخارجية</span><small>تصفح خامات الإضاءة والملمس من مصادر مفتوحة</small><b>فتح المكتبة ←</b></button><div class="effect-actions"><button class="btn-ghost" id="resetArtEffects" type="button">إعادة ضبط المؤثرات</button></div>
+</div>
+<div class="panel hidden" data-panel="filters">
+<div class="panel-head"><span>الفلاتر</span><button class="panel-close" data-close-panel="filters">×</button></div>
+<div class="filters-categories">
+<button class="fc-btn active" data-fc="all" type="button">الكل</button>
+<button class="fc-btn" data-fc="basic" type="button">أساسي</button>
+<button class="fc-btn" data-fc="warm" type="button">دافئ</button>
+<button class="fc-btn" data-fc="cool" type="button">بارد</button>
+<button class="fc-btn" data-fc="art" type="button">فني</button>
+</div>
+<div class="filters-grid-v2" id="filtersGrid"></div>
+<div class="panel-group" style="margin-top:14px">
+<label>شدة الفلتر: <span id="valFilterIntensity">100%</span></label>
+<input class="range" id="rangeFilterIntensity" max="100" min="0" type="range" value="100"/>
+</div>
+</div>
+<div class="panel hidden" data-panel="borders">
+<div class="panel-head"><span>الإطارات الاحترافية</span><button class="panel-close" data-close-panel="borders">×</button></div>
+<div class="frame-library-intro"><strong>إطارات جاهزة للتصوير والتصميم</strong><span>اختر إطارًا ثم عدّل ألوانه وسماكته قبل التصدير.</span></div>
+<div class="borders-grid" id="bordersGrid"></div>
+<div class="panel-group" style="margin-top:18px">
+<label>سماكة الإطار: <span id="valBorderWidth">20px</span></label>
+<input class="range" id="rangeBorderWidth" max="80" min="5" type="range" value="20"/>
+</div>
+<div class="panel-group row-2 frame-color-controls">
+<div><label for="framePrimaryColor">اللون الأساسي</label><input class="color-input" id="framePrimaryColor" type="color" value="#e0b884"/></div>
+<div><label for="frameAccentColor">لون التفاصيل</label><input class="color-input" id="frameAccentColor" type="color" value="#c99570"/></div>
+</div>
+</div>
+<div class="panel hidden" data-panel="text">
+<div class="panel-head"><span>النص</span><button class="panel-close" data-close-panel="text">×</button></div>
+<div class="panel-group"><label>نصك</label><textarea class="textarea" id="textInput" placeholder="اكتب هنا..."></textarea></div>
+<div class="panel-group">
+<label>الخط</label>
+<select class="select" id="textFont">
+<option value="'Readex Pro',sans-serif">Readex Pro</option>
+<option value="'Fraunces',serif">Fraunces</option>
+<option value="'Space Grotesk',sans-serif">Space Grotesk</option>
+<option value="Arial,sans-serif">Arial</option>
+</select>
+</div>
+<div class="text-presets"><button class="text-preset active" data-preset="headline" type="button">عنوان</button><button class="text-preset" data-preset="caption" type="button">تعليق</button><button class="text-preset" data-preset="label" type="button">ملصق نصي</button></div>
+<div class="panel-group"><label>الحجم: <span id="valTextSize">48px</span></label><input class="range" id="textSize" max="200" min="12" type="range" value="48"/></div>
+<div class="panel-group row-2">
+<div><label>اللون</label><input class="color-input" id="textColor" type="color" value="#ffffff"/></div>
+<div>
+<label>الخلفية</label>
+<select class="select" id="textBg">
+<option value="none">بدون</option>
+<option value="rgba(0,0,0,.75)">أسود</option>
+<option value="rgba(255,255,255,.9)">أبيض</option>
+<option value="rgba(196,124,72,.88)">ذهبي</option>
+</select>
+</div>
+</div>
+<div class="panel-group row-2">
+<div><label>لون الحدود</label><input class="color-input" id="textOutlineColor" type="color" value="#2b1a11"/></div>
+<div><label>سماكة الحدود: <span id="valTextOutline">0px</span></label><input class="range" id="textOutlineWidth" max="16" min="0" type="range" value="0"/></div>
+</div>
+<div class="panel-group">
+<label>ظل النص</label>
+<select class="select" id="textShadow">
+<option value="none">بدون</option>
+<option value="rgba(0,0,0,.7)">ظل خفيف</option>
+<option value="rgba(224,184,132,.9)">ظل ذهبي</option>
+<option value="rgba(184,115,66,.9)">ظل نحاسي</option>
+</select>
+</div>
+<button class="btn-primary" id="btnAddText" type="button">أضف النص</button>
+</div>
+
+<div class="panel hidden" data-panel="draw">
+<div class="panel-head"><span>رسم</span><button class="panel-close" data-close-panel="draw">×</button></div>
+<div class="panel-group"><label>حجم الفرشاة: <span id="valBrushSize">8px</span></label><input class="range" id="brushSize" max="80" min="1" type="range" value="8"/></div>
+<div class="panel-group">
+<label>اللون</label>
+<div class="color-row">
+<input class="color-input" id="brushColor" type="color" value="#e0b884"/>
+<div class="swatches" id="brushSwatches"></div>
+</div>
+</div>
+<div class="panel-group"><label>الشفافية: <span id="valBrushOpacity">100%</span></label><input class="range" id="brushOpacity" max="100" min="10" type="range" value="100"/></div>
+<div class="draw-modes">
+<button class="mode-btn active" data-drawmode="brush" type="button">فرشاة</button>
+<button class="mode-btn" data-drawmode="eraser" type="button">ممحاة</button>
+</div>
+<button class="btn-ghost" id="btnClearDraw" type="button">مسح كل الرسم</button>
+</div>
+<div class="panel hidden" data-panel="shapes">
+<div class="panel-head"><span>الأشكال والعناصر</span><button class="panel-close" data-close-panel="shapes" type="button">×</button></div>
+<p class="panel-note">أضف عناصر هندسية إلى الصورة، ثم حرّكها أو غيّر حجمها من مساحة العمل.</p>
+<div class="shape-color-control">
+<label for="shapeColor">لون الشكل</label>
+<input class="color-input" id="shapeColor" type="color" value="#c47c48"/>
+</div>
+<div class="shape-grid" id="shapeGrid">
+<button class="shape-choice" data-shape="circle" type="button"><span>●</span><small>دائرة</small></button>
+<button class="shape-choice" data-shape="square" type="button"><span>■</span><small>مربع</small></button>
+<button class="shape-choice" data-shape="triangle" type="button"><span>▲</span><small>مثلث</small></button>
+<button class="shape-choice" data-shape="star" type="button"><span>★</span><small>نجمة</small></button>
+<button class="shape-choice" data-shape="heart" type="button"><span>♥</span><small>قلب</small></button>
+<button class="shape-choice" data-shape="arrow" type="button"><span>➜</span><small>سهم</small></button>
+<button class="shape-choice" data-shape="diamond" type="button"><span>◆</span><small>ماسة</small></button>
+<button class="shape-choice" data-shape="bubble" type="button"><span>▱</span><small>فقاعة</small></button>
+</div>
+<div class="panel-group"><label>حجم العنصر <span id="valShapeSize">180px</span></label><input class="range" id="shapeSize" max="900" min="40" type="range" value="180"/></div>
+<div class="panel-group"><label>الشفافية <span id="valShapeOpacity">100%</span></label><input class="range" id="shapeOpacity" max="100" min="10" type="range" value="100"/></div>
+</div>
+<div class="panel hidden" data-panel="watermark">
+<div class="panel-head"><span>التوقيع الثابت</span><button class="panel-close" data-close-panel="watermark" type="button">×</button></div>
+<p class="panel-note">يُضاف توقيع Haider تلقائيًا بخط مميز في الركن السفلي الأيمن من الصورة. موضعه ثابت ولا يمكن سحبه أو تغييره.</p>
+<div class="panel-group"><label for="watermarkText">نص التوقيع</label><input class="sticker-search" id="watermarkText" maxlength="48" placeholder="اسمك أو اسم العلامة" type="text" value="Haider"/></div>
+<div class="panel-group row-2"><div><label for="watermarkColor">اللون</label><input class="color-input" id="watermarkColor" type="color" value="#f1dfc7"/></div><div><label for="watermarkSize">الحجم النسبي <span id="valWatermarkSize">34%</span></label><input class="range" id="watermarkSize" max="100" min="12" type="range" value="34"/></div></div>
+<div class="panel-group"><label>الشفافية <span id="valWatermarkOpacity">72%</span></label><input class="range" id="watermarkOpacity" max="100" min="10" type="range" value="72"/></div>
+<div class="signature-lock-note"><span>⌑</span><span>الموضع مقفل · الركن السفلي الأيمن</span></div>
+<button class="btn-primary" id="addWatermark" type="button">تحديث التوقيع</button>
+<button class="btn-ghost watermark-remove" id="removeWatermarks" type="button">إزالة التوقيع</button>
+</div>
+<div class="panel hidden" data-panel="layers">
+<div class="panel-head"><span>الطبقات والعناصر</span><button class="panel-close" data-close-panel="layers" type="button">×</button></div>
+<p class="panel-note">رتّب عناصر التصميم، وحدد كل طبقة أو أخفها أو انسخها أو احذفها.</p>
+<div class="layers-toolbar"><strong>قائمة الطبقات</strong><span id="layersCount">0 عناصر</span></div>
+<div class="layers-list" id="layersList"><div class="layers-empty">أضف نصًا أو ملصقًا أو شكلاً لتظهر طبقاته هنا</div></div>
+</div>
+</div>
+<div class="ws-toolsbar"><div class="tool-group"><div class="tool-group-label">الأساسيات</div><button class="tool" data-tool="crop" type="button">
+<span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M6 2v16a2 2 0 0 0 2 2h16"></path><path d="M2 6h16a2 2 0 0 1 2 2v16"></path></svg></span>
+<span>قص</span>
+</button><button class="tool" data-tool="background" type="button">
+<span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><rect height="18" rx="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="m21 15-5-5L5 21"></path></svg></span>
+<span>خلفية</span>
+</button><button class="tool" data-tool="adjust" type="button">
+<span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 10v6M4.2 4.2l4.3 4.3m7 7 4.3 4.3M1 12h6m10 0h6M4.2 19.8l4.3-4.3m7-7 4.3-4.3"></path></svg></span>
+<span>تعديلات</span>
+</button></div><div class="tool-group"><div class="tool-group-label">المظهر</div><button class="tool" data-tool="filters" type="button">
+<span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><circle cx="8" cy="12" r="3.5"></circle><circle cx="16" cy="12" r="3.5"></circle><path d="M8 8.5h8M8 15.5h8"></path></svg></span>
+<span>فلاتر</span>
+</button><button class="tool" data-tool="effects" type="button"><span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="m12 2 1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2Z"></path><path d="m19 16 .9 2.1L22 19l-2.1.9L19 22l-.9-2.1L16 19l2.1-.9L19 16Z"></path></svg></span><span>مؤثرات</span></button><button class="tool" data-tool="borders" type="button">
+<span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><rect height="18" rx="3" width="18" x="3" y="3"></rect><rect height="10" rx="1" width="10" x="7" y="7"></rect></svg></span>
+<span>إطارات</span>
+</button></div><div class="tool-group"><div class="tool-group-label">الإضافات</div><button class="tool" data-tool="text" type="button">
+<span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"></path></svg></span>
+<span>نص</span>
+</button><button class="tool" data-tool="stickers" type="button">
+<span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"></path></svg></span>
+<span>ملصقات</span>
+</button><button class="tool" data-tool="draw" type="button">
+<span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"></path><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"></path></svg></span>
+<span>رسم</span>
+</button><button class="tool" data-tool="shapes" type="button"><span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><circle cx="7" cy="7" r="4"></circle><rect height="8" rx="1" width="8" x="13" y="13"></rect><path d="m14 3 7 7h-7z"></path></svg></span><span>أشكال</span></button><button class="tool" data-tool="watermark" type="button"><span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"></path><circle cx="18" cy="17" r="3"></circle></svg></span><span>التوقيع</span></button></div><div class="tool-group"><div class="tool-group-label">التنظيم</div><button class="tool" data-tool="layers" type="button"><span class="tool-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"></path><path d="m3 12 9 5 9-5M3 16l9 5 9-5"></path></svg></span><span>الطبقات</span></button></div></div>
+<div class="export-settings">
+<div class="export-setting-field"><label for="exportFormat">صيغة التصدير</label><select class="select" id="exportFormat"><option value="image/png">PNG · شفافية</option><option value="image/jpeg">JPG · حجم أقل</option><option value="image/webp">WEBP · حديث</option></select></div>
+<div class="export-setting-field"><label for="exportQuality">جودة الصورة <span id="valExportQuality">92%</span></label><input class="range" id="exportQuality" max="100" min="50" type="range" value="92"/></div>
+<div class="export-setting-field"><label for="exportPreset">مقاس جاهز</label><select class="select" id="exportPreset"><option value="original">المقاس الأصلي</option><option value="square">منشور مربع · 1080 × 1080</option><option value="portrait">منشور عمودي · 1080 × 1350</option><option value="story">قصة · 1080 × 1920</option><option value="landscape">أفقي · 1920 × 1080</option><option value="custom">مخصص</option></select></div>
+<div class="export-setting-field export-dimensions"><label>أبعاد التصدير <span class="dimension-lock"><input checked="" id="exportLock" type="checkbox"/><span>حفظ النسبة</span></span></label><div class="dimension-fields"><label><span>العرض</span><input id="exportWidth" inputmode="numeric" max="12000" min="1" type="number" value="1080"/></label><span class="dimension-x">×</span><label><span>الارتفاع</span><input id="exportHeight" inputmode="numeric" max="12000" min="1" type="number" value="1080"/></label></div></div>
+</div>
+<div class="ws-actionsbar">
+<button class="action-btn secondary" id="btnNewImg" type="button">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M5 12h14"></path></svg>
+            صورة جديدة
+          </button>
+<button class="action-btn primary" id="btnSave" type="button">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M20 6 9 17l-5-5"></path></svg>تجهيز التصدير</button>
+<button class="action-btn success hidden" id="btnDownload" type="button">
+<svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 3v12M7 10l5 5 5-5"></path><path d="M4 21h16"></path></svg>تنزيل الصورة</button>
+</div>
+</div>
+</section><section class="view hidden asset-library-view" id="assetsView">
+<div class="asset-library-header">
+<div><span class="asset-eyebrow">مكتبة الموارد</span><h2>مكتبة الأصول</h2></div>
+<button class="btn-primary" id="assetBackToEditor" type="button">العودة إلى المحرر</button>
+</div>
+<div aria-label="تصنيفات مكتبة الأصول" class="asset-tabs" role="tablist">
+<button class="asset-tab active" data-asset-tab="backgrounds" type="button">الخلفيات</button>
+<button class="asset-tab" data-asset-tab="overlays" type="button">المؤثرات والتراكبات</button>
+<button class="asset-tab" data-asset-tab="stickers" type="button">الملصقات</button>
+<button class="asset-tab" data-asset-tab="textures" type="button">الخامات والتدرجات</button>
+</div>
+<section class="asset-pane" data-asset-pane="backgrounds">
+<div class="asset-pane-heading"><div><h3>الخلفيات الخارجية</h3><p>اختر خلفية جاهزة أو ابحث في مكتبة الصور المفتوحة.</p></div><span class="asset-source-pill">Unsplash · Openverse</span></div>
+<div id="assetBackgroundMount"><div class="asset-source-content">
+<div class="online-library-head"><div><strong>خلفيات مختارة</strong><span>36 خلفية جاهزة للمعاينة — يلزم اتصال بالإنترنت</span></div><a href="https://unsplash.com/license" rel="noopener noreferrer" target="_blank">الترخيص</a></div>
+<div class="online-backgrounds" id="onlineBackgrounds"></div>
+<div class="openverse-library-block">
+<div class="openverse-library-title"><div><strong>ابحث في مكتبة الصور المفتوحة</strong><small>نتائج كثيرة من أعمال مرخصة للاستخدام والتعديل</small></div><a href="https://openverse.org/" rel="noopener noreferrer" target="_blank">Openverse ↗</a></div>
+<div class="openverse-search-row"><input autocomplete="off" id="openverseSearch" placeholder="ابحث: طبيعة، سماء، رخام، مدينة..." type="search"/><button class="btn-primary small" id="openverseSearchBtn" type="button">بحث</button></div>
+<div class="openverse-quick-tags"><button data-openverse-query="mountain landscape" type="button">جبال</button><button data-openverse-query="flower botanical" type="button">زهور</button><button data-openverse-query="ocean beach" type="button">بحر</button><button data-openverse-query="abstract texture background" type="button">خامات</button><button data-openverse-query="night city architecture" type="button">مدن</button><button data-openverse-query="desert dunes" type="button">صحراء</button><button data-openverse-query="minimal studio backdrop" type="button">استوديو</button><button data-openverse-query="marble paper texture" type="button">رخام وورق</button><button data-openverse-query="flower pattern wallpaper" type="button">نقوش زهرية</button><button data-openverse-query="space nebula stars" type="button">فضاء</button><button data-openverse-query="interior room backdrop" type="button">ديكورات</button><button data-openverse-query="abstract gradient background" type="button">تجريدي</button></div>
+<div class="openverse-meta" id="openverseMeta">اكتب كلمة بحث للوصول إلى مكتبة الصور المفتوحة.</div>
+<div class="openverse-grid" id="openverseGrid"></div>
+<div class="openverse-selected-credit hidden" id="openverseSelectedCredit"></div>
+<p class="asset-credit">تُعرض معلومات الترخيص والمصدر لكل نتيجة. راجع صفحة العمل قبل نشر الصورة، خصوصًا تراخيص النسب والمشاركة بالمثل.</p>
+</div>
+</div></div>
+</section>
+<section class="asset-pane hidden" data-asset-pane="overlays">
+<div class="asset-pane-heading"><div><h3>المؤثرات والتراكبات</h3><p>خامات وإضاءات خارجية يمكن مزجها فوق الصورة.</p></div><span class="asset-source-pill">Unsplash · Openverse</span></div>
+<div class="asset-overlay-layout" id="assetOverlayMount"><section class="effect-section asset-external-section">
+<div class="effect-section-head"><div><strong>تراكبات صور من الإنترنت</strong><span>مزج خامات وإضاءات خارجية فوق الصورة</span></div><span class="effect-count">14</span></div>
+<div class="online-backgrounds online-overlays" id="onlineOverlaysGrid"></div>
+<div class="panel-group"><label>شفافية التراكب: <span id="valOnlineOverlayIntensity">35%</span></label><input class="range" id="onlineOverlayIntensity" max="100" min="0" type="range" value="35"/></div>
+<p class="asset-credit">مصادر الصور من Unsplash، ويتم مزجها داخل مساحة التحرير ويمكن تضمينها في التصدير عند نجاح تحميلها.</p>
+</section><section class="effect-section openverse-library-block asset-external-section">
+<div class="effect-section-head"><div><strong>ابحث عن تراكبات وخامات</strong><span>مصادر مفتوحة مع إظهار الترخيص</span></div><a href="https://openverse.org/" rel="noopener noreferrer" target="_blank">Openverse ↗</a></div>
+<div class="openverse-search-row"><input autocomplete="off" id="openverseOverlaySearch" placeholder="ضوء، غبار، خامة ورق، نجوم..." type="search"/><button class="btn-primary small" id="openverseOverlaySearchBtn" type="button">بحث</button></div>
+<div class="openverse-quick-tags"><button data-openverse-overlay-query="light leak texture" type="button">ضوء</button><button data-openverse-overlay-query="bokeh lights" type="button">بوكيه</button><button data-openverse-overlay-query="film grain texture" type="button">فيلم</button><button data-openverse-overlay-query="dust particles transparent" type="button">غبار</button><button data-openverse-overlay-query="paper texture" type="button">ورق</button><button data-openverse-overlay-query="rain drops window texture" type="button">مطر</button><button data-openverse-overlay-query="fire sparks particles" type="button">شرر</button><button data-openverse-overlay-query="snow particles overlay" type="button">ثلج</button><button data-openverse-overlay-query="lens flare light effect" type="button">عدسة</button><button data-openverse-overlay-query="smoke transparent texture" type="button">دخان</button></div>
+<div class="openverse-meta" id="openverseOverlayMeta">ابحث عن صور يمكن استخدامها كتراكبات.</div>
+<div class="openverse-grid" id="openverseOverlayGrid"></div>
+<div class="openverse-selected-credit" id="openverseOverlayCredit"></div>
+<div class="panel-group"><label for="onlineOverlayMode">طريقة المزج</label><select class="select" id="onlineOverlayMode"><option value="screen">إضاءة (Screen)</option><option value="soft-light">ضوء ناعم (Soft Light)</option><option value="overlay">تراكب (Overlay)</option><option value="multiply">ضرب الألوان (Multiply)</option><option value="lighten">تفتيح (Lighten)</option></select></div>
+</section></div>
+</section>
+<section class="asset-pane hidden" data-asset-pane="textures">
+<div class="asset-pane-heading"><div><h3>الخامات والتدرجات</h3><p>خلفيات هندسية محلية قابلة للتطبيق والتصدير.</p></div><span class="asset-source-pill">42 خامة</span></div>
+<div class="asset-texture-grid" id="assetTextureGrid"></div>
+<div class="asset-credit">تُنشأ هذه الخامات داخل المتصفح ولا تحتاج إلى تحميل خارجي.</div>
+</section>
+<section class="asset-pane hidden" data-asset-pane="stickers">
+<div class="asset-pane-heading"><div><h3>مكتبة الملصقات</h3><p>ملصقات جاهزة وملفات مخصصة. اختر عنصرًا بعد فتح صورة في المحرر.</p></div><span class="asset-source-pill">OpenMoji</span></div>
+<div id="assetStickerMount"><div class="panel asset-sticker-panel">
+<div class="panel-head"><div class="asset-panel-heading"><strong>مكتبة الملصقات</strong><span>اختر عنصرًا لإضافته إلى الصورة المفتوحة في المحرر</span></div><button class="asset-back-btn" id="assetStickerBack" type="button">العودة إلى المحرر</button></div>
+<input accept="image/png,image/webp,image/jpeg" hidden="" id="stickerFile" type="file"/>
+<div class="sticker-upload-card">
+<div class="sticker-upload-symbol">＋</div>
+<div class="sticker-upload-copy"><strong>أضف ملصقك الخاص</strong><span>PNG أو WebP أو JPG · حتى 12MB</span></div>
+<button class="btn-ghost small" id="stickerUploadBtn" type="button">رفع ملصق</button>
+</div>
+<div class="sticker-library-intro">
+<div><strong>مكتبة الملصقات</strong><span>اضغط على أي ملصق لإضافته إلى الصورة</span></div>
+<span class="sticker-count" id="stickerCount">0 ملصق</span>
+</div>
+<input autocomplete="off" class="sticker-search" id="stickerSearch" placeholder="ابحث باسم الملصق أو الرمز..." type="search"/>
+<div class="sticker-categories" id="stickerCategories"></div>
+<div class="sticker-library-meta"><span id="stickerResults">جميع الملصقات</span><button id="clearStickerRecent" type="button">مسح الأخيرة</button></div>
+<div class="stickers-grid" id="stickersGrid"></div>
+<p class="asset-credit">ملصقات OpenMoji مفتوحة المصدر بترخيص CC BY-SA 4.0. <a href="https://openmoji.org/" rel="noopener noreferrer" target="_blank">المصدر والترخيص</a></p>
+<div class="sticker-editor hidden" id="stickerEditor">
+<div class="sticker-editor-head"><strong>تعديل الملصق المحدد</strong><span>اسحبه داخل الصورة لتغيير مكانه</span></div>
+<div class="panel-group"><label>الحجم: <span id="valStickerSize">120px</span></label><input class="range" id="stickerSize" max="900" min="20" type="range" value="120"/></div>
+<div class="panel-group"><label>الدوران: <span id="valStickerRotate">0°</span></label><input class="range" id="stickerRotate" max="180" min="-180" type="range" value="0"/></div>
+<div class="panel-group"><label>الشفافية: <span id="valStickerOpacity">100%</span></label><input class="range" id="stickerOpacity" max="100" min="10" type="range" value="100"/></div>
+<div class="sticker-editor-actions">
+<button class="btn-ghost" id="btnStickerDuplicate" type="button">نسخ الملصق</button>
+<button class="btn-danger" id="btnStickerDelete" type="button">حذف الملصق</button>
+</div>
+</div>
+</div></div>
+</section>
+<div class="asset-library-footer">تختلف شروط الاستخدام حسب مصدر الملف. راجع الترخيص وبيانات النسب قبل استخدام المورد في عمل منشور.</div>
+</section>
+<section class="view hidden" id="historyView">
+<div class="sec-head">
+<div class="sec-title">سجل <span>العمليات</span></div>
+<div class="sec-chips">
+<div class="chip">الكل <strong id="statTotal">0</strong></div>
+<div class="chip">اليوم <strong id="statToday">0</strong></div>
+</div>
+</div>
+<div class="toolbar">
+<span>نتائجك المحفوظة</span>
+<button id="historyRefresh" type="button">↻ تحديث</button>
+</div>
+<div id="historyContent"></div>
+</section>
+<section class="view hidden" id="profileView">
+<div class="profile-heading">
+<div><span class="profile-kicker">إدارة الحساب</span><h2>الحساب الشخصي</h2><p>إدارة بيانات الحساب، ومراجعة الاستخدام، وضبط خيارات التصدير.</p></div>
+<div class="profile-live"><i></i> الحساب نشط</div>
+</div>
+<div class="profile-wrap">
+<div class="profile-hero">
+<div class="profile-card-top"><span>الحساب الشخصي</span><span class="profile-plan-badge" id="pPlanBadge">الحساب المجاني</span></div>
+<div class="avatar-area">
+<div class="avatar-ring"><div class="avatar" id="avatar">؟</div></div>
+<button aria-label="تغيير الصورة الشخصية" class="avatar-edit" id="avatarPickBtn" title="تغيير الصورة الشخصية" type="button">✎</button>
+<input accept="image/png,image/jpeg,image/webp" hidden="" id="avatarFile" type="file"/>
+</div>
+<div class="p-name" id="pUsername">—</div>
+<div class="p-email" id="pEmail">—</div>
+<div class="profile-badges"><div class="p-role" id="pRole">مستخدم</div><span class="p-joined" id="pJoined"></span></div>
+<div class="profile-avatar-hint">يتم تحديث الصورة الشخصية بعد اختيار الملف مباشرة.</div>
+<div class="profile-edit-box">
+<div class="profile-section-title"><div><span>البيانات الشخصية</span><strong>تعديل بيانات الحساب</strong></div></div>
+<div class="profile-form-field"><label for="profileDisplayName">اسم العرض</label><input id="profileDisplayName" maxlength="30" placeholder="اسم العرض" type="text"/></div>
+<div class="profile-form-field"><label for="profileBio">نبذة شخصية <span>اختياري</span></label><textarea id="profileBio" maxlength="120" placeholder="نبذة قصيرة عنك" rows="3"></textarea></div>
+<button class="btn-primary profile-save-account" id="saveProfileName" type="button">حفظ بيانات الحساب</button>
+<small>يحفظ هذا الإجراء اسم العرض والنبذة في بيانات حسابك.</small>
+</div>
+</div>
+<div class="profile-side">
+<div class="panel profile-stats-panel">
+<div class="profile-section-title"><div><span>ملخص الاستخدام</span><strong>نشاط الحساب</strong></div><button aria-label="تحديث الإحصائيات" class="profile-refresh" id="refreshProfile" title="تحديث الإحصائيات" type="button">↻</button></div>
+<div class="stats-3">
+<div class="st"><span class="st-icon">▧</span><strong id="statOps">0</strong><span>إجمالي العمليات</span></div>
+<div class="st"><span class="st-icon">◷</span><strong id="statOpsToday">0</strong><span>عمليات اليوم</span></div>
+<div class="st"><span class="st-icon">✦</span><strong id="statRemain">5</strong><span>المتبقي اليوم</span></div>
+</div>
+<div class="usage-card"><div class="usage-top"><strong>الاستخدام اليومي</strong><span id="usageText">0 من 5 عمليات</span></div><div class="usage-track"><span id="usageProgress"></span></div><small>تُحدّث هذه البيانات عند فتح الحساب أو طلب التحديث.</small></div>
+</div>
+<div class="panel profile-details-panel">
+<div class="profile-section-title"><div><span>بيانات الحساب</span><strong>الخطة والحالة</strong></div></div>
+<div class="info-2"><div class="ib"><span>الخطة الحالية</span><strong id="pPlan">Free</strong></div><div class="ib"><span>حالة الحساب</span><strong id="pStatus">نشط</strong></div></div>
+<div class="profile-preferences">
+<div class="profile-section-title"><div><span>إعدادات التصدير</span><strong>الخيارات الافتراضية</strong></div></div>
+<div class="panel-group"><label for="profileExportFormat">صيغة الصورة</label><select class="select" id="profileExportFormat"><option value="image/png">PNG — يدعم الشفافية</option><option value="image/jpeg">JPG — حجم أصغر</option><option value="image/webp">WebP — ضغط حديث</option></select></div>
+<div class="panel-group"><label for="profileExportQuality">جودة التصدير: <span id="profileExportQualityValue">92%</span></label><input class="range" id="profileExportQuality" max="100" min="55" type="range" value="92"/></div>
+<button class="btn-ghost profile-pref-save" id="saveProfilePrefs" type="button">حفظ خيارات التصدير</button>
+<small class="profile-pref-note">تُحفظ الخيارات على هذا الجهاز وتُطبّق تلقائيًا في المحرر.</small>
+</div>
+<div class="row-actions profile-account-actions"><button class="btn-danger" id="logoutBtn" type="button">تسجيل الخروج</button></div>
+</div>
+</div>
+</div>
+<div class="profile-lower-grid">
+<div class="panel profile-recent-panel"><div class="profile-section-title"><div><span>النشاط الأخير</span><strong>آخر العمليات المحفوظة</strong></div><button class="profile-refresh" id="profileHistoryBtn" type="button">عرض السجل ↗</button></div><div class="profile-activity-list" id="profileRecentActivity"><div class="profile-activity-empty">لا توجد عمليات محفوظة بعد.</div></div></div>
+<div class="panel profile-creative-panel"><div class="profile-section-title"><div><span>مساحة العمل</span><strong>الوصول السريع</strong></div></div><div class="creative-stat"><span class="creative-stat-icon">✦</span><div><strong id="profileFavoritesCount">0</strong><small>ملصقات في المفضلة</small></div></div><div class="profile-quick-actions"><button class="btn-primary" id="profileEditorBtn" type="button">فتح المحرر</button><button class="btn-ghost" id="profileNewImageBtn" type="button">اختيار صورة جديدة</button></div></div>
+</div>
+</section>
+<section class="view hidden" id="adminView">
+<div class="admin-hdr">
+<div>
+<div class="admin-title">مركز <span>المطوّر</span></div>
+<div class="admin-sub">إدارة الحسابات والعمليات</div>
+</div>
+<div class="row-actions">
+<button class="btn-ghost" id="adminRefresh" type="button">↻ تحديث</button>
+<button class="btn-ghost" id="adminBack" type="button">الاستوديو</button>
+</div>
+</div>
+<div class="metrics">
+<div class="metric"><strong id="mUsers">0</strong><span>حسابات</span></div>
+<div class="metric"><strong id="mOps">0</strong><span>عمليات</span></div>
+<div class="metric"><strong id="mToday">0</strong><span>اليوم</span></div>
+<div class="metric"><strong id="mActive">0</strong><span>نشاط</span></div>
+</div>
+<input class="search" id="adminSearch" placeholder="ابحث بالاسم أو البريد..." type="search"/>
+<div class="admin-cols">
+<div class="sec"><div class="sec-head2"><strong>الحسابات</strong><span id="usersLabel">0</span></div><div class="users-list" id="usersList"></div></div>
+<div class="sec"><div class="sec-head2"><strong>آخر العمليات</strong><span>الكل</span></div><div class="ops-grid" id="opsList"></div></div>
+</div>
+</section>
+<footer class="ft">© RemoveBG · استوديو تحرير الصور</footer>
+</div>
+</main>
+<div class="modal" id="modal"><div class="modal-card"><div class="modal-head"><strong id="modalTitle">إدارة الحساب</strong><button class="modal-x" id="modalClose" type="button">×</button></div><div class="modal-body" id="modalBody"></div></div></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/Pass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="intro-3d.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
