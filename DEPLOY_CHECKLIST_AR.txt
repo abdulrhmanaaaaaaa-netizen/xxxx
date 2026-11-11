@@ -1,0 +1,14 @@
+قائمة فحص النشر — Cloudflare Pages (الملفات في الجذر)
+
+[ ] index.html في جذر المستودع مباشرة.
+[ ] styles.css وapp.js وconfig.js بجوار index.html.
+[ ] images/ في الجذر.
+[ ] functions/api/nanobanana.js في الجذر، وليس داخل images أو public أو dist.
+[ ] _routes.json في الجذر ويتضمن /api/* فقط.
+[ ] Cloudflare مربوط بمستودع GitHub عبر Git integration.
+[ ] Framework preset = None.
+[ ] Root directory فارغ.
+[ ] Build output directory = .
+[ ] Build command فارغ، أو exit 0 إذا تعذر تركه فارغًا.
+[ ] لا حاجة إلى npm install ولا node_modules.
+[ ] بعد النشر، اختبر الصفحة الرئيسية ثم /api/nanobanana.
