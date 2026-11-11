@@ -1,0 +1,16 @@
+قائمة النشر — RemoveBG / Cloudflare Pages
+
+[ ] index.html في جذر المستودع مباشرة.
+[ ] app.js وconfig.js وstyles.css بجوار index.html.
+[ ] images/ بجوار ملفات الموقع.
+[ ] functions/api/nanobanana.js في الجذر.
+[ ] _routes.json في الجذر.
+[ ] Cloudflare Pages مربوط بمستودع GitHub عبر Git integration.
+[ ] Framework preset = None.
+[ ] Root directory فارغ.
+[ ] Build command = exit 0.
+[ ] Build output directory = .
+[ ] لا ترفع node_modules ولا تثبت npm packages.
+[ ] بعد النشر افتح /app.js و/styles.css وتأكد أنهما لا يعيدان 404.
+[ ] افتح الموقع في نافذة خاصة/بعد تحديث قوي لتجاوز كاش المتصفح.
+[ ] إذا ظهر تشخيص داخل الصفحة، انسخ نصه كما هو.
