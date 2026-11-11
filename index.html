@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#050302">
+  <title>XAVRO — Ancient Intelligence</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%; margin: 0; overflow: hidden;
+      background: #050302; /* أسود ترابي داكن جداً */
+      font-family: "Courier New", monospace;
+    }
+
+    body {
+      position: relative;
+      background: radial-gradient(ellipse at 50% 48%, rgba(80, 50, 30, .15), transparent 60%), #050302;
+    }
+
+    canvas { position: fixed; inset: 0; display: block; width: 100%; height: 100%; }
+
+    .boot-text {
+      position: fixed; z-index: 2; top: max(24px, env(safe-area-inset-top)); left: clamp(18px, 5vw, 42px);
+      direction: ltr; color: #8c6a3d; /* نحاسي باهت */
+      font-size: clamp(11px, 2.5vw, 15px); line-height: 1.8;
+      letter-spacing: .7px; opacity: 0; text-shadow: 0 0 8px rgba(140, 106, 61, .4); pointer-events: none;
+    }
+
+    .boot-text span { color: #5c4528; }
+
+    .ui-container {
+      position: fixed; z-index: 3; left: 0; right: 0; bottom: max(38px, calc(env(safe-area-inset-bottom) + 26px));
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      direction: ltr; opacity: 0; pointer-events: none;
+    }
+
+    .logo-text {
+      margin: 0 0 8px; font-family: 'Times New Roman', serif;
+      font-size: clamp(32px, 8vw, 46px);
+      font-weight: 800; letter-spacing: .25em; padding-left: .25em; color: transparent;
+      background: linear-gradient(95deg, #6b4c2a 5%, #9e7a4a 50%, #b8935f 95%);
+      -webkit-background-clip: text; background-clip: text;
+      filter: drop-shadow(0 0 10px rgba(140, 106, 61, .3));
+    }
+
+    .sub-text {
+      margin: 5px 0; color: #b09b82; font-size: clamp(10px, 2.4vw, 13px);
+      letter-spacing: .2em; padding-left: .2em; text-shadow: 0 0 8px rgba(140, 106, 61, .2);
+    }
+
+    .sub-text.small { margin-top: 12px; color: #7a6450; font-size: clamp(8px, 2vw, 10px); letter-spacing: .25em; }
+
+    .btn {
+      pointer-events: auto; margin-top: 23px; min-width: 200px; padding: 15px 42px;
+      border: 1px solid rgba(140, 106, 61, .6); border-radius: 50px; color: #050302;
+      background: linear-gradient(115deg, #7a5834, #9e7a4a);
+      box-shadow: 0 0 10px rgba(140, 106, 61, .2), inset 0 0 0 3px rgba(255,255,255,.05);
+      font-size: 15px; font-weight: bold; cursor: pointer; transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(140, 106, 61, .5), inset 0 0 0 3px rgba(255,255,255,.1);
+    }
+
+    @media (max-height: 730px) {
+      .ui-container { bottom: max(20px, calc(env(safe-area-inset-bottom) + 14px)); }
+      .btn { margin-top: 14px; padding: 12px 36px; }
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+
+<body>
+
+  <div class="boot-text" id="bootText">
+    XAVRO // BOOT<br>
+    <span>&gt; sandstorm.forming</span><br>
+    <span>&gt; obsidian.assemble</span><br>
+    <span>&gt; core.awaken</span>
+  </div>
+
+  <div class="ui-container" id="uiContainer">
+    <div class="logo-text">XAVRO</div>
+    <div class="sub-text">ANCIENT WISDOM. MODERN POWER.</div>
+    <div class="sub-text small">AI CHAT &nbsp; CREATE &nbsp; BUILD &nbsp; EXPLORE</div>
+    <button class="btn" type="button">Enter The Realm &nbsp; →</button>
+  </div>
+
+  <script>
+    // 1. Scene & Background
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x050302, 0.02); 
+
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 180);
+    camera.position.set(0, 4, 30);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.7));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.9; // تقليل الإضاءة العامة
+    document.body.appendChild(renderer.domElement);
+
+    // 2. Bloom (تم تقليله ليكون خافتاً جداً ومريحاً للعين)
+    const renderScene = new THREE.RenderPass(scene, camera);
+    const bloomPass = new THREE.UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      0.15, // قوة التوهج خافتة جداً
+      0.3,  // نصف القطر
+      0.85  // العتبة عالية جداً (فقط الحواف اللامعة جداً ستتوهج)
+    );
+    const composer = new THREE.EffectComposer(renderer);
+    composer.addPass(renderScene);
+    composer.addPass(bloomPass);
+
+    // 3. Lighting (أضواء دافئة خافتة)
+    scene.add(new THREE.HemisphereLight(0x5c4033, 0x0a0502, 0.6)); // ضوء علوي بني دافئ
+    scene.add(new THREE.AmbientLight(0x2a1a10, 0.8));
+
+    const keyLight = new THREE.PointLight(0x8c6a3d, 40, 40, 2); // نحاسي باهت
+    keyLight.position.set(-10, 10, 10);
+    scene.add(keyLight);
+
+    const backLight = new THREE.PointLight(0x4a2511, 30, 40, 2); // برتقالي محروق داكن
+    backLight.position.set(10, -5, -10);
+    scene.add(backLight);
+
+    // 4. Particles (غبار صحراوي خافت)
+    const particleCount = 10000;
+    const pGeo = new THREE.BufferGeometry();
+    const pPos = new Float32Array(particleCount * 3);
+    const pTargets = new Float32Array(particleCount * 3);
+    const pColors = new Float32Array(particleCount * 3);
+
+    const c1 = new THREE.Color(0x6b4c2a); // بني ترابي
+    const c2 = new THREE.Color(0x3b2512); // بني داكن
+    const c3 = new THREE.Color(0x8c6a3d); // نحاسي خافت
+
+    let pIdx = 0;
+    function fillHVolume(xMin, xMax, yMin, yMax, zMin, zMax, count) {
+      for (let i = 0; i < count; i++) {
+        if (pIdx >= particleCount) break;
+        pTargets[pIdx * 3] = xMin + Math.random() * (xMax - xMin);
+        pTargets[pIdx * 3 + 1] = yMin + Math.random() * (yMax - yMin);
+        pTargets[pIdx * 3 + 2] = zMin + Math.random() * (zMax - zMin);
+        pIdx++;
+      }
+    }
+
+    fillHVolume(-2.5, -1.0, -3.5, 3.5, -0.5, 0.5, 3000);
+    fillHVolume(1.0, 2.5, -3.5, 3.5, -0.5, 0.5, 3000);
+    fillHVolume(-1.0, 1.0, -0.8, 0.8, -0.5, 0.5, 2000);
+
+    for (let i = 0; i < particleCount; i++) {
+      pPos[i * 3] = (Math.random() - 0.5) * 120;
+      pPos[i * 3 + 1] = (Math.random() - 0.5) * 120;
+      pPos[i * 3 + 2] = (Math.random() - 0.5) * 120;
+
+      const choice = Math.random();
+      const color = choice > 0.85 ? c3 : choice > 0.6 ? c1 : c2;
+
+      pColors[i * 3] = color.r;
+      pColors[i * 3 + 1] = color.g;
+      pColors[i * 3 + 2] = color.b;
+    }
+
+    pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
+    pGeo.setAttribute("color", new THREE.BufferAttribute(pColors, 3));
+
+    const pMat = new THREE.PointsMaterial({
+      size: 0.12, vertexColors: true, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    const particles = new THREE.Points(pGeo, pMat);
+    scene.add(particles);
+
+    // 5. Materials (مواد ترابية ومطفية)
+    const shellMaterial = new THREE.MeshStandardMaterial({
+      color: 0x0a0502, // أسود ترابي
+      metalness: 0.7,
+      roughness: 0.4,
+      emissive: 0x050201,
+      emissiveIntensity: 0.1
+    });
+
+    const glassMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x1a0f0a,
+      metalness: 0.5,
+      roughness: 0.3,
+      clearcoat: 0.5,
+      clearcoatRoughness: 0.2,
+      emissive: 0x2b1508,
+      emissiveIntensity: 0.1,
+      reflectivity: 0.6,
+      transparent: true,
+      opacity: 0.95
+    });
+
+    const innerGlassMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x0f0804,
+      metalness: 0.6,
+      roughness: 0.3,
+      clearcoat: 0.4,
+      emissive: 0x1a0a00,
+      emissiveIntensity: 0.1
+    });
+
+    // إطار نحاسي باهت (بدون توهج فاقع)
+    const frameMaterial = new THREE.MeshStandardMaterial({
+      color: 0x8c6a3d,
+      metalness: 0.9,
+      roughness: 0.3,
+      emissive: 0x2b1a0a,
+      emissiveIntensity: 0.1
+    });
+
+    const highlightMaterial = new THREE.MeshBasicMaterial({
+      color: 0x6b4c2a,
+      transparent: true,
+      opacity: 0.4
+    });
+
+    const subtleMaterial = new THREE.MeshStandardMaterial({
+      color: 0x3b2512,
+      metalness: 0.8,
+      roughness: 0.4,
+      emissive: 0x1a0a00,
+      emissiveIntensity: 0.1
+    });
+
+    // 6. Panel Builder
+    function createPanel(w, h, d) {
+      const group = new THREE.Group();
+
+      function addBox(width, height, depth, material, x, y, z) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material);
+        mesh.position.set(x, y, z);
+        group.add(mesh);
+        return mesh;
+      }
+
+      addBox(w, h, d, shellMaterial, 0, 0, 0);
+      addBox(w - 0.12, h - 0.12, 0.09, glassMaterial, 0, 0, d / 2 + 0.025);
+      addBox(w - 0.34, h - 0.34, 0.045, innerGlassMaterial, 0, 0, d / 2 + 0.087);
+      addBox(w - 0.49, h - 0.49, 0.025, glassMaterial, 0, 0, d / 2 + 0.12);
+
+      const frontZ = d / 2 + 0.15;
+      const rail = 0.065;
+
+      addBox(w - 0.05, rail, 0.07, frameMaterial, 0, h / 2 - rail / 2, frontZ);
+      addBox(w - 0.05, rail, 0.07, frameMaterial, 0, -h / 2 + rail / 2, frontZ);
+      addBox(rail, h - 0.05, 0.07, frameMaterial, -w / 2 + rail / 2, 0, frontZ);
+      addBox(rail, h - 0.05, 0.07, frameMaterial, w / 2 - rail / 2, 0, frontZ);
+
+      const innerW = w - 0.34;
+      const innerH = h - 0.34;
+      const innerRail = 0.025;
+
+      addBox(innerW, innerRail, 0.025, subtleMaterial, 0, innerH / 2, frontZ + 0.015);
+      addBox(innerW, innerRail, 0.025, subtleMaterial, 0, -innerH / 2, frontZ + 0.015);
+      addBox(innerRail, innerH, 0.025, subtleMaterial, -innerW / 2, 0, frontZ + 0.015);
+      addBox(innerRail, innerH, 0.025, subtleMaterial, innerW / 2, 0, frontZ + 0.015);
+
+      if (h >= w) {
+        [-0.22, 0.22].forEach(x => {
+          addBox(0.018, h * 0.63, 0.018, highlightMaterial, x * w, 0, frontZ + 0.035);
+        });
+      } else {
+        [-0.22, 0.22].forEach(y => {
+          addBox(w * 0.62, 0.018, 0.018, highlightMaterial, 0, y * h, frontZ + 0.035);
+        });
+      }
+
+      const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(w, h, d));
+      const edgeLines = new THREE.LineSegments(
+        edgeGeo,
+        new THREE.LineBasicMaterial({ color: 0x6b4c2a, transparent: true, opacity: 0.5 }) // حواف باهتة
+      );
+      group.add(edgeLines);
+
+      return group;
+    }
+
+    // 7. H Structure
+    const letterGroup = new THREE.Group();
+    scene.add(letterGroup);
+
+    const pieces = [
+      { w: 1.8, h: 2.35, x: -2.5, y: 2.35, z: 0.00 },
+      { w: 1.8, h: 2.35, x: -2.5, y: 0, z: 0.00 },
+      { w: 1.8, h: 2.35, x: -2.5, y: -2.35, z: 0.00 },
+      { w: 1.8, h: 2.35, x: 2.5, y: 2.35, z: 0.00 },
+      { w: 1.8, h: 2.35, x: 2.5, y: 0, z: 0.00 },
+      { w: 1.8, h: 2.35, x: 2.5, y: -2.35, z: 0.00 },
+      { w: 3.4, h: 1.3, x: 0, y: 0, z: 0.42 }
+    ];
+
+    const panels = pieces.map(p => {
+      const panel = createPanel(p.w, p.h, 0.42);
+      panel.position.set((Math.random() - 0.5) * 42, (Math.random() - 0.5) * 30, -18 - Math.random() * 20);
+      panel.rotation.set((Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5);
+      panel.scale.setScalar(0.85);
+      panel.userData.targetPos = new THREE.Vector3(p.x, p.y, p.z);
+      letterGroup.add(panel);
+      return panel;
+    });
+
+    // 8. Platform (قاعدة حجرية داكنة جداً)
+    const platformGroup = new THREE.Group();
+    platformGroup.position.set(0, -4.35, 0);
+    platformGroup.scale.setScalar(0);
+    scene.add(platformGroup);
+
+    // قاعدة سوداء مطفية (حجر بركاني)
+    const baseBodyMaterial = new THREE.MeshStandardMaterial({ color: 0x050302, metalness: 0.8, roughness: 0.5 });
+    const baseSideMaterial = new THREE.MeshStandardMaterial({ color: 0x0f0804, metalness: 0.9, roughness: 0.4 });
+    const baseTopMaterial = new THREE.MeshStandardMaterial({ color: 0x1a0f0a, metalness: 0.85, roughness: 0.3 });
+    
+    // معدن نحاسي باهت بدون أي توهج (emissive = 0)
+    const baseBrassMaterial = new THREE.MeshStandardMaterial({ color: 0x6b4c2a, metalness: 0.95, roughness: 0.3, emissive: 0x000000 });
+    
+    // نقوش باهتة
+    const baseDullLightMaterial = new THREE.MeshBasicMaterial({ color: 0x4a351a, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending });
+
+    function addBaseCylinder(radiusTop, radiusBottom, height, material, y) {
+      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radiusTop, radiusBottom, height, 112, 1), material);
+      mesh.position.y = y;
+      platformGroup.add(mesh);
+      return mesh;
+    }
+
+    addBaseCylinder(3.75, 4.05, 0.38, baseBodyMaterial, -0.19);
+    addBaseCylinder(3.48, 3.75, 0.14, baseSideMaterial, 0.07);
+    addBaseCylinder(3.2, 3.48, 0.12, baseTopMaterial, 0.20);
+    addBaseCylinder(2.65, 3.2, 0.055, baseSideMaterial, 0.287);
+
+    function addPlatformRing(radius, tube, material, y) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, tube, 12, 144), material);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = y;
+      platformGroup.add(ring);
+      return ring;
+    }
+
+    addPlatformRing(3.88, 0.035, baseBrassMaterial, -0.20);
+    addPlatformRing(3.56, 0.022, baseDullLightMaterial, 0.105);
+    addPlatformRing(3.24, 0.028, baseBrassMaterial, 0.265);
+    addPlatformRing(2.72, 0.018, baseDullLightMaterial, 0.319);
+    addPlatformRing(2.15, 0.012, baseBrassMaterial, 0.319);
+
+    // 9. Background Atmosphere (غبار خافت)
+    const dustCount = 1500;
+    const dustPositions = new Float32Array(dustCount * 3);
+    for (let i = 0; i < dustCount; i++) {
+      dustPositions[i * 3] = (Math.random() - 0.5) * 100;
+      dustPositions[i * 3 + 1] = (Math.random() - 0.5) * 70;
+      dustPositions[i * 3 + 2] = (Math.random() - 0.5) * 70;
+    }
+
+    const dustGeometry = new THREE.BufferGeometry();
+    dustGeometry.setAttribute("position", new THREE.BufferAttribute(dustPositions, 3));
+    const dustMaterial = new THREE.PointsMaterial({ color: 0x3b2512, size: 0.03, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false });
+    const dust = new THREE.Points(dustGeometry, dustMaterial);
+    scene.add(dust);
+
+    // 10. Animation Timeline
+    const tl = gsap.timeline();
+    const morphVal = { v: 0 };
+
+    tl.to("#bootText", { opacity: 1, duration: 2 }, 0);
+    tl.to(pMat, { opacity: 1, duration: 3 }, 1);
+    tl.to(morphVal, { v: 1, duration: 5, ease: "power2.inOut" }, 3);
+    tl.to(pMat, { opacity: 0, duration: 1.5, ease: "power2.in" }, 8.5);
+    tl.to(particles.scale, { x: 2.5, y: 2.5, z: 2.5, duration: 2, ease: "power2.out" }, 8.5);
+
+    const assemblyOrder = [...panels];
+    for (let i = assemblyOrder.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [assemblyOrder[i], assemblyOrder[j]] = [assemblyOrder[j], assemblyOrder[i]];
+    }
+
+    assemblyOrder.forEach((panel, index) => {
+      const startTime = 9.4 + index * 0.28 + Math.random() * 0.18;
+      
+      tl.to(panel.position, {
+        x: panel.userData.targetPos.x, y: panel.userData.targetPos.y, z: panel.userData.targetPos.z,
+        duration: 4.3, ease: "power3.inOut"
+      }, startTime);
+
+      tl.to(panel.rotation, { x: 0, y: 0, z: 0, duration: 4.3, ease: "power3.inOut" }, startTime);
+      tl.to(panel.scale, { x: 1, y: 1, z: 1, duration: 3.8, ease: "back.out(1.15)" }, startTime);
+    });
+
+    tl.to(platformGroup.scale, { x: 1, y: 1, z: 1, duration: 2.5, ease: "back.out(1.25)" }, 14.8);
+    tl.to(letterGroup.scale, { x: 0.75, y: 0.75, z: 0.75, duration: 3, ease: "power2.inOut" }, 15.8);
+    tl.to(letterGroup.position, { y: -1.5, duration: 3, ease: "power2.inOut" }, 15.8);
+    tl.to("#bootText", { opacity: 0, duration: 1.5 }, 17.1);
+    tl.to("#uiContainer", { opacity: 1, duration: 2.5 }, 18);
+
+    // 11. Render Loop
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const time = clock.elapsedTime;
+
+      if (morphVal.v > 0 && pMat.opacity > 0) {
+        const positions = particles.geometry.attributes.position.array;
+        const speed = 0.03 * morphVal.v;
+        for (let i = 0; i < particleCount; i++) {
+          const i3 = i * 3;
+          positions[i3] += (pTargets[i3] - positions[i3]) * speed;
+          positions[i3 + 1] += (pTargets[i3 + 1] - positions[i3 + 1]) * speed;
+          positions[i3 + 2] += (pTargets[i3 + 2] - positions[i3 + 2]) * speed;
+        }
+        particles.geometry.attributes.position.needsUpdate = true;
+      }
+
+      dust.rotation.y = time * 0.005;
+      dust.rotation.x = Math.sin(time * 0.08) * 0.02;
+
+      if (time > 18) {
+        letterGroup.position.y = -1.5 + Math.sin(time * 0.8) * 0.055;
+        letterGroup.rotation.y = Math.sin(time * 0.2) * 0.035;
+        camera.position.x = Math.sin(time * 0.1) * 1.1;
+        camera.position.y = 4 + Math.cos(time * 0.15) * 0.35;
+        camera.lookAt(0, -1, 0);
+      }
+
+      composer.render();
+    }
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.7));
+      composer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+  </script>
+</body>
+  </html>
