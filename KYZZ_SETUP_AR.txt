@@ -1,0 +1,25 @@
+إعداد خدمات KYZZ AI في Cloudflare Pages
+======================================
+
+1) افتح Cloudflare Dashboard.
+2) ادخل إلى Workers & Pages ثم اختر مشروع RemoveBG.
+3) افتح Settings ثم Variables and Secrets.
+4) اختر Add variable ثم Secret.
+5) الاسم:
+   KYZZ_API_KEY
+6) القيمة:
+   الصق مفتاح KYZZ الذي زودتني به في المحادثة.
+7) احفظ السر، وأضفه إلى Production. أضفه إلى Preview أيضًا إذا كنت تختبر فروع GitHub.
+8) أعد نشر المشروع (Retry deployment أو Commit جديد).
+
+بعد النشر:
+- سجّل الدخول إلى الموقع.
+- ارفع صورة.
+- افتح أداة التعديل بالذكاء الاصطناعي.
+- اختر إحدى خدمات KYZZ الثلاث عشرة.
+- لخدمة «تعديل من النص»، اكتب وصفًا في مربع الوصف قبل الضغط على الخدمة.
+
+مهم:
+لا تضع المفتاح في app.js أو config.js أو GitHub. الملف
+functions/api/ai-image/[operation].js يضيفه إلى طلب المزود من Secret الخادم.
+المسار /api/* موجود بالفعل داخل _routes.json.
