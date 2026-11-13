@@ -1,0 +1,11 @@
+قائمة النشر والفحص
+
+[ ] كل ملفات المشروع موجودة في جذر مجلد الإخراج.
+[ ] مجلد images موجود بجانب index.html.
+[ ] _worker.js موجود بجانب index.html.
+[ ] المشروع منشور على Cloudflare Pages مع Git Integration وAdvanced Mode.
+[ ] /api/image-process يعرض keyConfigured: true.
+[ ] تسجيل الدخول يعمل.
+[ ] تحويل toanime يعمل على صورة JPG صغيرة.
+[ ] تعديل edit-image يعمل مع prompt قصير.
+[ ] تجربة to3d تنشئ صورة أو ملف GLB حسب ناتج المزود.
